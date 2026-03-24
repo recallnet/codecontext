@@ -1,0 +1,12 @@
+{
+  "id": "malformed",
+  "description": "Malformed tags are reported",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context decision missing separator\npackage fixture\n",
+  "expected": {
+    "tags": [],
+    "errors": ["Malformed @context tag: \"@context decision missing separator\""],
+    "resolvedCtxFiles": []
+  }
+}

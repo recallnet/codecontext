@@ -1,0 +1,25 @@
+{
+  "id": "verified-date",
+  "description": "parses an explicit verification date in canonical syntax",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.ts",
+  "source": "// @context decision:tradeoff #docs/context/cache-strategy.ctx.md !high [verified:2026-03-24] -- LRU keeps eviction O(1).\nconst strategy = 'lru';\n",
+  "supportFiles": {
+    "docs/context/cache-strategy.ctx.md": "---\nid: cache-strategy\ntype: decision\nstatus: active\nverified: 2026-03-24\n---\n\n## Decision\n\nUse an in-process LRU cache.\n"
+  },
+  "expected": {
+    "tags": [
+      {
+        "type": "decision",
+        "subtype": "tradeoff",
+        "id": "docs/context/cache-strategy.ctx.md",
+        "priority": "high",
+        "verified": "2026-03-24",
+        "summary": "LRU keeps eviction O(1).",
+        "line": 1
+      }
+    ],
+    "errors": [],
+    "resolvedCtxFiles": ["docs/context/cache-strategy.ctx.md"]
+  }
+}

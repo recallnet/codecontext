@@ -151,6 +151,7 @@ describe("computeStaleness", () => {
     expect(results[0].tag).toBe(tag);
     expect(results[0].blockHash).toBeTruthy();
     expect(results[0].verifiedAt).toBeUndefined();
+    expect(results[0].reason).toBe("fresh");
   });
 
   it("returns 'verified' when hash matches cache", () => {
@@ -173,6 +174,7 @@ describe("computeStaleness", () => {
     expect(secondResults).toHaveLength(1);
     expect(secondResults[0].status).toBe("verified");
     expect(secondResults[0].verifiedAt).toBeTruthy();
+    expect(secondResults[0].reason).toBe("fresh");
   });
 
   it("returns 'stale' when hash differs from cache", () => {
@@ -203,6 +205,79 @@ describe("computeStaleness", () => {
     expect(secondResults).toHaveLength(1);
     expect(secondResults[0].status).toBe("stale");
     expect(secondResults[0].verifiedAt).toBeTruthy();
+    expect(secondResults[0].reason).toBe("missing-verification-date");
+  });
+
+  it("returns 'verified' when code changes and the verification date is bumped", () => {
+    const tag = makeTag({ id: "my-tag", verified: "2026-03-20" });
+    const originalLines = [
+      "// @context decision [verified:2026-03-20] — Test tag",
+      "function foo() {",
+      "  return 42;",
+      "}",
+    ];
+
+    const cache = createEmptyCache();
+    const firstResults = computeStaleness([tag], originalLines, cache);
+    const updatedCache = updateCache(cache, firstResults);
+
+    const changedLines = [
+      "// @context decision [verified:2026-03-24] — Test tag",
+      "function foo() {",
+      "  return 99;",
+      "}",
+    ];
+    const changedTag = makeTag({ id: "my-tag", verified: "2026-03-24" });
+
+    const secondResults = computeStaleness([changedTag], changedLines, updatedCache);
+
+    expect(secondResults[0].status).toBe("verified");
+    expect(secondResults[0].reason).toBe("date-bumped");
+    expect(secondResults[0].verifiedDate).toBe("2026-03-24");
+  });
+
+  it("returns 'stale' when code changes and the verification date is not bumped", () => {
+    const tag = makeTag({ id: "my-tag", verified: "2026-03-20" });
+    const originalLines = [
+      "// @context decision [verified:2026-03-20] — Test tag",
+      "function foo() {",
+      "  return 42;",
+      "}",
+    ];
+
+    const cache = createEmptyCache();
+    const firstResults = computeStaleness([tag], originalLines, cache);
+    const updatedCache = updateCache(cache, firstResults);
+
+    const changedLines = [
+      "// @context decision [verified:2026-03-20] — Test tag",
+      "function foo() {",
+      "  return 99;",
+      "}",
+    ];
+
+    const secondResults = computeStaleness([tag], changedLines, updatedCache);
+
+    expect(secondResults[0].status).toBe("stale");
+    expect(secondResults[0].reason).toBe("code-changed-without-date-bump");
+  });
+
+  it("returns 'review-required' when the verification date exceeds the max age", () => {
+    const tag = makeTag({ verified: "2025-12-01" });
+    const sourceLines = [
+      "// @context decision [verified:2025-12-01] — Test tag",
+      "function foo() {",
+      "  return 42;",
+      "}",
+    ];
+
+    const results = computeStaleness([tag], sourceLines, createEmptyCache(), {
+      maxAgeDays: 30,
+      now: new Date("2026-03-24T00:00:00.000Z"),
+    });
+
+    expect(results[0].status).toBe("review-required");
+    expect(results[0].reason).toBe("verification-date-expired");
   });
 
   it("handles multiple tags in one file", () => {
@@ -270,6 +345,7 @@ describe("updateCache", () => {
     expect(updated.entries[key]).toBeDefined();
     expect(updated.entries[key].blockHash).toBe(results[0].blockHash);
     expect(updated.entries[key].verifiedAt).toBeTruthy();
+    expect(updated.entries[key].verifiedDate).toBeUndefined();
     // verifiedAt should be a valid ISO date string
     expect(new Date(updated.entries[key].verifiedAt).toISOString()).toBe(
       updated.entries[key].verifiedAt
@@ -286,6 +362,37 @@ describe("updateCache", () => {
 
     expect(Object.keys(cache.entries)).toHaveLength(0);
     expect(Object.keys(updated.entries)).toHaveLength(1);
+  });
+
+  it("stores the verification date when present", () => {
+    const tag = makeTag({ id: "dated-tag", verified: "2026-03-24" });
+    const sourceLines = ["// @context:decision [verified:2026-03-24] — Test tag", "const x = 1;"];
+
+    const cache = createEmptyCache();
+    const results = computeStaleness([tag], sourceLines, cache);
+    const updated = updateCache(cache, results);
+
+    expect(updated.entries["test.ts:#dated-tag"]?.verifiedDate).toBe("2026-03-24");
+  });
+
+  it("does not update the cache for stale entries", () => {
+    const tag = makeTag({ id: "stale-tag", verified: "2026-03-20" });
+    const originalLines = ["// @context:decision [verified:2026-03-20] — Test tag", "const x = 1;"];
+    const cache = updateCache(
+      createEmptyCache(),
+      computeStaleness([tag], originalLines, createEmptyCache())
+    );
+
+    const staleResults = computeStaleness(
+      [tag],
+      ["// @context:decision [verified:2026-03-20] — Test tag", "const x = 2;"],
+      cache
+    );
+    const updated = updateCache(cache, staleResults);
+
+    expect(updated.entries["test.ts:#stale-tag"]?.blockHash).toBe(
+      cache.entries["test.ts:#stale-tag"]?.blockHash
+    );
   });
 
   it("preserves existing cache entries when adding new ones", () => {

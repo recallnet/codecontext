@@ -1,6 +1,7 @@
 import { runDefault } from "./commands/default.js";
 import { runDiff } from "./commands/diff.js";
 import { runJson } from "./commands/json.js";
+import { runReport } from "./commands/report.js";
 import { runScope } from "./commands/scope.js";
 import { runStaged } from "./commands/staged.js";
 import { runStale } from "./commands/stale.js";
@@ -14,6 +15,7 @@ Commands:
   codecontext --scope <filepath>      Pre-read briefing sorted by priority
   codecontext --diff [ref] <filepath> Context for changed lines only (ref defaults to HEAD)
   codecontext --stale <filepath>      Show only stale/review-required entries
+  codecontext --report                Repo-wide decision registry
   codecontext --staged                Pre-commit hook: check all staged files
   codecontext --help                  Show this help message
 
@@ -22,6 +24,7 @@ Options:
   --scope      Sort by priority, compact briefing format
   --diff       Filter to context tags in git-changed lines
   --stale      Filter to stale or review-required entries only
+  --report     Scan the repo and print a project-wide report
   --staged     Check all staged files for staleness (exit 1 if issues found)
   --help, -h   Show help
 `.trim();
@@ -63,6 +66,11 @@ function main(): void {
 
   if (args.includes("--staged")) {
     runStaged();
+    return;
+  }
+
+  if (args.includes("--report")) {
+    runReport(args.includes("--json"));
     return;
   }
 

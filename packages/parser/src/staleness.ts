@@ -11,6 +11,12 @@ export interface StalenessCache {
 interface CacheEntry {
   blockHash: string;
   verifiedAt: string;
+  verifiedDate?: string;
+}
+
+export interface StalenessOptions {
+  maxAgeDays?: number;
+  now?: Date;
 }
 
 /**
@@ -18,6 +24,51 @@ interface CacheEntry {
  */
 export function createEmptyCache(): StalenessCache {
   return { version: 1, entries: {} };
+}
+
+function ageInDays(verifiedDate: string, now: Date): number {
+  const verifiedAt = new Date(`${verifiedDate}T00:00:00.000Z`);
+  return Math.floor((now.getTime() - verifiedAt.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function isExpired(verifiedDate: string | undefined, maxAgeDays: number, now: Date): boolean {
+  if (!verifiedDate) {
+    return false;
+  }
+
+  return ageInDays(verifiedDate, now) > maxAgeDays;
+}
+
+function withOptionalContext(
+  base: AnchoredContext,
+  options: { verifiedAt?: string; verifiedDate?: string }
+): AnchoredContext {
+  const result: AnchoredContext = { ...base };
+
+  if (options.verifiedAt) {
+    result.verifiedAt = options.verifiedAt;
+  }
+  if (options.verifiedDate) {
+    result.verifiedDate = options.verifiedDate;
+  }
+
+  return result;
+}
+
+function optionalContextValues(
+  verifiedAt?: string,
+  verifiedDate?: string
+): { verifiedAt?: string; verifiedDate?: string } {
+  const result: { verifiedAt?: string; verifiedDate?: string } = {};
+
+  if (verifiedAt) {
+    result.verifiedAt = verifiedAt;
+  }
+  if (verifiedDate) {
+    result.verifiedDate = verifiedDate;
+  }
+
+  return result;
 }
 
 /**
@@ -64,10 +115,14 @@ export function extractBlock(lines: string[], tagLineIndex: number): string {
   let consecutiveBlanks = 0;
 
   // Find the indentation level of the tag line
+  // eslint-plugin-security flags numeric array indexing generically; this is a local line array.
+  // eslint-disable-next-line security/detect-object-injection
   const tagLine = lines[tagLineIndex];
   const tagIndent = tagLine ? tagLine.search(/\S/) : 0;
 
   for (let i = tagLineIndex + 1; i < lines.length; i++) {
+    // eslint-plugin-security flags numeric array indexing generically; this is a local line array.
+    // eslint-disable-next-line security/detect-object-injection
     const line = lines[i] ?? "";
     const trimmed = line.trim();
 
@@ -107,27 +162,67 @@ export function extractBlock(lines: string[], tagLineIndex: number): string {
 export function computeStaleness(
   tags: ContextTag[],
   sourceLines: string[],
-  cache: StalenessCache
+  cache: StalenessCache,
+  options: StalenessOptions = {}
 ): AnchoredContext[] {
+  const maxAgeDays = options.maxAgeDays ?? 90;
+  const now = options.now ?? new Date();
+
   return tags.map((tag): AnchoredContext => {
     const key = cacheKey(tag);
     const block = extractBlock(sourceLines, tag.location.line - 1);
     const currentHash = hashBlock(block);
     // eslint-disable-next-line security/detect-object-injection
     const cached = cache.entries[key];
+    const verifiedDate = tag.verified;
+
+    if (isExpired(verifiedDate, maxAgeDays, now)) {
+      return withOptionalContext(
+        {
+          tag,
+          blockHash: currentHash,
+          status: "review-required",
+          reason: "verification-date-expired",
+        },
+        optionalContextValues(cached?.verifiedAt, verifiedDate)
+      );
+    }
 
     if (!cached) {
       // First time seeing this tag — treat as verified
-      return { tag, blockHash: currentHash, status: "verified" };
+      return withOptionalContext(
+        { tag, blockHash: currentHash, status: "verified", reason: "fresh" },
+        optionalContextValues(undefined, verifiedDate)
+      );
     }
 
     if (cached.blockHash === currentHash) {
       // Block hasn't changed since last verification
-      return { tag, blockHash: currentHash, status: "verified", verifiedAt: cached.verifiedAt };
+      return withOptionalContext(
+        { tag, blockHash: currentHash, status: "verified", reason: "fresh" },
+        optionalContextValues(cached.verifiedAt, verifiedDate)
+      );
+    }
+
+    if (!verifiedDate) {
+      return withOptionalContext(
+        { tag, blockHash: currentHash, status: "stale", reason: "missing-verification-date" },
+        optionalContextValues(cached.verifiedAt)
+      );
+    }
+
+    if (!cached.verifiedDate || verifiedDate > cached.verifiedDate) {
+      return withOptionalContext(
+        { tag, blockHash: currentHash, status: "verified", reason: "date-bumped" },
+        optionalContextValues(cached.verifiedAt, verifiedDate)
+      );
     }
 
     // Block changed — mark as stale
-    return { tag, blockHash: currentHash, status: "stale", verifiedAt: cached.verifiedAt };
+    return withOptionalContext(
+      { tag, blockHash: currentHash, status: "stale", reason: "code-changed-without-date-bump" },
+      optionalContextValues(cached.verifiedAt, verifiedDate)
+    );
   });
 }
 
@@ -140,12 +235,20 @@ export function updateCache(cache: StalenessCache, anchored: AnchoredContext[]):
   const now = new Date().toISOString();
 
   for (const entry of anchored) {
+    if (entry.status !== "verified") {
+      continue;
+    }
+
     const key = cacheKey(entry.tag);
-    // eslint-disable-next-line security/detect-object-injection
-    updated.entries[key] = {
+    const nextEntry: CacheEntry = {
       blockHash: entry.blockHash,
       verifiedAt: now,
     };
+    if (entry.verifiedDate) {
+      nextEntry.verifiedDate = entry.verifiedDate;
+    }
+    // eslint-disable-next-line security/detect-object-injection
+    updated.entries[key] = nextEntry;
   }
 
   return updated;

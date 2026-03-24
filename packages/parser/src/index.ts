@@ -6,6 +6,7 @@ export type {
   RiskSubtype,
   Priority,
   StalenessStatus,
+  StalenessReason,
   SourceLocation,
   ContextTag,
   CtxFileFrontmatter,
@@ -38,15 +39,19 @@ export {
   hashBlock,
   createEmptyCache,
   updateCache,
+  type StalenessOptions,
   type StalenessCache,
 } from "./staleness.js";
 
 // Utilities
 export {
   findContextDir,
+  findProjectRoot,
   loadCtxFileById,
+  loadCtxFileByRef,
   loadAllCtxFiles,
   resolveCtxFiles,
   loadCache,
+  saveCache,
   buildFileContext,
 } from "./utils.js";

@@ -1,0 +1,21 @@
+{
+  "id": "legacy-syntax",
+  "description": "Legacy colon syntax remains accepted",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context:decision:tradeoff !high -- Legacy syntax still parses\npackage fixture\n",
+  "expected": {
+    "tags": [
+      {
+        "type": "decision",
+        "subtype": "tradeoff",
+        "id": null,
+        "priority": "high",
+        "summary": "Legacy syntax still parses",
+        "line": 1
+      }
+    ],
+    "errors": [],
+    "resolvedCtxFiles": []
+  }
+}

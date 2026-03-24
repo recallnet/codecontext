@@ -1,0 +1,12 @@
+{
+  "id": "invalid-type",
+  "description": "Unknown types are rejected",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context banana -- Not allowed\npackage fixture\n",
+  "expected": {
+    "tags": [],
+    "errors": ["Unknown context type: \"banana\""],
+    "resolvedCtxFiles": []
+  }
+}

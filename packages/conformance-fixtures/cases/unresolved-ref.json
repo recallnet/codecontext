@@ -1,0 +1,21 @@
+{
+  "id": "unresolved-ref",
+  "description": "Missing references are reported",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context decision #docs/context/missing.md -- Missing ref\npackage fixture\n",
+  "expected": {
+    "tags": [
+      {
+        "type": "decision",
+        "subtype": null,
+        "id": "docs/context/missing.md",
+        "priority": null,
+        "summary": "Missing ref",
+        "line": 1
+      }
+    ],
+    "errors": ["Unresolved context reference: \"docs/context/missing.md\""],
+    "resolvedCtxFiles": []
+  }
+}

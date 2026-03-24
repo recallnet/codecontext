@@ -1,0 +1,12 @@
+{
+  "id": "invalid-subtype",
+  "description": "Invalid subtypes are rejected",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context decision:nope -- Bad subtype\npackage fixture\n",
+  "expected": {
+    "tags": [],
+    "errors": ["Invalid subtype \"nope\" for type \"decision\""],
+    "resolvedCtxFiles": []
+  }
+}

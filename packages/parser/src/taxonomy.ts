@@ -57,5 +57,7 @@ export function isValidSubtype(type: ContextType, subtype: string): subtype is C
 }
 
 export function getValidSubtypes(type: ContextType): string[] {
+  // eslint-plugin-security flags typed taxonomy lookups generically; `type` is a constrained union.
+  // eslint-disable-next-line security/detect-object-injection
   return Object.keys(TAXONOMY[type].subtypes);
 }

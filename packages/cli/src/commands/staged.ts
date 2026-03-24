@@ -1,7 +1,14 @@
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { buildFileContext } from "@recallnet/codecontext-parser";
+import {
+  buildFileContext,
+  loadCache,
+  updateCache,
+  type StalenessCache,
+} from "@recallnet/codecontext-parser";
 
+import { isSourceFile } from "../files.js";
 import { formatFileContext } from "../formatters/human.js";
 import { getStagedFiles, getProjectRoot } from "../git.js";
 
@@ -11,35 +18,43 @@ const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
 const RESET = "\x1b[0m";
 
-const SOURCE_EXTENSIONS = /\.(ts|tsx|js|jsx|py|rs|go|java|c|cpp|h|hpp|rb|swift|kt)$/;
-
-function isSourceFile(relativePath: string): boolean {
-  return SOURCE_EXTENSIONS.test(relativePath);
-}
-
 interface FileResult {
   staleCount: number;
   reviewCount: number;
   output: string | null;
+  cache: StalenessCache;
 }
 
-function processFile(absPath: string): FileResult {
+function persistCache(projectRoot: string, cache: StalenessCache): void {
+  writeFileSync(
+    join(projectRoot, ".codecontext-cache.json"),
+    JSON.stringify(cache, null, 2),
+    "utf-8"
+  );
+}
+
+function processFile(absPath: string, cache: StalenessCache): FileResult {
   let ctx;
   try {
-    ctx = buildFileContext(absPath);
+    ctx = buildFileContext(absPath, { cache });
   } catch {
-    return { staleCount: 0, reviewCount: 0, output: null };
+    return { staleCount: 0, reviewCount: 0, output: null, cache };
   }
 
   if (ctx.tags.length === 0) {
-    return { staleCount: 0, reviewCount: 0, output: null };
+    return { staleCount: 0, reviewCount: 0, output: null, cache };
   }
 
   const stale = ctx.anchored.filter((a) => a.status === "stale");
   const review = ctx.anchored.filter((a) => a.status === "review-required");
 
   if (stale.length === 0 && review.length === 0) {
-    return { staleCount: 0, reviewCount: 0, output: null };
+    return {
+      staleCount: 0,
+      reviewCount: 0,
+      output: null,
+      cache: updateCache(cache, ctx.anchored),
+    };
   }
 
   const output = formatFileContext({
@@ -54,7 +69,7 @@ function processFile(absPath: string): FileResult {
     anchored: [...stale, ...review],
   });
 
-  return { staleCount: stale.length, reviewCount: review.length, output };
+  return { staleCount: stale.length, reviewCount: review.length, output, cache };
 }
 
 function printResults(outputs: string[], totalStale: number, totalReview: number): void {
@@ -89,6 +104,7 @@ function printResults(outputs: string[], totalStale: number, totalReview: number
 export function runStaged(): void {
   const projectRoot = getProjectRoot();
   const stagedFiles = getStagedFiles();
+  let cache = loadCache(projectRoot);
 
   if (stagedFiles.length === 0) {
     // eslint-disable-next-line no-console
@@ -106,12 +122,17 @@ export function runStaged(): void {
     }
 
     const absPath = join(projectRoot, relativePath);
-    const result = processFile(absPath);
+    const result = processFile(absPath, cache);
     totalStale += result.staleCount;
     totalReview += result.reviewCount;
+    cache = result.cache;
     if (result.output) {
       outputs.push(result.output);
     }
+  }
+
+  if (outputs.length === 0) {
+    persistCache(projectRoot, cache);
   }
 
   printResults(outputs, totalStale, totalReview);

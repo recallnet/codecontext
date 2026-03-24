@@ -27,7 +27,7 @@ plugin.configs["recommended"] = {
     "codecontext/context-hierarchy": "error",
     "codecontext/valid-context-refs": "warn",
     "codecontext/require-context-for-complex": "warn",
-    "codecontext/no-stale-context": "warn",
+    "codecontext/no-stale-context": "error",
   },
 };
 

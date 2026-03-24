@@ -3,17 +3,21 @@
 **Version:** 1.0.0-draft
 **Parent document:** [SPEC.md](SPEC.md)
 
-This document defines how codecontext tracks whether context tags remain accurate as code evolves. The staleness model uses content-addressable hashing to detect changes in the code associated with a context tag.
+This document defines how codecontext tracks whether context tags remain accurate as code evolves. The staleness model uses content-addressable hashing plus explicit verification dates to detect stale context.
 
 ## Overview
 
-The staleness model answers one question: **has the code changed since the context was last verified?**
+The staleness model answers two questions:
 
-It works in three steps:
+1. **Has the code changed since the context was last verified?**
+2. **Is the explicit verification date too old to trust without review?**
+
+It works in four steps:
 
 1. **Identify** the logical block of code associated with each `@context` tag.
 2. **Hash** the logical block's content to produce a fingerprint.
-3. **Compare** the current fingerprint with the stored fingerprint to determine status.
+3. **Read** the explicit verification date from `[verified:YYYY-MM-DD]` or a resolved `.ctx.md` file's `verified:` frontmatter.
+4. **Compare** the current fingerprint and verification date with the stored state to determine status.
 
 ## Logical Block Identification
 
@@ -111,23 +115,23 @@ verified ──> stale ──> review-required
 
 ### verified
 
-The content hash of the current logical block matches the stored hash. The context is considered accurate.
+The content hash is unchanged, or the developer changed the code and explicitly advanced the verification date. The context is considered accurate.
 
-**Transitions to `stale`:** when the logical block changes and the recomputed hash no longer matches the stored hash.
+**Transitions to `stale`:** when the logical block changes and the verification date was not advanced.
 
 ### stale
 
-The content hash has changed since the last verification. The code has been modified and the context may no longer be accurate.
+The content hash has changed since the last verification and the verification date was not advanced. The code has been modified and the context may no longer be accurate.
 
-**Transitions to `review-required`:** when the staleness duration exceeds the configured threshold (`stalenessThresholdDays` in `codecontext.json`, default 30 days).
+**Transitions to `review-required`:** a tool MAY escalate stale context after a configured grace period.
 
-**Transitions to `verified`:** when a developer or tool re-verifies the context (updates the stored hash).
+**Transitions to `verified`:** when a developer or tool re-verifies the context and updates the explicit verification date.
 
 ### review-required
 
-The context has been stale for longer than the configured threshold. This is an elevated alert that demands attention.
+The explicit verification date is older than the configured max-age threshold, even if the code has not changed. This is an elevated alert that demands attention.
 
-**Transitions to `verified`:** when a developer reviews and re-verifies the context.
+**Transitions to `verified`:** when a developer reviews the code and advances the explicit verification date.
 
 ### Status Determination Algorithm
 

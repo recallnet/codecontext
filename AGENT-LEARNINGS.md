@@ -13,6 +13,31 @@ Entries tagged `meta` are cross-cutting (not repo-specific) and surfaced team-wi
 
 <!-- Entries below, newest first -->
 
+### 2026-03-24 — Freshness gates need first-class verified dates (confirmed)
+
+Author: Hatch
+Insight: If freshness depends on a date, that date must be parsed as
+structured metadata and tied to the block-hash cache; scraping dates from
+free-form summaries produces inconsistent gates and cannot reliably detect
+"code changed but verification was not renewed."
+
+Detail: The repo had two competing ideas of staleness: hash-based code-change
+detection in the parser/CLI and a separate ESLint rule that scraped dates
+from `history` summaries. That split could not enforce the desired workflow
+of "you changed the code, so bump the verification date or delete the stale
+context." The fix was to add explicit `[verified:YYYY-MM-DD]` syntax on tags,
+flow that field through the shared parser/types, fall back to `.ctx.md`
+frontmatter `verified:` when present, and compare both hash and date in the
+same staleness engine.
+
+Directive: Model verification dates as first-class parsed fields, not prose.
+Use one shared staleness engine for CLI, lint, and future language bindings.
+Action: Keep `[verified:YYYY-MM-DD]` in the core grammar, preserve the shared
+conformance fixtures for verified-date cases, and avoid adding tooling that
+re-parses dates from summaries.
+Context: main branch, adding verified-date freshness modes, conformance
+fixtures, and staged-cache enforcement
+
 ### 2026-03-24 — Polyglot QA must be wired outside Turbo (confirmed)
 
 Author: Hatch

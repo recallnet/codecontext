@@ -1,22 +1,25 @@
+import { buildFileContext, type FileContext } from "@recallnet/codecontext-parser";
 import type { Rule } from "eslint";
 
-import { extractContextTags } from "../utils/comment-extractor.js";
-
-/**
- * Matches a date in YYYY-MM-DD format within a @context history tag summary.
- */
-const DATE_PATTERN = /(\d{4}-\d{2}-\d{2})/;
+type DetailedAnchored = FileContext["anchored"][number] & {
+  verifiedDate?: string;
+  reason?: string;
+};
 
 const rule: Rule.RuleModule = {
   meta: {
-    type: "suggestion",
+    type: "problem",
     docs: {
       description:
-        "Warn when @context history tags reference dates older than a configurable threshold",
+        "Error when @context verification dates are too old or when annotated code changes without a verification-date bump",
     },
     messages: {
-      staleContext:
-        "@context history references date {{date}}, which is {{ageDays}} days old (threshold: {{maxAgeDays}} days).",
+      verificationDateExpired:
+        "@context verification date {{date}} is {{ageDays}} days old (threshold: {{maxAgeDays}} days). Update the date or remove the stale context.",
+      codeChangedWithoutDateBump:
+        "@context code changed since the last verification, but the verification date was not advanced. Update [verified:YYYY-MM-DD] or remove the context.",
+      missingVerificationDate:
+        "@context code changed since the last verification and this annotation has no verification date. Add [verified:YYYY-MM-DD] or remove the context.",
     },
     schema: [
       {
@@ -24,7 +27,7 @@ const rule: Rule.RuleModule = {
         properties: {
           maxAgeDays: {
             type: "integer",
-            description: "Maximum age in days before a history context is considered stale",
+            description: "Maximum allowed age for an explicit verification date",
           },
         },
         additionalProperties: false,
@@ -38,36 +41,56 @@ const rule: Rule.RuleModule = {
 
     return {
       Program() {
-        const tags = extractContextTags(context);
-        const now = Date.now();
+        const ctx = buildFileContext(context.filename, { maxAgeDays });
 
-        for (const tag of tags) {
-          if (tag.type !== "history") {
-            continue;
-          }
+        for (const anchored of ctx.anchored) {
+          const detailedAnchored = anchored as DetailedAnchored;
 
-          const dateMatch = DATE_PATTERN.exec(tag.summary) ?? DATE_PATTERN.exec(tag.raw);
-          if (!dateMatch) {
-            continue;
-          }
+          switch (detailedAnchored.reason) {
+            case "verification-date-expired": {
+              const verifiedDate = detailedAnchored.verifiedDate;
+              if (!verifiedDate) {
+                continue;
+              }
 
-          const dateStr = dateMatch[1] ?? "";
-          const tagDate = new Date(dateStr);
-          if (isNaN(tagDate.getTime())) {
-            continue;
-          }
-
-          const ageDays = Math.floor((now - tagDate.getTime()) / (1000 * 60 * 60 * 24));
-          if (ageDays > maxAgeDays) {
-            context.report({
-              loc: { line: tag.line, column: tag.column },
-              messageId: "staleContext",
-              data: {
-                date: dateStr,
-                ageDays: String(ageDays),
-                maxAgeDays: String(maxAgeDays),
-              },
-            });
+              const ageDays = Math.floor(
+                (Date.now() - new Date(`${verifiedDate}T00:00:00.000Z`).getTime()) /
+                  (1000 * 60 * 60 * 24)
+              );
+              context.report({
+                loc: {
+                  line: anchored.tag.location.line,
+                  column: anchored.tag.location.column,
+                },
+                messageId: "verificationDateExpired",
+                data: {
+                  date: verifiedDate,
+                  ageDays: String(ageDays),
+                  maxAgeDays: String(maxAgeDays),
+                },
+              });
+              break;
+            }
+            case "code-changed-without-date-bump":
+              context.report({
+                loc: {
+                  line: anchored.tag.location.line,
+                  column: anchored.tag.location.column,
+                },
+                messageId: "codeChangedWithoutDateBump",
+              });
+              break;
+            case "missing-verification-date":
+              context.report({
+                loc: {
+                  line: anchored.tag.location.line,
+                  column: anchored.tag.location.column,
+                },
+                messageId: "missingVerificationDate",
+              });
+              break;
+            default:
+              break;
           }
         }
       },

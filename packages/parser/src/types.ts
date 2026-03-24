@@ -9,6 +9,12 @@ export type ContextSubtype = DecisionSubtype | RiskSubtype;
 export type Priority = "critical" | "high" | "low";
 
 export type StalenessStatus = "verified" | "stale" | "review-required";
+export type StalenessReason =
+  | "fresh"
+  | "date-bumped"
+  | "missing-verification-date"
+  | "code-changed-without-date-bump"
+  | "verification-date-expired";
 
 export interface SourceLocation {
   file: string;
@@ -27,6 +33,8 @@ export interface ContextTag {
   id?: string;
   /** Priority level */
   priority?: Priority;
+  /** Optional verification date in YYYY-MM-DD format */
+  verified?: string;
   /** The summary text after the em-dash */
   summary: string;
   /** Source location */
@@ -65,6 +73,10 @@ export interface AnchoredContext {
   status: StalenessStatus;
   /** ISO date of last verification, if known */
   verifiedAt?: string;
+  /** Verification date declared on the tag or resolved .ctx.md file */
+  verifiedDate?: string;
+  /** Why the current status was assigned */
+  reason: StalenessReason;
 }
 
 export interface FileContext {

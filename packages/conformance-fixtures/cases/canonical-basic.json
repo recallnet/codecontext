@@ -1,0 +1,21 @@
+{
+  "id": "canonical-basic",
+  "description": "Canonical syntax parses a basic decision tag",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context decision -- Chose REST for simplicity\npackage fixture\n",
+  "expected": {
+    "tags": [
+      {
+        "type": "decision",
+        "subtype": null,
+        "id": null,
+        "priority": null,
+        "summary": "Chose REST for simplicity",
+        "line": 1
+      }
+    ],
+    "errors": [],
+    "resolvedCtxFiles": []
+  }
+}

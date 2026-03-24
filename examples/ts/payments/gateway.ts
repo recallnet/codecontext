@@ -1,4 +1,4 @@
-// @context decision #examples/docs/context/gate-42.md !critical -- Strict > avoids duplicate processing.
+// @context decision #examples/docs/context/gate-42.md !critical [verified:2026-03-24] -- Strict > avoids duplicate processing.
 export function shouldProcess(messageTimestamp: number, cutoff: number): boolean {
   return messageTimestamp > cutoff;
 }
@@ -23,22 +23,22 @@ export class LRUCache<K, V> {
   }
 }
 
-// @context requirement #examples/docs/requirements/billing-rounding.md !high -- Settlement must match finance rules.
+// @context requirement #examples/docs/requirements/billing-rounding.md !high [verified:2026-03-24] -- Settlement must match finance rules.
 export function roundForSettlement(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-// @context risk:security !critical -- Caller must authenticate the webhook before invoking this parser.
+// @context risk:security !critical [verified:2026-03-24] -- Caller must authenticate the webhook before invoking this parser.
 export function parseWebhook(body: string): Record<string, unknown> {
   return JSON.parse(body) as Record<string, unknown>;
 }
 
-// @context related #examples/go/payments/gateway.go -- Keep TS and Go gateway behavior aligned.
+// @context related #examples/go/payments/gateway.go [verified:2026-03-24] -- Keep TS and Go gateway behavior aligned.
 export function nextRetryCount(base: number): number {
   return base + 1;
 }
 
-// @context history -- Replaced recursive retry scheduling after stack growth in production.
+// @context history [verified:2026-03-24] -- Replaced recursive retry scheduling after stack growth in production.
 export function scheduleRetries(maxRetries: number): number[] {
   const retries: number[] = [];
   for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
@@ -47,7 +47,7 @@ export function scheduleRetries(maxRetries: number): number[] {
   return retries;
 }
 
-// @context doc -- This helper keeps call sites focused on business logic rather than HTTP boilerplate.
+// @context doc [verified:2026-03-24] -- This helper keeps call sites focused on business logic rather than HTTP boilerplate.
 export async function postJSON(url: string, payload: unknown): Promise<Response> {
   return fetch(url, {
     method: "POST",

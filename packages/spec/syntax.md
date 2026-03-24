@@ -10,13 +10,15 @@ This document defines the formal grammar, provides examples for all type/subtype
 The following grammar uses a BNF-like notation. Terminal symbols are enclosed in quotes or described by regex patterns in angle brackets.
 
 ```
-context-tag     ::= "@context" <space> type sub-type? ref? priority? separator summary
+context-tag     ::= "@context" <space> type sub-type? ref? priority? verified? separator summary
 
 type            ::= <[a-z][a-z0-9]*>
 sub-type        ::= ":" <[a-z][a-z0-9]*>
 ref             ::= "#" <non-space path text>
 priority        ::= "!" priority-level
 priority-level  ::= "critical" | "high" | "low"
+verified        ::= "[verified:" iso-date "]"
+iso-date        ::= <\d{4}-\d{2}-\d{2}>
 separator       ::= <em-dash>                      ; U+2014 (—)
                    | <space> <hyphen> <hyphen> <space>  ; " -- " as ASCII fallback
 summary         ::= <any printable characters to end of line>
@@ -53,73 +55,73 @@ For block comments spanning multiple lines, the parser MUST process each line in
 ### decision
 
 ```javascript
-// @context decision #docs/api/versioning.md — REST versioning uses URL path prefix over Accept headers
+// @context decision #docs/api/versioning.md [verified:2026-03-24] — REST versioning uses URL path prefix over Accept headers
 ```
 
 #### decision:tradeoff
 
 ```go
-// @context decision:tradeoff #docs/benchmarks/mem-vs-cpu.md !high — Pre-compute lookup table; trades 64MB RAM for 10x query speedup
+// @context decision:tradeoff #docs/benchmarks/mem-vs-cpu.md !high [verified:2026-03-24] — Pre-compute lookup table; trades 64MB RAM for 10x query speedup
 ```
 
 #### decision:constraint
 
 ```python
-# @context decision:constraint — Must use stdlib only; no third-party dependencies allowed in this module
+# @context decision:constraint [verified:2026-03-24] — Must use stdlib only; no third-party dependencies allowed in this module
 ```
 
 #### decision:assumption
 
 ```rust
-// @context decision:assumption #docs/tenancy.md — Assumes single-tenant deployment; multi-tenant requires rework
+// @context decision:assumption #docs/tenancy.md [verified:2026-03-24] — Assumes single-tenant deployment; multi-tenant requires rework
 ```
 
 ### requirement
 
 ```typescript
-// @context requirement #docs/finance/billing-calc.md !critical — Implements rounding rules from finance spec section 4.2
+// @context requirement #docs/finance/billing-calc.md !critical [verified:2026-03-24] — Implements rounding rules from finance spec section 4.2
 ```
 
 ### risk
 
 ```sql
--- @context risk — This migration is not reversible; back up the table before running
+-- @context risk [verified:2026-03-24] — This migration is not reversible; back up the table before running
 ```
 
 #### risk:perf
 
 ```python
-# @context risk:perf !high — Nested loop over full dataset; O(n*m) where n,m can reach 100k
+# @context risk:perf !high [verified:2026-03-24] — Nested loop over full dataset; O(n*m) where n,m can reach 100k
 ```
 
 #### risk:security
 
 ```java
-// @context risk:security !critical — User input interpolated into query; parameterize before production
+// @context risk:security !critical [verified:2026-03-24] — User input interpolated into query; parameterize before production
 ```
 
 #### risk:compat
 
 ```css
-/* @context risk:compat — Flexbox gap not supported in Safari < 14.1 */
+/* @context risk:compat [verified:2026-03-24] — Flexbox gap not supported in Safari < 14.1 */
 ```
 
 ### related
 
 ```html
-<!-- @context related #auth/session.ts — Session token validation logic is in auth/session.ts -->
+<!-- @context related #auth/session.ts [verified:2026-03-24] — Session token validation logic is in auth/session.ts -->
 ```
 
 ### history
 
 ```ruby
-# @context history — Switched from Nokogiri to Ox in v3.1 for 5x XML parsing speedup
+# @context history [verified:2026-03-24] — Switched from Nokogiri to Ox in v3.1 for 5x XML parsing speedup
 ```
 
 ### doc
 
 ```lua
--- @context doc — State machine transitions: IDLE -> LOADING -> READY | ERROR -> IDLE
+-- @context doc [verified:2026-03-24] — State machine transitions: IDLE -> LOADING -> READY | ERROR -> IDLE
 ```
 
 ## Multi-line Context Blocks

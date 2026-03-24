@@ -63,13 +63,14 @@ function colorStatus(status: StalenessStatus): string {
 function formatTag(tag: ContextTag, status?: StalenessStatus): string {
   const parts: string[] = [];
   const priorityStr = colorPriority(tag.priority);
+  const verified = "verified" in tag && typeof tag.verified === "string" ? tag.verified : undefined;
   parts.push(`  ${colorType(tag.type, tag.subtype)}${priorityStr}`);
   if (status) {
     parts[0] = (parts[0] ?? "") + `  ${DIM}(${colorStatus(status)}${DIM})${RESET}`;
   }
   parts.push(`    ${tag.summary}`);
   parts.push(
-    `    ${DIM}at line ${String(tag.location.line)}${tag.id ? ` | ref: #${tag.id}` : ""}${RESET}`
+    `    ${DIM}at line ${String(tag.location.line)}${tag.id ? ` | ref: #${tag.id}` : ""}${verified ? ` | verified: ${verified}` : ""}${RESET}`
   );
   return parts.join("\n");
 }

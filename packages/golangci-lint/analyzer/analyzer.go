@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"golang.org/x/tools/go/analysis"
 )
 
 var (
-	contextPattern = regexp.MustCompile(`^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$`)
+	contextPattern = regexp.MustCompile(`^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$`)
 	contextPrefix  = regexp.MustCompile(`^@context(?:\s+|:)`)
 )
 
@@ -88,7 +89,8 @@ func checkCommentGroup(
 		contextType := matches[1]
 		contextSubtype := matches[2]
 		ref := matches[3]
-		summary := matches[5]
+		verified := matches[5]
+		summary := matches[6]
 
 		subtypes, ok := taxonomy[contextType]
 		if !ok {
@@ -103,6 +105,10 @@ func checkCommentGroup(
 		}
 		if strings.TrimSpace(summary) == "" {
 			pass.Reportf(comment.Pos(), "empty @context summary")
+			continue
+		}
+		if verified != "" && !isValidVerifiedDate(verified) {
+			pass.Reportf(comment.Pos(), "invalid verification date %q", verified)
 			continue
 		}
 		if checkRefs && ref != "" && projectRoot != "" {
@@ -160,6 +166,11 @@ func referenceExists(projectRoot string, contextDir string, ref string) bool {
 		}
 	}
 	return false
+}
+
+func isValidVerifiedDate(value string) bool {
+	parsed, err := time.Parse("2006-01-02", value)
+	return err == nil && parsed.Format("2006-01-02") == value
 }
 
 func pathExists(path string) bool {

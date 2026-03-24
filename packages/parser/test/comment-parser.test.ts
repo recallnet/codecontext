@@ -43,6 +43,17 @@ describe("parseContextTags", () => {
     expect(tag.summary).toBe("Chose JWT over sessions for stateless scaling");
   });
 
+  it("parses a tag with an explicit verification date", () => {
+    const source =
+      `// @context decision:tradeoff #docs/decisions/auth-choice.md !critical ` +
+      `[verified:2026-03-24] — Chose JWT over sessions for stateless scaling`;
+    const { tags, errors } = parseContextTags(source, file);
+
+    expect(errors).toHaveLength(0);
+    expect(tags).toHaveLength(1);
+    expect(tags[0].verified).toBe("2026-03-24");
+  });
+
   it("parses multiple tags from one file", () => {
     const source = [
       "const x = 1;",
@@ -163,6 +174,14 @@ describe("parseContextTags", () => {
       expect(tags).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toMatch(/Invalid subtype "notreal" for type "decision"/);
+    });
+
+    it("reports error for an invalid verification date", () => {
+      const source = `// @context decision [verified:2026-02-31] — Some summary`;
+      const { tags, errors } = parseContextTags(source, file);
+      expect(tags).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].message).toMatch(/Invalid verification date "2026-02-31"/);
     });
   });
 

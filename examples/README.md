@@ -7,8 +7,9 @@ This folder contains small TypeScript and Go examples showing different
 - legacy `@context:<type>` compatibility
 - `decision`, `requirement`, `risk`, `related`, `history`, and `doc`
 - subtype usage
+- explicit `[verified:YYYY-MM-DD]` dates on tags
 - direct `#ref` links to ordinary project files
-- optional structured `.ctx.md` documents
+- optional structured `.ctx.md` documents with frontmatter `verified:` dates
 
 Files:
 

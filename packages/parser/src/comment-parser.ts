@@ -3,7 +3,7 @@ import type { ContextSubtype, ContextTag, Priority, SourceLocation } from "./typ
 
 /**
  * Regex for the `@context` tag format:
- *   `@context <type>[:<subtype>] [#id] [!priority] — <summary>`
+ *   `@context <type>[:<subtype>] [#id] [!priority] [verified:YYYY-MM-DD] — <summary>`
  *
  * Supports both the canonical `@context <type>` form and the legacy
  * `@context:<type>` form, plus both em-dash (—) and double-dash (--)
@@ -11,7 +11,7 @@ import type { ContextSubtype, ContextTag, Priority, SourceLocation } from "./typ
  */
 const CONTEXT_PATTERN =
   // eslint-disable-next-line security/detect-unsafe-regex
-  /^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$/;
+  /^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$/;
 
 const CONTEXT_PREFIX_PATTERN = /^@context(?:\s+|:)/;
 
@@ -68,6 +68,11 @@ export interface ParseResult {
   errors: ParseError[];
 }
 
+function isValidVerifiedDate(value: string): boolean {
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value);
+}
+
 export function isContextTagCandidate(text: string): boolean {
   return CONTEXT_PREFIX_PATTERN.test(text.trim());
 }
@@ -108,7 +113,8 @@ function parseSingleTag(
   const subtypeStr = match[2];
   const id = match[3];
   const priorityStr = match[4];
-  const summary = match[5];
+  const verified = match[5];
+  const summary = match[6];
 
   if (!typeStr || !summary) {
     return null;
@@ -130,6 +136,14 @@ function parseSingleTag(
     return null;
   }
 
+  if (verified && !isValidVerifiedDate(verified)) {
+    errors.push({
+      message: `Invalid verification date "${verified}". Expected YYYY-MM-DD.`,
+      location: { file: filePath, line: lineNumber, column: 1 },
+    });
+    return null;
+  }
+
   const tag: ContextTag = {
     raw: line,
     type: typeStr,
@@ -146,6 +160,9 @@ function parseSingleTag(
   if (priorityStr !== undefined) {
     tag.priority = priorityStr as Priority;
   }
+  if (verified !== undefined) {
+    tag.verified = verified;
+  }
 
   return tag;
 }
@@ -159,6 +176,8 @@ export function parseContextTags(source: string, filePath: string): ParseResult 
   const errors: ParseError[] = [];
 
   for (let i = 0; i < lines.length; i++) {
+    // eslint-plugin-security flags numeric array indexing generically; this is a local line array.
+    // eslint-disable-next-line security/detect-object-injection
     const line = lines[i] ?? "";
     const inner = stripCommentDelimiters(line);
     if (!inner || !isContextTagCandidate(inner)) {

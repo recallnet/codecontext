@@ -15,7 +15,7 @@ Three days later, 0.3% of transactions were processing twice. The payment gatewa
 This is the problem codecontext solves.
 
 ```typescript
-// @context decision #docs/context/gate-42.md !critical — strict > (not >=): upstream sends
+// @context decision #docs/context/gate-42.md !critical [verified:2026-03-24] — strict > (not >=): upstream sends
 //   at-threshold values during clock skew. >= causes double-processing.
 //   See INCIDENT-5678.
 if (message.timestamp > cutoff) {
@@ -23,7 +23,7 @@ if (message.timestamp > cutoff) {
 }
 ```
 
-Now anyone — human or AI agent — sees the constraint _before_ they touch the code. And if they change it anyway, the staleness system flags the annotation for review.
+Now anyone — human or AI agent — sees the constraint _before_ they touch the code. And if they change the code without re-verifying the context, the freshness gate fails.
 
 ## Why Everything Else Falls Short
 
@@ -63,26 +63,26 @@ codecontext doesn't replace any of these. It fills the gap between them:
 ### 1. Annotate decisions in code
 
 ```typescript
-// @context decision:tradeoff #docs/context/cache-strategy.md !critical — LRU over LFU
+// @context decision:tradeoff #docs/context/cache-strategy.md !critical [verified:2026-03-24] — LRU over LFU
 //   for O(1) eviction. LFU was 3x slower in benchmarks at our p99 load.
 const cache = new LRUCache({ maxSize: 10_000 });
 ```
 
 ```python
-# @context risk:security !high — Rate limiter uses in-memory counter.
+# @context risk:security !high [verified:2026-03-24] — Rate limiter uses in-memory counter.
 #   Resets on deploy. Acceptable because deploy frequency < attack window.
 def check_rate_limit(client_id: str) -> bool:
     ...
 ```
 
 ```sql
--- @context decision:constraint — Foreign keys disabled on this table.
+-- @context decision:constraint [verified:2026-03-24] — Foreign keys disabled on this table.
 --   Bulk import from legacy system requires it. Re-enabled by migration 047.
 CREATE TABLE imports ( ... );
 ```
 
 ```go
-// @context decision:assumption — Retry count of 3 assumes p99 latency < 500ms.
+// @context decision:assumption [verified:2026-03-24] — Retry count of 3 assumes p99 latency < 500ms.
 //   If upstream SLA changes, revisit this.
 const maxRetries = 3
 ```
@@ -98,7 +98,7 @@ $ npx codecontext --scope src/payments/gateway.ts
     strict > (not >=): upstream sends at-threshold values during clock skew
     doc: docs/context/gate-42.md
 
-  HIGH  risk:security  (stale — code changed 2026-03-10)
+  HIGH  risk:security  (STALE)
     API key rotation assumes 24h TTL from provider
 
   decision:assumption  (verified)
@@ -130,7 +130,7 @@ import codecontext from "@recallnet/codecontext-eslint-plugin";
 export default [codecontext.configs.recommended];
 ```
 
-The linter catches stale context, unresolved references, invalid types, and complex functions without annotations — before the PR merges.
+The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not bumped.
 
 Examples live in [`examples/`](examples/) and include both TypeScript and Go source with different context variations.
 
@@ -184,9 +184,9 @@ A Claude skill is included in `skills/codecontext/` that automates this entire w
 npx codecontext --staged
 ```
 
-Exits non-zero if any staged files have stale context. Catches it before it reaches the branch.
+Exits non-zero if annotated code changed without advancing its verification date, or if a verification date exceeded the max-age threshold.
 
-## Future: The Decision Registry
+## The Decision Registry
 
 ```bash
 $ npx codecontext --report
@@ -213,7 +213,7 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 ## Comment Syntax
 
 ```
-@context <type>[:<subtype>] [#ref] [!priority] — <summary>
+@context <type>[:<subtype>] [#ref] [!priority] [verified:YYYY-MM-DD] — <summary>
 ```
 
 | Field       | Required | Description                                                    |
@@ -222,6 +222,7 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 | `subtype`   | No       | Narrows the type (e.g., `decision:tradeoff`, `risk:security`)  |
 | `#ref`      | No       | Project-relative reference to supporting docs or code          |
 | `!priority` | No       | `!critical`, `!high`, or `!low`                                |
+| `verified`  | No       | Explicit verification date used by freshness checks            |
 | `summary`   | Yes      | Human-readable description after the em-dash                   |
 
 ### Type Taxonomy
@@ -245,6 +246,11 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 | `!low`      | Background context, informational                          |
 
 The canonical form is `@context <type>...`, which is valid TSDoc. The legacy `@context:<type>...` form is still parsed for backwards compatibility, but should not be used for new annotations.
+
+Freshness has two modes:
+
+1. `max age`: a tag or `.ctx.md` `verified` date older than the configured threshold requires review.
+2. `not older than code`: if the anchored code changes and the verification date did not advance, the staged check fails and tells the developer to bump the date or delete the stale context.
 
 ## Extended Docs
 
@@ -304,12 +310,12 @@ transactions during peak hours, totaling $12,000 in Q4.
 npm install -D @recallnet/codecontext-eslint-plugin
 ```
 
-| Rule                                      | Default | Description                                                          |
-| ----------------------------------------- | ------- | -------------------------------------------------------------------- |
-| `codecontext/context-hierarchy`           | error   | Type/subtype combinations must be valid                              |
-| `codecontext/valid-context-refs`          | error   | `#ref` must resolve to an existing local file                        |
-| `codecontext/require-context-for-complex` | warn    | Complex functions (cyclomatic complexity > 5) should have `@context` |
-| `codecontext/no-stale-context`            | warn    | `@context history` dates older than 90 days trigger a warning        |
+| Rule                                      | Default | Description                                                                  |
+| ----------------------------------------- | ------- | ---------------------------------------------------------------------------- |
+| `codecontext/context-hierarchy`           | error   | Type/subtype combinations must be valid                                      |
+| `codecontext/valid-context-refs`          | error   | `#ref` must resolve to an existing local file                                |
+| `codecontext/require-context-for-complex` | warn    | Complex functions (cyclomatic complexity > 5) should have `@context`         |
+| `codecontext/no-stale-context`            | error   | Explicit verification dates are too old, or code changed without a date bump |
 
 ## Language Support
 

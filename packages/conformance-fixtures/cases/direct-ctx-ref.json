@@ -1,0 +1,24 @@
+{
+  "id": "direct-ctx-ref",
+  "description": "Direct project-relative .ctx.md refs resolve as structured context files",
+  "implementations": ["ts", "go"],
+  "filePath": "src/example.go",
+  "source": "// @context decision:tradeoff #docs/context/cache-strategy.ctx.md -- LRU keeps eviction O(1)\npackage fixture\n",
+  "supportFiles": {
+    "docs/context/cache-strategy.ctx.md": "---\nid: cache-strategy\ntype: decision\nstatus: active\n---\n\n## Decision\n\nUse LRU.\n"
+  },
+  "expected": {
+    "tags": [
+      {
+        "type": "decision",
+        "subtype": "tradeoff",
+        "id": "docs/context/cache-strategy.ctx.md",
+        "priority": null,
+        "summary": "LRU keeps eviction O(1)",
+        "line": 1
+      }
+    ],
+    "errors": [],
+    "resolvedCtxFiles": ["docs/context/cache-strategy.ctx.md"]
+  }
+}
