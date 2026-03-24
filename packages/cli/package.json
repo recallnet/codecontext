@@ -1,0 +1,26 @@
+{
+  "name": "codecontext",
+  "version": "0.1.0",
+  "description": "CLI for querying @context annotations in source code",
+  "type": "module",
+  "bin": {
+    "codecontext": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@codecontext/parser": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

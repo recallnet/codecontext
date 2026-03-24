@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+.codecontext-cache.json
+
+# OS
+.DS_Store
+Thumbs.db
