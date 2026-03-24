@@ -1,0 +1,91 @@
+# Publish Packages — publishes @codecontext/* packages to GitHub Packages (npm).
+#
+# Triggers after CI completes on main. Uses changesets to determine which
+# packages have version bumps pending. Versions, commits, and publishes
+# when changesets are present.
+#
+# Only runs on the main repo (not forks) and only on main branch pushes.
+
+name: Publish Packages
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Only run on main repo, not forks
+    if: >-
+      github.repository == 'recallnet/codecontext' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@codecontext"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for changesets
+        id: changesets
+        run: |
+          output=$(pnpm changeset status 2>&1) && rc=0 || rc=$?
+          if [ "$rc" -eq 0 ]; then
+            echo "has_changesets=true" >> "$GITHUB_OUTPUT"
+            echo "Found pending changesets"
+          elif echo "$output" | grep -qi "no.*changesets"; then
+            echo "has_changesets=false" >> "$GITHUB_OUTPUT"
+            echo "No pending changesets"
+          else
+            echo "::error::changeset status failed unexpectedly:"
+            echo "$output"
+            exit 1
+          fi
+
+      - name: Build packages
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: pnpm build
+
+      - name: Version packages
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: pnpm changeset version
+
+      - name: Commit and push version changes
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: version packages [skip ci]" || echo "No changes to commit"
+          git push
+
+      - name: Publish packages
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: pnpm changeset publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

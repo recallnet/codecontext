@@ -1,7 +1,17 @@
 {
-  "name": "codecontext",
+  "name": "@codecontext/cli",
   "version": "0.1.0",
+  "private": false,
   "description": "CLI for querying @context annotations in source code",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recallnet/codecontext.git",
+    "directory": "packages/cli"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "type": "module",
   "bin": {
     "codecontext": "./dist/index.js"

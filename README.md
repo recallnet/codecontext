@@ -125,7 +125,7 @@ $ npx codecontext --diff HEAD src/payments/gateway.ts
 
 ```javascript
 // eslint.config.js
-import codecontext from "eslint-plugin-codecontext";
+import codecontext from "@codecontext/eslint-plugin";
 
 export default [codecontext.configs.recommended];
 ```
@@ -286,7 +286,7 @@ transactions during peak hours, totaling $12,000 in Q4.
 ## ESLint Rules
 
 ```bash
-npm install -D eslint-plugin-codecontext
+npm install -D @codecontext/eslint-plugin
 ```
 
 | Rule | Default | Description |
@@ -317,16 +317,16 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 
 | Package | Description |
 |---------|-------------|
-| [`codecontext`](packages/cli) | CLI tool — query, scope, diff, stale-check |
+| [`@codecontext/cli`](packages/cli) | CLI tool — query, scope, diff, stale-check |
 | [`@codecontext/parser`](packages/parser) | Core parser for `@context` tags and `.ctx.md` files |
-| [`eslint-plugin-codecontext`](packages/eslint-plugin) | ESLint rules for freshness and validity |
+| [`@codecontext/eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity |
 | [`@codecontext/spec`](packages/spec) | Language-agnostic specification |
 
 ## Quick Start
 
 ```bash
 # Install
-pnpm add -D codecontext eslint-plugin-codecontext
+pnpm add -D @codecontext/cli @codecontext/eslint-plugin
 
 # Add to ESLint
 echo 'import codecontext from "eslint-plugin-codecontext";

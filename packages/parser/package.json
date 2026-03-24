@@ -1,7 +1,17 @@
 {
   "name": "@codecontext/parser",
   "version": "0.1.0",
+  "private": false,
   "description": "Core parser for @context tags and .ctx.md files",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recallnet/codecontext.git",
+    "directory": "packages/parser"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
