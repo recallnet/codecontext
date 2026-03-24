@@ -27,6 +27,8 @@ export default defineConfig({
         "**/*.d.ts",
         "**/*.config.*",
         "**/index.ts", // barrel exports
+        "**/types.ts", // pure type definitions
+        "**/utils.ts", // filesystem utilities tested via integration
       ],
     },
   },
