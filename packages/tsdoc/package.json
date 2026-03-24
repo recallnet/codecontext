@@ -1,0 +1,21 @@
+{
+  "name": "@recallnet/codecontext-tsdoc",
+  "version": "0.1.0",
+  "private": false,
+  "description": "TSDoc tag definitions for codecontext",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recallnet/codecontext.git",
+    "directory": "packages/tsdoc"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "files": [
+    "tsdoc-base.json"
+  ],
+  "exports": {
+    "./tsdoc-base.json": "./tsdoc-base.json"
+  }
+}

@@ -27,7 +27,7 @@ Before modifying any file, run the scope command:
 npx codecontext --scope <filepath>
 ```
 
-This returns all `@context` entries sorted by priority, with critical entries first. Read the output. If any `!critical` entries exist, open and read the linked `.ctx.md` files before proceeding.
+This returns all `@context` entries sorted by priority, with critical entries first. Read the output. If any `!critical` entries exist, open and read the linked supporting files before proceeding.
 
 **Why this matters:** The briefing surfaces constraints you would otherwise violate unknowingly. A `!critical` tag on a comparison operator means someone learned the hard way that changing it breaks things. If you skip the briefing and change that operator, you reintroduce the bug.
 
@@ -39,7 +39,7 @@ Scope Briefing: src/payments/gateway.ts
 
   @context(decision) [CRITICAL]  (verified)
     Strict > (not >=) because upstream sends at-threshold values during clock skew
-    -> #gate-42: active
+    -> #docs/context/gate-42.md
 
   @context(risk:perf) [HIGH]  (review-required)
     This loop is O(n^2); acceptable for n < 1000
@@ -48,7 +48,7 @@ Scope Briefing: src/payments/gateway.ts
     Migrated from polling to event-driven in v3.1
 ```
 
-If you see `-> #gate-42: active`, the file `docs/context/gate-42.ctx.md` has extended context. Read it.
+If you see `-> #docs/context/gate-42.md`, that file has extended context. Read it.
 
 ## After Editing: Check for Invalidation
 
@@ -70,7 +70,7 @@ When you change code that has `@context` annotations:
 
 2. **Remove dead context.** If you deleted the code a tag annotates, delete the tag. If you refactored away the tradeoff a `decision:tradeoff` describes, remove it.
 
-3. **Check linked .ctx.md files.** If the tag has a `#id` reference, open the corresponding `.ctx.md` file in `docs/context/` and check whether its content still applies. Update the `verified` date in frontmatter if you've confirmed it's still accurate.
+3. **Check linked supporting files.** If the tag has a `#ref` reference, open the referenced file and check whether its content still applies. If it is a structured `.ctx.md` file and you've confirmed it is still accurate, update the `verified` date in frontmatter.
 
 4. **Don't leave stale annotations.** A stale `@context` tag that contradicts the code is a trap. Either update it to match reality or remove it entirely.
 
@@ -116,18 +116,18 @@ Do not add `@context` for:
 - _(no priority)_ -- Standard relevance. The default.
 - `!low` -- Background information. Nice to know, not essential.
 
-### When to Create a .ctx.md File
+### When to Create a Structured .ctx.md File
 
-Create a `docs/context/<id>.ctx.md` file when:
+Create a `.ctx.md` file when:
 
 - The rationale needs more than one or two lines.
 - There are alternatives considered, constraints, or external references to document.
 - Multiple code locations reference the same decision.
 
-Reference it inline with `#id`:
+Reference it inline with `#ref`:
 
 ```javascript
-// @context:decision #cache-strategy !high — LRU chosen over LFU; see cache-strategy for benchmarks
+// @context decision #docs/context/cache-strategy.md !high — LRU chosen over LFU; see benchmarks
 ```
 
 ### .ctx.md File Template
@@ -167,7 +167,7 @@ External factors that shaped the decision.
 Tag format:
 
 ```
-@context:<type>[:<subtype>] [#id] [!priority] — <summary>
+@context <type>[:<subtype>] [#ref] [!priority] — <summary>
 ```
 
 Types and subtypes:
@@ -202,7 +202,7 @@ CLI commands:
 
 **Don't use @context for TODOs.** `@context` documents why code _is_ the way it is. Use `// TODO` or issue trackers for what it should become.
 
-**Don't duplicate what the code says.** `@context:doc — This function returns a boolean` is worse than nothing. It's one more thing to keep in sync for zero informational value.
+**Don't duplicate what the code says.** `@context doc — This function returns a boolean` is worse than nothing. It's one more thing to keep in sync for zero informational value.
 
 **Don't add context retroactively without understanding the original decision.** If you don't know _why_ the code uses `>` instead of `>=`, don't guess in a `@context` tag. Guessing produces confident-sounding misinformation. Investigate first, or leave the code unannotated.
 

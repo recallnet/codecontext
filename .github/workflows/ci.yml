@@ -27,9 +27,21 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+  go-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: packages/golangci-lint/go.mod
+      - name: Verify Go formatting
+        run: test -z "$(cd packages/golangci-lint && gofmt -l analyzer plugin)"
+      - name: Verify Go analyzer
+        run: cd packages/golangci-lint && go test ./...
+
   test:
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck]
+    needs: [lint-and-typecheck, go-qa]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
@@ -55,6 +67,9 @@ jobs:
         with:
           node-version: 22
           cache: "pnpm"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: packages/golangci-lint/go.mod
       - run: pnpm install --frozen-lockfile
       - name: Build all packages
         run: pnpm build
@@ -64,6 +79,8 @@ jobs:
         run: node -e "const m = await import('./packages/parser/dist/index.js'); if (!m.parseContextTags) throw new Error('Missing export'); console.log('Parser exports OK');"
       - name: Verify ESLint plugin exports
         run: node -e "const m = await import('./packages/eslint-plugin/dist/index.js'); if (!m.default?.rules) throw new Error('Missing rules'); console.log('ESLint plugin exports OK');"
+      - name: Verify Go analyzer package
+        run: pnpm go:test
 
   changeset-check:
     runs-on: ubuntu-latest

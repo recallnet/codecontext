@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { isContextTagCandidate, stripCommentDelimiters } from "./comment-parser.js";
 import type { AnchoredContext, ContextTag } from "./types.js";
 
 export interface StalenessCache {
@@ -71,7 +72,8 @@ export function extractBlock(lines: string[], tagLineIndex: number): string {
     const trimmed = line.trim();
 
     // Stop at another @context tag
-    if (trimmed.includes("@context:")) {
+    const innerComment = stripCommentDelimiters(line);
+    if (innerComment && isContextTagCandidate(innerComment)) {
       break;
     }
 

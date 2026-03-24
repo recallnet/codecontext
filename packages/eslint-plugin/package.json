@@ -33,6 +33,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@microsoft/tsdoc": "^0.16.0",
     "@recallnet/codecontext-parser": "workspace:*"
   },
   "peerDependencies": {

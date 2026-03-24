@@ -15,7 +15,7 @@ Three days later, 0.3% of transactions were processing twice. The payment gatewa
 This is the problem codecontext solves.
 
 ```typescript
-// @context:decision #gate-42 !critical — strict > (not >=): upstream sends
+// @context decision #docs/context/gate-42.md !critical — strict > (not >=): upstream sends
 //   at-threshold values during clock skew. >= causes double-processing.
 //   See INCIDENT-5678.
 if (message.timestamp > cutoff) {
@@ -63,26 +63,26 @@ codecontext doesn't replace any of these. It fills the gap between them:
 ### 1. Annotate decisions in code
 
 ```typescript
-// @context:decision:tradeoff #cache-strategy !critical — LRU over LFU
+// @context decision:tradeoff #docs/context/cache-strategy.md !critical — LRU over LFU
 //   for O(1) eviction. LFU was 3x slower in benchmarks at our p99 load.
 const cache = new LRUCache({ maxSize: 10_000 });
 ```
 
 ```python
-# @context:risk:security !high — Rate limiter uses in-memory counter.
+# @context risk:security !high — Rate limiter uses in-memory counter.
 #   Resets on deploy. Acceptable because deploy frequency < attack window.
 def check_rate_limit(client_id: str) -> bool:
     ...
 ```
 
 ```sql
--- @context:decision:constraint — Foreign keys disabled on this table.
+-- @context decision:constraint — Foreign keys disabled on this table.
 --   Bulk import from legacy system requires it. Re-enabled by migration 047.
 CREATE TABLE imports ( ... );
 ```
 
 ```go
-// @context:decision:assumption — Retry count of 3 assumes p99 latency < 500ms.
+// @context decision:assumption — Retry count of 3 assumes p99 latency < 500ms.
 //   If upstream SLA changes, revisit this.
 const maxRetries = 3
 ```
@@ -94,9 +94,9 @@ $ npx codecontext --scope src/payments/gateway.ts
 
   src/payments/gateway.ts — 4 context entries
 
-  CRITICAL  decision #gate-42  (verified 2025-11-15)
+    CRITICAL  decision #docs/context/gate-42.md  (verified 2025-11-15)
     strict > (not >=): upstream sends at-threshold values during clock skew
-    doc: docs/context/gate-42.ctx.md
+    doc: docs/context/gate-42.md
 
   HIGH  risk:security  (stale — code changed 2026-03-10)
     API key rotation assumes 24h TTL from provider
@@ -114,11 +114,11 @@ $ npx codecontext --scope src/payments/gateway.ts
 $ npx codecontext --diff HEAD src/payments/gateway.ts
 
   Lines 42-44 (modified):
-    CRITICAL  decision #gate-42  — strict > (not >=)
+    CRITICAL  decision #docs/context/gate-42.md  — strict > (not >=)
     STATUS: ANCHORED CODE CHANGED — review required
     Previous anchor hash: a1b2c3d4
     Current anchor hash:  e5f6a7b8
-    doc: docs/context/gate-42.ctx.md
+    doc: docs/context/gate-42.md
 ```
 
 ### 4. Enforce freshness with ESLint
@@ -131,6 +131,8 @@ export default [codecontext.configs.recommended];
 ```
 
 The linter catches stale context, unresolved references, invalid types, and complex functions without annotations — before the PR merges.
+
+Examples live in [`examples/`](examples/) and include both TypeScript and Go source with different context variations.
 
 ## The Agent Integration (The Killer Feature)
 
@@ -159,7 +161,7 @@ $ npx codecontext --scope src/payments/gateway.ts --json
     {
       "line": 42,
       "type": "decision",
-      "id": "gate-42",
+      "id": "docs/context/gate-42.md",
       "priority": "critical",
       "status": "verified",
       "summary": "strict > (not >=): upstream sends at-threshold values during clock skew",
@@ -211,14 +213,14 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 ## Comment Syntax
 
 ```
-@context:<type>[:<subtype>] [#id] [!priority] — <summary>
+@context <type>[:<subtype>] [#ref] [!priority] — <summary>
 ```
 
 | Field       | Required | Description                                                    |
 | ----------- | -------- | -------------------------------------------------------------- |
 | `type`      | Yes      | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
 | `subtype`   | No       | Narrows the type (e.g., `decision:tradeoff`, `risk:security`)  |
-| `#id`       | No       | Links to a `docs/context/<id>.ctx.md` file                     |
+| `#ref`      | No       | Project-relative reference to supporting docs or code          |
 | `!priority` | No       | `!critical`, `!high`, or `!low`                                |
 | `summary`   | Yes      | Human-readable description after the em-dash                   |
 
@@ -242,9 +244,22 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 | _(omitted)_ | Standard relevance                                         |
 | `!low`      | Background context, informational                          |
 
-## Extended Context Files (.ctx.md)
+The canonical form is `@context <type>...`, which is valid TSDoc. The legacy `@context:<type>...` form is still parsed for backwards compatibility, but should not be used for new annotations.
 
-When the decision needs more than a one-liner, create `docs/context/<id>.ctx.md`:
+## Extended Docs
+
+`#ref` can point to any project-relative file that helps explain the decision:
+
+```typescript
+// @context decision #docs/context/gate-42.md !critical — Boundary timestamps must be excluded
+// @context related #src/payments/gateway.ts — Matching implementation lives here
+```
+
+If you want a structured long-form document, `.ctx.md` remains supported, but it is optional rather than required.
+
+## Structured Context Files (.ctx.md)
+
+When the decision needs more than a one-liner and you want frontmatter plus predictable sections, create a `.ctx.md` file:
 
 ```markdown
 ---
@@ -292,9 +307,9 @@ npm install -D @recallnet/codecontext-eslint-plugin
 | Rule                                      | Default | Description                                                          |
 | ----------------------------------------- | ------- | -------------------------------------------------------------------- |
 | `codecontext/context-hierarchy`           | error   | Type/subtype combinations must be valid                              |
-| `codecontext/valid-context-refs`          | error   | `#id` must resolve to an existing `.ctx.md` file                     |
+| `codecontext/valid-context-refs`          | error   | `#ref` must resolve to an existing local file                        |
 | `codecontext/require-context-for-complex` | warn    | Complex functions (cyclomatic complexity > 5) should have `@context` |
-| `codecontext/no-stale-context`            | warn    | `@context:history` dates older than 90 days trigger a warning        |
+| `codecontext/no-stale-context`            | warn    | `@context history` dates older than 90 days trigger a warning        |
 
 ## Language Support
 
@@ -309,7 +324,7 @@ codecontext is a **language-agnostic specification**. The `@context` tag works i
 | `<!-- -->`    | HTML, XML, SVG                                                    |
 | `{/* */}`     | JSX, TSX                                                          |
 
-The TypeScript implementation is the first. The parser and CLI already work on files in any of these languages. Language-specific packages (linter plugins for Ruff, clippy, golangci-lint) are the only per-language pieces — everything else is universal.
+The TypeScript implementation is the first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where needed. Go support is available via the `go/analysis` package in `packages/golangci-lint`.
 
 See the full [specification](packages/spec/SPEC.md) for adaptation rules and conformance levels.
 
@@ -318,9 +333,11 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 | Package                                                          | Description                                         |
 | ---------------------------------------------------------------- | --------------------------------------------------- |
 | [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check          |
-| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and `.ctx.md` files |
+| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and structured docs |
 | [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity             |
+| [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint   |
 | [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                     |
+| [`@recallnet/codecontext-tsdoc`](packages/tsdoc)                 | TSDoc extension for the `@context` block tag        |
 
 ## Quick Start
 
@@ -341,6 +358,8 @@ You'll need a GitHub personal access token with `read:packages` scope. Set it as
 pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-parser
 # Optional: ESLint plugin for freshness enforcement
 pnpm add -D @recallnet/codecontext-eslint-plugin
+# Optional: TSDoc extension if you use eslint-plugin-tsdoc / API Extractor
+pnpm add -D @recallnet/codecontext-tsdoc
 ```
 
 ### 3. Configure ESLint (optional)
@@ -361,13 +380,22 @@ export default [
 mkdir -p docs/context
 ```
 
-### 5. Add your first `@context` tag
+### 5. Configure TSDoc (optional)
 
-```typescript
-// @context:decision !high — chose approach A over B because of X
+```json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+  "extends": ["@recallnet/codecontext-tsdoc/tsdoc-base.json"]
+}
 ```
 
-### 6. Run the CLI
+### 6. Add your first `@context` tag
+
+```typescript
+// @context decision !high — chose approach A over B because of X
+```
+
+### 7. Run the CLI
 
 ```bash
 # Briefing before editing

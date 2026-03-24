@@ -5,14 +5,14 @@
 
 ## Abstract
 
-codecontext is a specification for embedding structured decision context directly in source code comments, designed for both human readability and machine consumption. By using a universal `@context` tag syntax that works within any programming language's native comment delimiters, codecontext enables developers, tools, and AI agents to capture, discover, and reason about the _why_ behind code — tradeoffs, constraints, risks, and historical decisions — without leaving the source file. Companion `.ctx.md` files provide extended context when inline comments are insufficient.
+codecontext is a specification for embedding structured decision context directly in source code comments, designed for both human readability and machine consumption. By using a universal `@context` tag syntax that works within any programming language's native comment delimiters, codecontext enables developers, tools, and AI agents to capture, discover, and reason about the _why_ behind code — tradeoffs, constraints, risks, and historical decisions — without leaving the source file. Supporting references can point to any project file, and optional `.ctx.md` documents provide a structured long-form format when teams want one.
 
 ## Terminology
 
 | Term              | Definition                                                                                                                                                                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Context tag**   | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional ID, optional priority, and a human-readable summary.                              |
-| **Context file**  | A Markdown file with the extension `.ctx.md` that provides extended context for a decision or annotation. Context files use YAML frontmatter for structured metadata and a Markdown body for prose.                                        |
+| **Context tag**   | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional reference, optional priority, and a human-readable summary.                       |
+| **Context file**  | An optional long-form supporting document referenced from a context tag. A project MAY use ordinary files such as `.md`, `.html`, or source files, or it MAY use the structured `.ctx.md` format defined by this specification.            |
 | **Logical block** | The contiguous region of code immediately following a context tag. The logical block is the scope to which the tag applies. Block boundaries are language-dependent (e.g., the next function, class, statement, or brace-delimited block). |
 | **Anchor**        | The association between a context tag and its logical block. The anchor is what makes staleness detection possible: when the logical block changes, the anchor's hash changes.                                                             |
 | **Staleness**     | The condition where the logical block associated with a context tag has been modified since the tag was last verified. Staleness indicates that the context may no longer accurately describe the code.                                    |
@@ -23,18 +23,18 @@ codecontext is a specification for embedding structured decision context directl
 A context tag is a single annotation with the following structure:
 
 ```
-@context:<type>[:<subtype>] [#id] [!priority] — <summary>
+@context <type>[:<subtype>] [#ref] [!priority] — <summary>
 ```
 
 ### Fields
 
-| Field       | Required | Format                          | Description                                                                      |
-| ----------- | -------- | ------------------------------- | -------------------------------------------------------------------------------- |
-| `type`      | Yes      | Lowercase alphanumeric          | The primary classification of the context. See Type Taxonomy.                    |
-| `subtype`   | No       | Lowercase alphanumeric          | A secondary classification within the type.                                      |
-| `#id`       | No       | `#` followed by `[a-z0-9-]+`    | A reference to a `.ctx.md` file for extended context.                            |
-| `!priority` | No       | `!critical`, `!high`, or `!low` | The importance level of the annotation.                                          |
-| `summary`   | Yes      | Free-form text                  | A human-readable description of the context. Follows an em-dash (`—`) separator. |
+| Field       | Required | Format                           | Description                                                                      |
+| ----------- | -------- | -------------------------------- | -------------------------------------------------------------------------------- |
+| `type`      | Yes      | Lowercase alphanumeric           | The primary classification of the context. See Type Taxonomy.                    |
+| `subtype`   | No       | Lowercase alphanumeric           | A secondary classification within the type.                                      |
+| `#ref`      | No       | `#` followed by a non-space path | A project-relative reference to supporting docs or code.                         |
+| `!priority` | No       | `!critical`, `!high`, or `!low`  | The importance level of the annotation.                                          |
+| `summary`   | Yes      | Free-form text                   | A human-readable description of the context. Follows an em-dash (`—`) separator. |
 
 ### Universal Comment Embedding
 
@@ -43,27 +43,27 @@ The `@context` sigil can appear inside any comment form that a programming langu
 Examples across languages:
 
 ```javascript
-// @context:decision:tradeoff #cache-strategy !critical — LRU chosen over LFU for O(1) eviction
+// @context decision:tradeoff #docs/context/cache-strategy.md !critical — LRU chosen over LFU for O(1) eviction
 ```
 
 ```python
-# @context:risk:perf !high — This loop is O(n^2); acceptable for n < 1000
+# @context risk:perf !high — This loop is O(n^2); acceptable for n < 1000
 ```
 
 ```sql
--- @context:decision:constraint — Foreign keys disabled for bulk import performance
+-- @context decision:constraint — Foreign keys disabled for bulk import performance
 ```
 
 ```css
-/* @context:requirement — WCAG 2.1 AA contrast ratio required */
+/* @context requirement — WCAG 2.1 AA contrast ratio required */
 ```
 
 ```html
-<!-- @context:related #auth-flow — See authentication context for session handling -->
+<!-- @context related #docs/auth-flow.md — See authentication context for session handling -->
 ```
 
 ```lisp
-;; @context:history — Migrated from recursive to iterative approach in v2.3
+;; @context history — Migrated from recursive to iterative approach in v2.3
 ```
 
 A context tag MUST appear on a single logical line. Multi-line context is achieved through consecutive context tags (see [syntax.md](syntax.md)).
@@ -112,21 +112,21 @@ A context tag MUST appear on a single logical line. Multi-line context is achiev
 
 A conforming tool SHOULD surface `!critical` tags prominently when a developer is editing the associated logical block.
 
-## ID References
+## References
 
-An ID reference takes the form `#<id>` where `<id>` matches the pattern `[a-z0-9]+(-[a-z0-9]+)*` (lowercase alphanumeric segments separated by hyphens).
+A reference takes the form `#<ref>` where `<ref>` is a non-space project-relative path such as `docs/context/cache-strategy.md` or `src/cache/lru.ts`.
 
 ### Resolution
 
-When a parser encounters `#<id>`, it resolves the reference by searching for a file named `<id>.ctx.md` in the project's context directory. The default context directory is `docs/context/` relative to the project root. This path MAY be overridden in `codecontext.json`.
+When a tool encounters `#<ref>`, it SHOULD resolve the reference relative to the project root.
 
 Resolution order:
 
-1. Check `codecontext.json` for a custom `contextDir` path.
-2. Look for `<contextDir>/<id>.ctx.md`.
+1. If `<ref>` names an existing project-relative path, resolve it directly.
+2. If a tool supports legacy bare IDs, it MAY also search configured context directories such as `docs/context/`.
 3. If not found, report an unresolved reference (tools SHOULD warn, not error).
 
-See [ctx-files.md](ctx-files.md) for the `.ctx.md` file format.
+See [ctx-files.md](ctx-files.md) for the optional structured `.ctx.md` file format.
 
 ## Language Adaptation
 
@@ -167,15 +167,15 @@ codecontext is language-agnostic. The specification does NOT prescribe which com
 A **Minimal** conforming implementation MUST:
 
 - Parse `@context` tags from source code comments in at least one language.
-- Extract the type, subtype (if present), ID (if present), priority (if present), and summary.
+- Extract the type, subtype (if present), reference (if present), priority (if present), and summary.
 - Report parse errors for malformed tags.
 
 ### Level 2: Standard
 
 A **Standard** conforming implementation MUST satisfy all Minimal requirements and additionally:
 
-- Resolve `#id` references to `.ctx.md` files.
-- Parse `.ctx.md` YAML frontmatter and Markdown body.
+- Resolve `#ref` references to project files.
+- If the target uses the structured `.ctx.md` format, parse its YAML frontmatter and Markdown body.
 - Report unresolved references as warnings.
 
 ### Level 3: Full

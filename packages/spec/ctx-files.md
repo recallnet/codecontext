@@ -1,9 +1,9 @@
-# Context Files (.ctx.md)
+# Structured Context Files (.ctx.md)
 
 **Version:** 1.0.0-draft
 **Parent document:** [SPEC.md](SPEC.md)
 
-Context files provide extended decision context when inline `@context` tags are insufficient. They are Markdown files with YAML frontmatter, identified by the `.ctx.md` extension.
+Structured context files provide an optional long-form format when inline `@context` tags are insufficient. They are Markdown files with YAML frontmatter, identified by the `.ctx.md` extension.
 
 ## File Naming
 

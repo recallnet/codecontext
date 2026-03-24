@@ -1,3 +1,4 @@
+import { isContextTagCandidate } from "@recallnet/codecontext-parser";
 import type { Rule } from "eslint";
 import type { Node } from "estree";
 
@@ -92,7 +93,12 @@ function computeComplexity(node: Node): number {
 
 function hasContextInComments(sourceCode: Rule.RuleContext["sourceCode"], node: Node): boolean {
   const comments = sourceCode.getCommentsBefore(node);
-  return comments.some((c) => c.value.includes("@context:"));
+  return comments.some((c) =>
+    c.value
+      .split("\n")
+      .map((line) => line.trim())
+      .some((line) => isContextTagCandidate(line))
+  );
 }
 
 const rule: Rule.RuleModule = {

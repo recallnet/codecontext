@@ -10,11 +10,11 @@ This document defines the formal grammar, provides examples for all type/subtype
 The following grammar uses a BNF-like notation. Terminal symbols are enclosed in quotes or described by regex patterns in angle brackets.
 
 ```
-context-tag     ::= "@context" ":" type sub-type? id-ref? priority? separator summary
+context-tag     ::= "@context" <space> type sub-type? ref? priority? separator summary
 
 type            ::= <[a-z][a-z0-9]*>
 sub-type        ::= ":" <[a-z][a-z0-9]*>
-id-ref          ::= "#" <[a-z0-9]+(-[a-z0-9]+)*>
+ref             ::= "#" <non-space path text>
 priority        ::= "!" priority-level
 priority-level  ::= "critical" | "high" | "low"
 separator       ::= <em-dash>                      ; U+2014 (—)
@@ -53,73 +53,73 @@ For block comments spanning multiple lines, the parser MUST process each line in
 ### decision
 
 ```javascript
-// @context:decision #api-versioning — REST versioning uses URL path prefix over Accept headers
+// @context decision #docs/api/versioning.md — REST versioning uses URL path prefix over Accept headers
 ```
 
 #### decision:tradeoff
 
 ```go
-// @context:decision:tradeoff #mem-vs-cpu !high — Pre-compute lookup table; trades 64MB RAM for 10x query speedup
+// @context decision:tradeoff #docs/benchmarks/mem-vs-cpu.md !high — Pre-compute lookup table; trades 64MB RAM for 10x query speedup
 ```
 
 #### decision:constraint
 
 ```python
-# @context:decision:constraint — Must use stdlib only; no third-party dependencies allowed in this module
+# @context decision:constraint — Must use stdlib only; no third-party dependencies allowed in this module
 ```
 
 #### decision:assumption
 
 ```rust
-// @context:decision:assumption #single-tenant — Assumes single-tenant deployment; multi-tenant requires rework
+// @context decision:assumption #docs/tenancy.md — Assumes single-tenant deployment; multi-tenant requires rework
 ```
 
 ### requirement
 
 ```typescript
-// @context:requirement #billing-calc !critical — Implements rounding rules from finance spec section 4.2
+// @context requirement #docs/finance/billing-calc.md !critical — Implements rounding rules from finance spec section 4.2
 ```
 
 ### risk
 
 ```sql
--- @context:risk — This migration is not reversible; back up the table before running
+-- @context risk — This migration is not reversible; back up the table before running
 ```
 
 #### risk:perf
 
 ```python
-# @context:risk:perf !high — Nested loop over full dataset; O(n*m) where n,m can reach 100k
+# @context risk:perf !high — Nested loop over full dataset; O(n*m) where n,m can reach 100k
 ```
 
 #### risk:security
 
 ```java
-// @context:risk:security !critical — User input interpolated into query; parameterize before production
+// @context risk:security !critical — User input interpolated into query; parameterize before production
 ```
 
 #### risk:compat
 
 ```css
-/* @context:risk:compat — Flexbox gap not supported in Safari < 14.1 */
+/* @context risk:compat — Flexbox gap not supported in Safari < 14.1 */
 ```
 
 ### related
 
 ```html
-<!-- @context:related #auth-flow — Session token validation logic is in auth/session.ts -->
+<!-- @context related #auth/session.ts — Session token validation logic is in auth/session.ts -->
 ```
 
 ### history
 
 ```ruby
-# @context:history — Switched from Nokogiri to Ox in v3.1 for 5x XML parsing speedup
+# @context history — Switched from Nokogiri to Ox in v3.1 for 5x XML parsing speedup
 ```
 
 ### doc
 
 ```lua
--- @context:doc — State machine transitions: IDLE -> LOADING -> READY | ERROR -> IDLE
+-- @context doc — State machine transitions: IDLE -> LOADING -> READY | ERROR -> IDLE
 ```
 
 ## Multi-line Context Blocks
@@ -131,7 +131,7 @@ When a single line is insufficient, consecutive `@context` comments form a **con
 The first line contains the full context tag. Subsequent lines use `@context+` to indicate continuation:
 
 ```typescript
-// @context:decision:tradeoff #orm-choice !high — Chose raw SQL over ORM for this module
+// @context decision:tradeoff #docs/persistence/orm-choice.md !high — Chose raw SQL over ORM for this module
 // @context+ — ORM added 200ms p99 latency due to hydration overhead
 // @context+ — Raw SQL is acceptable here because the schema is stable and well-tested
 ```
@@ -157,8 +157,8 @@ continuation    ::= "@context+" separator summary
 The canonical separator is the em-dash character (U+2014: `—`). As an ASCII-compatible fallback, parsers MUST also accept a space-surrounded double hyphen (`--`):
 
 ```python
-# @context:decision — Using em-dash separator (canonical)
-# @context:decision -- Using double-hyphen fallback (ASCII)
+# @context decision — Using em-dash separator (canonical)
+# @context decision -- Using double-hyphen fallback (ASCII)
 ```
 
 A parser MUST normalize both forms to the same internal representation. When serializing, a tool SHOULD use the em-dash form.
@@ -177,7 +177,8 @@ If a summary must contain a literal `@context` string (unusual but possible), no
 
 ### Unicode
 
-- The `type`, `subtype`, and `id` fields are restricted to ASCII lowercase alphanumeric characters and hyphens: `[a-z0-9-]`.
+- The `type` and `subtype` fields are restricted to ASCII lowercase alphanumeric characters.
+- The `ref` field MAY contain path characters such as letters, numbers, `_`, `-`, `/`, and `.`.
 - The `summary` field MAY contain any Unicode characters.
 - Parsers MUST handle UTF-8 encoded source files.
 - Parsers SHOULD handle other encodings (UTF-16, Latin-1) if common for the target language.
@@ -186,9 +187,9 @@ If a summary must contain a literal `@context` string (unusual but possible), no
 
 A context tag with an empty summary (separator followed by only whitespace) is a parse error. The summary MUST contain at least one non-whitespace character.
 
-### Duplicate IDs
+### Duplicate References
 
-Multiple `@context` tags in the same file MAY reference the same `#id`. This indicates that multiple code locations share the same extended context. This is valid and expected.
+Multiple `@context` tags in the same file MAY reference the same `#ref`. This indicates that multiple code locations share the same supporting material. This is valid and expected.
 
 ### Nested Block Comments
 
@@ -200,13 +201,13 @@ Many codebases use decorative comment styles:
 
 ```java
 /**
- * @context:decision:tradeoff — Builder pattern over constructor telescoping
+ * @context decision:tradeoff — Builder pattern over constructor telescoping
  */
 ```
 
 ```python
 ###############################################
-# @context:risk:security !critical — Input not sanitized
+# @context risk:security !critical — Input not sanitized
 ###############################################
 ```
 

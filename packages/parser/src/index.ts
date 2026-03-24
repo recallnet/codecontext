@@ -18,6 +18,7 @@ export type {
 
 // Comment parser
 export {
+  isContextTagCandidate,
   parseContextTags,
   stripCommentDelimiters,
   type ParseResult,

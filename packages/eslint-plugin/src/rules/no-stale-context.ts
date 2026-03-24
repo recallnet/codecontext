@@ -3,7 +3,7 @@ import type { Rule } from "eslint";
 import { extractContextTags } from "../utils/comment-extractor.js";
 
 /**
- * Matches a date in YYYY-MM-DD format within a @context:history tag summary.
+ * Matches a date in YYYY-MM-DD format within a @context history tag summary.
  */
 const DATE_PATTERN = /(\d{4}-\d{2}-\d{2})/;
 
@@ -12,11 +12,11 @@ const rule: Rule.RuleModule = {
     type: "suggestion",
     docs: {
       description:
-        "Warn when @context:history tags reference dates older than a configurable threshold",
+        "Warn when @context history tags reference dates older than a configurable threshold",
     },
     messages: {
       staleContext:
-        "@context:history references date {{date}}, which is {{ageDays}} days old (threshold: {{maxAgeDays}} days).",
+        "@context history references date {{date}}, which is {{ageDays}} days old (threshold: {{maxAgeDays}} days).",
     },
     schema: [
       {

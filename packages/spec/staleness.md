@@ -71,7 +71,7 @@ The hash algorithm and length MAY be overridden in `codecontext.json` via the `h
 Given this code:
 
 ```typescript
-// @context:decision:tradeoff #cache-strategy !high — LRU over LFU for O(1) eviction
+// @context decision:tradeoff #docs/context/cache-strategy.md !high — LRU over LFU for O(1) eviction
 function evict(cache: Map<string, Entry>): void {
   const oldest = cache.keys().next().value;
   cache.delete(oldest);
@@ -162,7 +162,7 @@ The staleness cache is stored in `.codecontext-cache.json` at the project root. 
     "src/cache/lru.ts": [
       {
         "line": 14,
-        "tag": "@context:decision:tradeoff #cache-strategy !high",
+        "tag": "@context decision:tradeoff #docs/context/cache-strategy.md !high",
         "hash": "a1b2c3d4e5f67890",
         "verifiedAt": "2025-11-15T10:30:00Z",
         "verifiedBy": "cli",
@@ -173,7 +173,7 @@ The staleness cache is stored in `.codecontext-cache.json` at the project root. 
     "src/auth/session.py": [
       {
         "line": 7,
-        "tag": "@context:risk:security !critical",
+        "tag": "@context risk:security !critical",
         "hash": "f0e1d2c3b4a59687",
         "verifiedAt": "2025-11-10T08:00:00Z",
         "verifiedBy": "pre-commit",
@@ -245,10 +245,10 @@ An AI agent or code assistant integration SHOULD:
 
 When a developer encounters a stale context tag, the recommended workflow is:
 
-1. **Read** the context tag and any associated `.ctx.md` file.
+1. **Read** the context tag and any associated supporting file.
 2. **Review** the code changes that caused staleness (via `git diff` or similar).
 3. **Decide:**
    - If the context is still accurate: **re-verify** (update the hash in the cache).
-   - If the context needs updating: **update** the tag and/or `.ctx.md` file, then re-verify.
+   - If the context needs updating: **update** the tag and/or supporting file, then re-verify.
    - If the context is no longer relevant: **deprecate** or **remove** the tag.
 4. **Commit** the updated cache (if the project tracks it) or let the pre-commit hook update it.

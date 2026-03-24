@@ -6,6 +6,7 @@ import security from "eslint-plugin-security";
 import promise from "eslint-plugin-promise";
 import noSecrets from "eslint-plugin-no-secrets";
 import importX from "eslint-plugin-import-x";
+import tsdoc from "eslint-plugin-tsdoc";
 import prettier from "eslint-config-prettier";
 
 export default tseslint.config(
@@ -13,6 +14,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "**/coverage/**",
       "**/node_modules/**",
       "**/.turbo/**",
       "*.config.mjs",
@@ -31,7 +33,7 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["packages/*/test/*.test.ts"],
+          allowDefaultProject: ["packages/*/test/*.test.ts", "examples/ts/payments/gateway.ts"],
           defaultProject: "tsconfig.eslint.json",
         },
         tsconfigRootDir: import.meta.dirname,
@@ -126,6 +128,15 @@ export default tseslint.config(
       ],
       "import-x/no-duplicates": "error",
       "import-x/no-self-import": "error",
+    },
+  },
+
+  // TSDoc validation for TypeScript doc comments
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    plugins: { tsdoc },
+    rules: {
+      "tsdoc/syntax": "error",
     },
   },
 

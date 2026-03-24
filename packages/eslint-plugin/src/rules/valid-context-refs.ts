@@ -9,10 +9,10 @@ const rule: Rule.RuleModule = {
   meta: {
     type: "problem",
     docs: {
-      description: "Check that #id references in @context comments resolve to .ctx.md files",
+      description: "Check that #references in @context comments resolve to existing local files",
     },
     messages: {
-      missingCtxFile: "Context file not found for #{{id}}. Expected: {{expectedPath}}.",
+      missingCtxFile: "Context reference not found for #{{id}}. Looked for: {{expectedPath}}.",
     },
     schema: [
       {
@@ -31,28 +31,43 @@ const rule: Rule.RuleModule = {
   create(context) {
     const options = (context.options[0] as { contextDir?: string } | undefined) ?? {};
     const contextDir = options.contextDir ?? "docs/context";
+    const looksLikePathReference = (value: string): boolean =>
+      value.includes("/") || value.includes(".");
+
+    const resolveCandidates = (value: string, cwd: string): string[] => {
+      if (looksLikePathReference(value)) {
+        return [path.resolve(cwd, value)];
+      }
+
+      return [
+        path.resolve(cwd, value),
+        path.resolve(cwd, contextDir, value),
+        path.resolve(cwd, contextDir, `${value}.ctx.md`),
+      ];
+    };
 
     return {
       Program() {
         const tags = extractContextTags(context);
 
-        // Resolve the context directory relative to the current working directory
         const cwd = context.cwd;
-        const resolvedContextDir = path.resolve(cwd, contextDir);
 
         for (const tag of tags) {
           if (!tag.id) {
             continue;
           }
 
-          const expectedFile = path.join(resolvedContextDir, `${tag.id}.ctx.md`);
-          if (!fs.existsSync(expectedFile)) {
+          const candidates = resolveCandidates(tag.id, cwd);
+          const resolvedFile = candidates.find((candidate) => fs.existsSync(candidate));
+          if (!resolvedFile) {
             context.report({
               loc: { line: tag.line, column: tag.column },
               messageId: "missingCtxFile",
               data: {
                 id: tag.id,
-                expectedPath: path.relative(cwd, expectedFile),
+                expectedPath: candidates
+                  .map((candidate) => path.relative(cwd, candidate))
+                  .join(", "),
               },
             });
           }

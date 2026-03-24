@@ -9,9 +9,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "turbo typecheck",
+    "go:test": "cd packages/golangci-lint && go test ./...",
+    "go:fmt:check": "sh -c 'test -z \"$(cd packages/golangci-lint && gofmt -l analyzer plugin)\"'",
+    "go:qa": "pnpm go:fmt:check && pnpm go:test",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@microsoft/tsdoc": "^0.16.0",
     "@changesets/cli": "^2.27.0",
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
@@ -21,6 +25,7 @@
     "eslint-plugin-promise": "^7.0.0",
     "eslint-plugin-security": "^3.0.0",
     "eslint-plugin-sonarjs": "^3.0.0",
+    "eslint-plugin-tsdoc": "^0.4.0",
     "eslint-plugin-unicorn": "^58.0.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",

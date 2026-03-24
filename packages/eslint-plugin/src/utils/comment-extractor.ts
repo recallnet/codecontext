@@ -1,105 +1,117 @@
+import {
+  TSDocConfiguration,
+  TSDocParser,
+  TSDocTagDefinition,
+  TSDocTagSyntaxKind,
+} from "@microsoft/tsdoc";
+import {
+  isContextTagCandidate,
+  parseContextTags,
+  type ContextTag,
+} from "@recallnet/codecontext-parser";
 import type { Rule } from "eslint";
 
-/**
- * Regex for the @context tag format:
- *   @context:<type>[:<subtype>] [#id] [!priority] — <summary>
- *
- * Mirrors the pattern from @recallnet/codecontext-parser.
- */
-const CONTEXT_PATTERN =
-  // eslint-disable-next-line security/detect-unsafe-regex
-  /^@context:(\w+)(?::(\w+))?\s*(?:#([\w-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$/;
+const tsdocConfiguration = new TSDocConfiguration();
+const contextBlockTag = new TSDocTagDefinition({
+  tagName: "@context",
+  syntaxKind: TSDocTagSyntaxKind.BlockTag,
+  allowMultiple: true,
+});
 
-export interface ExtractedTag {
-  raw: string;
-  type: string;
-  subtype?: string;
-  id?: string;
-  priority?: string;
-  summary: string;
+tsdocConfiguration.addTagDefinition(contextBlockTag);
+tsdocConfiguration.setSupportForTag(contextBlockTag, true);
+
+const tsdocParser = new TSDocParser(tsdocConfiguration);
+
+export interface ExtractedTag extends Omit<ContextTag, "location"> {
   line: number;
   column: number;
   comment: ReturnType<Rule.RuleContext["sourceCode"]["getAllComments"]>[number];
 }
 
-/**
- * Strip comment delimiters from a single line of a comment value.
- * ESLint's comment AST nodes already strip leading // or /* but
- * block comments may contain continuation lines with leading ` * `.
- */
-function stripBlockContinuation(line: string): string {
-  const m = /^\s*\*?\s?(.*)$/.exec(line);
-  return m ? (m[1] ?? line) : line;
+type ParsedComment = ExtractedTag["comment"] & {
+  loc: NonNullable<ExtractedTag["comment"]["loc"]>;
+  range: NonNullable<ExtractedTag["comment"]["range"]>;
+};
+
+function hasTSDocContextBlock(rawComment: string): boolean {
+  if (!rawComment.startsWith("/**")) {
+    return false;
+  }
+
+  const parserContext = tsdocParser.parseString(rawComment);
+  return parserContext.docComment.customBlocks.some(
+    (block) => block.blockTag.tagName === "@context"
+  );
 }
 
-function parseTag(
-  raw: string
-): { type: string; subtype?: string; id?: string; priority?: string; summary: string } | null {
-  const match = CONTEXT_PATTERN.exec(raw);
-  if (!match) {
-    return null;
+function shouldParseComment(comment: ParsedComment, rawComment: string): boolean {
+  if (!rawComment.includes("@context")) {
+    return false;
   }
 
-  const [, type, subtype, id, priority, summary] = match;
-  if (!type || !summary) {
-    return null;
+  if (comment.type !== "Block" || !rawComment.startsWith("/**")) {
+    return true;
   }
 
-  const result: {
-    type: string;
-    subtype?: string;
-    id?: string;
-    priority?: string;
-    summary: string;
-  } = {
-    type,
-    summary: summary.trim(),
+  if (hasTSDocContextBlock(rawComment)) {
+    return true;
+  }
+
+  return rawComment.split("\n").some((line) => isContextTagCandidate(line));
+}
+
+function mapParsedTag(comment: ParsedComment, tag: ContextTag): ExtractedTag {
+  const extracted: ExtractedTag = {
+    raw: tag.raw,
+    type: tag.type,
+    summary: tag.summary,
+    line: comment.loc.start.line + tag.location.line - 1,
+    column: tag.location.line === 1 ? comment.loc.start.column : 0,
+    comment,
   };
-  if (subtype) {
-    result.subtype = subtype;
+
+  if (tag.subtype) {
+    extracted.subtype = tag.subtype;
   }
-  if (id) {
-    result.id = id;
+  if (tag.id) {
+    extracted.id = tag.id;
   }
-  if (priority) {
-    result.priority = priority;
+  if (tag.priority) {
+    extracted.priority = tag.priority;
   }
-  return result;
+
+  return extracted;
 }
 
 /**
  * Extract all @context tags from every comment in the source file.
+ *
+ * For TSDoc comments we first ask the official TSDoc parser whether this
+ * docblock contains an @context block tag. The shared codecontext parser
+ * then parses the payload so line comments and non-TSDoc comments still
+ * follow the same grammar.
  */
 export function extractContextTags(context: Rule.RuleContext): ExtractedTag[] {
   const sourceCode = context.sourceCode;
   const comments = sourceCode.getAllComments();
+  const filePath = context.filename;
   const tags: ExtractedTag[] = [];
 
   for (const comment of comments) {
-    const lines = comment.value.split("\n");
-    const commentLoc = comment.loc;
-    const startLine = commentLoc ? commentLoc.start.line : 1;
-    const startColumn = commentLoc ? commentLoc.start.column : 0;
+    if (!comment.loc || !comment.range) {
+      continue;
+    }
+    const parsedComment = comment as ParsedComment;
 
-    for (let i = 0; i < lines.length; i++) {
-      // eslint-disable-next-line security/detect-object-injection
-      const raw = stripBlockContinuation(lines[i] ?? "").trim();
-      if (!raw.includes("@context:")) {
-        continue;
-      }
+    const rawComment = sourceCode.text.slice(parsedComment.range[0], parsedComment.range[1]);
+    if (!shouldParseComment(parsedComment, rawComment)) {
+      continue;
+    }
 
-      const parsed = parseTag(raw);
-      if (!parsed) {
-        continue;
-      }
-
-      tags.push({
-        raw,
-        ...parsed,
-        line: startLine + i,
-        column: startColumn,
-        comment,
-      });
+    const parsed = parseContextTags(rawComment, filePath);
+    for (const tag of parsed.tags) {
+      tags.push(mapParsedTag(parsedComment, tag));
     }
   }
 

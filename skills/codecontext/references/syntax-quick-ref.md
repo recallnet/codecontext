@@ -3,7 +3,7 @@
 ## Inline Tag Format
 
 ```
-@context:<type>[:<subtype>] [#id] [!priority] — <summary>
+@context <type>[:<subtype>] [#ref] [!priority] — <summary>
 ```
 
 ## Types and Subtypes
@@ -11,45 +11,45 @@
 ### decision -- A deliberate choice among alternatives
 
 ```javascript
-// @context:decision — Chose REST over GraphQL for simplicity of client caching
-// @context:decision:tradeoff — LRU over LFU: sacrifices hit rate for O(1) eviction
-// @context:decision:constraint — Batch size capped at 100 by Stripe API limits
-// @context:decision:assumption — Assumes user timezone offset fits in i16
+// @context decision — Chose REST over GraphQL for simplicity of client caching
+// @context decision:tradeoff — LRU over LFU: sacrifices hit rate for O(1) eviction
+// @context decision:constraint — Batch size capped at 100 by Stripe API limits
+// @context decision:assumption — Assumes user timezone offset fits in i16
 ```
 
 ### requirement -- Traces code to a product or compliance requirement
 
 ```javascript
-// @context:requirement — WCAG 2.1 AA contrast ratio required for all text
-// @context:requirement #gdpr-retention — 90-day data retention per GDPR Article 17
+// @context requirement — WCAG 2.1 AA contrast ratio required for all text
+// @context requirement #docs/compliance/gdpr-retention.md — 90-day data retention per GDPR Article 17
 ```
 
 ### risk -- Known risk or concern
 
 ```python
-# @context:risk:perf !high — This loop is O(n^2); acceptable for n < 1000
-# @context:risk:security !critical — Input not sanitized here; relies on upstream validation
-# @context:risk:compat — Safari < 16.4 doesn't support this CSS property
+# @context risk:perf !high — This loop is O(n^2); acceptable for n < 1000
+# @context risk:security !critical — Input not sanitized here; relies on upstream validation
+# @context risk:compat — Safari < 16.4 doesn't support this CSS property
 ```
 
 ### related -- Points to related context
 
 ```go
-// @context:related #auth-flow — Session handling depends on auth-flow decision
-// @context:related — See also: billing/invoice.ts for the other half of this flow
+// @context related #docs/auth-flow.md — Session handling depends on auth-flow decision
+// @context related — See also: billing/invoice.ts for the other half of this flow
 ```
 
 ### history -- Why code changed
 
 ```rust
-// @context:history — Migrated from recursive to iterative after stack overflow in prod (v2.3)
-// @context:history — Was a HashMap; switched to BTreeMap for deterministic iteration order
+// @context history — Migrated from recursive to iterative after stack overflow in prod (v2.3)
+// @context history — Was a HashMap; switched to BTreeMap for deterministic iteration order
 ```
 
 ### doc -- Supplementary explanation
 
 ```sql
--- @context:doc — This CTE materializes the join to avoid repeated index scans on orders
+-- @context doc — This CTE materializes the join to avoid repeated index scans on orders
 ```
 
 ## Priority Levels
@@ -63,13 +63,13 @@
 
 ## ID References
 
-Link to extended context in `docs/context/<id>.ctx.md`:
+Link to supporting context in any project file:
 
 ```typescript
-// @context:decision #gate-42 !critical — Strict > (not >=); see gate-42 for details
+// @context decision #docs/context/gate-42.md !critical — Strict > (not >=); see gate-42 for details
 ```
 
-The `#gate-42` reference resolves to `docs/context/gate-42.ctx.md`.
+The `#docs/context/gate-42.md` reference resolves directly to that file.
 
 ## .ctx.md File Template
 
@@ -145,9 +145,9 @@ npx codecontext src/gateway.ts --json
 
 | Language                       | Syntax                  |
 | ------------------------------ | ----------------------- |
-| JS / TS / Go / Rust / C / Java | `// @context:...`       |
-| Python / Ruby / Shell / YAML   | `# @context:...`        |
-| SQL / Lua / Haskell            | `-- @context:...`       |
-| HTML / XML                     | `<!-- @context:... -->` |
-| CSS                            | `/* @context:... */`    |
-| Lisp / Clojure                 | `;; @context:...`       |
+| JS / TS / Go / Rust / C / Java | `// @context ...`       |
+| Python / Ruby / Shell / YAML   | `# @context ...`        |
+| SQL / Lua / Haskell            | `-- @context ...`       |
+| HTML / XML                     | `<!-- @context ... -->` |
+| CSS                            | `/* @context ... */`    |
+| Lisp / Clojure                 | `;; @context ...`       |

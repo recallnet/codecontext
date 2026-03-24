@@ -2,14 +2,18 @@ import { isValidSubtype, isValidType } from "./taxonomy.js";
 import type { ContextSubtype, ContextTag, Priority, SourceLocation } from "./types.js";
 
 /**
- * Regex for the @context tag format:
- *   @context:<type>[:<subtype>] [#id] [!priority] — <summary>
+ * Regex for the `@context` tag format:
+ *   `@context <type>[:<subtype>] [#id] [!priority] — <summary>`
  *
- * Supports both em-dash (—) and double-dash (--) as separators.
+ * Supports both the canonical `@context <type>` form and the legacy
+ * `@context:<type>` form, plus both em-dash (—) and double-dash (--)
+ * separators.
  */
 const CONTEXT_PATTERN =
   // eslint-disable-next-line security/detect-unsafe-regex
-  /^@context:(\w+)(?::(\w+))?\s*(?:#([\w-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$/;
+  /^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$/;
+
+const CONTEXT_PREFIX_PATTERN = /^@context(?:\s+|:)/;
 
 /**
  * Patterns to strip comment delimiters from a line.
@@ -64,6 +68,10 @@ export interface ParseResult {
   errors: ParseError[];
 }
 
+export function isContextTagCandidate(text: string): boolean {
+  return CONTEXT_PREFIX_PATTERN.test(text.trim());
+}
+
 /**
  * Strip comment delimiters from a line, returning the inner text.
  * Returns null if the line is not a comment.
@@ -87,7 +95,7 @@ function parseSingleTag(
 ): ContextTag | null {
   const match = CONTEXT_PATTERN.exec(inner);
   if (!match) {
-    if (inner.startsWith("@context:")) {
+    if (isContextTagCandidate(inner)) {
       errors.push({
         message: `Malformed @context tag: "${inner}"`,
         location: { file: filePath, line: lineNumber, column: 1 },
@@ -153,7 +161,7 @@ export function parseContextTags(source: string, filePath: string): ParseResult 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i] ?? "";
     const inner = stripCommentDelimiters(line);
-    if (!inner?.includes("@context:")) {
+    if (!inner || !isContextTagCandidate(inner)) {
       continue;
     }
 

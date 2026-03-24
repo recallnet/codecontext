@@ -5,8 +5,8 @@ import { parseContextTags, stripCommentDelimiters } from "../src/comment-parser.
 describe("parseContextTags", () => {
   const file = "test.ts";
 
-  it("parses a basic @context:decision tag with summary", () => {
-    const source = `// @context:decision — Use REST over GraphQL for simplicity`;
+  it("parses a basic @context decision tag with summary", () => {
+    const source = `// @context decision — Use REST over GraphQL for simplicity`;
     const { tags, errors } = parseContextTags(source, file);
 
     expect(errors).toHaveLength(0);
@@ -16,8 +16,20 @@ describe("parseContextTags", () => {
     expect(tags[0].location).toEqual({ file, line: 1, column: 1 });
   });
 
+  it("parses the legacy @context:decision syntax for backwards compatibility", () => {
+    const source = `// @context:decision — Legacy syntax still parses`;
+    const { tags, errors } = parseContextTags(source, file);
+
+    expect(errors).toHaveLength(0);
+    expect(tags).toHaveLength(1);
+    expect(tags[0].type).toBe("decision");
+    expect(tags[0].summary).toBe("Legacy syntax still parses");
+  });
+
   it("parses a tag with all fields: type, subtype, id, priority, summary", () => {
-    const source = `// @context:decision:tradeoff #auth-choice !critical — Chose JWT over sessions for stateless scaling`;
+    const source =
+      `// @context decision:tradeoff #docs/decisions/auth-choice.md !critical — ` +
+      "Chose JWT over sessions for stateless scaling";
     const { tags, errors } = parseContextTags(source, file);
 
     expect(errors).toHaveLength(0);
@@ -26,7 +38,7 @@ describe("parseContextTags", () => {
     const tag = tags[0];
     expect(tag.type).toBe("decision");
     expect(tag.subtype).toBe("tradeoff");
-    expect(tag.id).toBe("auth-choice");
+    expect(tag.id).toBe("docs/decisions/auth-choice.md");
     expect(tag.priority).toBe("critical");
     expect(tag.summary).toBe("Chose JWT over sessions for stateless scaling");
   });
@@ -34,9 +46,9 @@ describe("parseContextTags", () => {
   it("parses multiple tags from one file", () => {
     const source = [
       "const x = 1;",
-      "// @context:decision — First decision",
+      "// @context decision — First decision",
       "function foo() {}",
-      "// @context:risk:perf — Hot path, avoid allocations",
+      "// @context risk:perf — Hot path, avoid allocations",
       "function bar() {}",
     ].join("\n");
 
@@ -53,7 +65,7 @@ describe("parseContextTags", () => {
 
   describe("comment styles", () => {
     it("parses // line comment", () => {
-      const source = `// @context:decision — Line comment style`;
+      const source = `// @context decision — Line comment style`;
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -61,7 +73,7 @@ describe("parseContextTags", () => {
     });
 
     it("parses /* block comment */", () => {
-      const source = `/* @context:decision — Block comment style */`;
+      const source = `/* @context decision — Block comment style */`;
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -69,7 +81,7 @@ describe("parseContextTags", () => {
     });
 
     it("parses /** JSDoc-style comment */", () => {
-      const source = `/** @context:decision — JSDoc comment style */`;
+      const source = `/** @context decision — JSDoc comment style */`;
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -77,7 +89,7 @@ describe("parseContextTags", () => {
     });
 
     it("parses block comment continuation line ( * )", () => {
-      const source = ["/**", " * @context:decision — Block continuation style", " */"].join("\n");
+      const source = ["/**", " * @context decision — Block continuation style", " */"].join("\n");
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -85,7 +97,7 @@ describe("parseContextTags", () => {
     });
 
     it("parses # hash comment (Python/Shell)", () => {
-      const source = `# @context:decision — Hash comment style`;
+      const source = `# @context decision — Hash comment style`;
       const { tags, errors } = parseContextTags(source, "script.py");
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -93,15 +105,15 @@ describe("parseContextTags", () => {
     });
 
     it("parses -- double-dash comment (SQL/Lua)", () => {
-      const source = `-- @context:decision — SQL comment style`;
+      const source = `-- @context decision — SQL comment style`;
       const { tags, errors } = parseContextTags(source, "query.sql");
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
       expect(tags[0].summary).toBe("SQL comment style");
     });
 
-    it("parses JSX comment {/* @context:... */}", () => {
-      const source = `{/* @context:decision — JSX comment style */}`;
+    it("parses JSX comment {/* @context ... */}", () => {
+      const source = `{/* @context decision — JSX comment style */}`;
       const { tags, errors } = parseContextTags(source, "component.tsx");
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -111,7 +123,7 @@ describe("parseContextTags", () => {
 
   describe("separator styles", () => {
     it("handles em-dash separator", () => {
-      const source = `// @context:decision \u2014 Uses em-dash`;
+      const source = `// @context decision \u2014 Uses em-dash`;
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -119,7 +131,7 @@ describe("parseContextTags", () => {
     });
 
     it("handles double-dash separator", () => {
-      const source = `// @context:decision -- Uses double-dash`;
+      const source = `// @context decision -- Uses double-dash`;
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -129,7 +141,7 @@ describe("parseContextTags", () => {
 
   describe("error reporting", () => {
     it("reports error for malformed @context tag", () => {
-      const source = `// @context:decision missing separator`;
+      const source = `// @context decision missing separator`;
       const { tags, errors } = parseContextTags(source, file);
       expect(tags).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -138,7 +150,7 @@ describe("parseContextTags", () => {
     });
 
     it("reports error for unknown type", () => {
-      const source = `// @context:foobar — Some summary`;
+      const source = `// @context foobar — Some summary`;
       const { tags, errors } = parseContextTags(source, file);
       expect(tags).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -146,7 +158,7 @@ describe("parseContextTags", () => {
     });
 
     it("reports error for invalid subtype", () => {
-      const source = `// @context:decision:notreal — Some summary`;
+      const source = `// @context decision:notreal — Some summary`;
       const { tags, errors } = parseContextTags(source, file);
       expect(tags).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -168,14 +180,14 @@ describe("parseContextTags", () => {
   });
 
   it("ignores lines that are not comments", () => {
-    const source = `const x = "@context:decision — not a real tag";`;
+    const source = `const x = "@context decision — not a real tag";`;
     const { tags, errors } = parseContextTags(source, file);
     expect(tags).toHaveLength(0);
     expect(errors).toHaveLength(0);
   });
 
   it("stores the raw line text", () => {
-    const raw = "  // @context:risk:security !high — Sanitize user input";
+    const raw = "  // @context risk:security !high — Sanitize user input";
     const { tags } = parseContextTags(raw, file);
     expect(tags).toHaveLength(1);
     expect(tags[0].raw).toBe(raw);

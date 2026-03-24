@@ -23,7 +23,7 @@ export interface ContextTag {
   type: ContextType;
   /** Optional subtype (e.g., decision:tradeoff) */
   subtype?: ContextSubtype;
-  /** Optional ID linking to a .ctx.md file */
+  /** Optional reference to supporting docs or code */
   id?: string;
   /** Priority level */
   priority?: Priority;
