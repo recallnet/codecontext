@@ -1,5 +1,5 @@
 {
-  "name": "@codecontext/spec",
+  "name": "@recallnet/codecontext-spec",
   "version": "0.1.0",
   "description": "Language-agnostic specification for codecontext",
   "private": true

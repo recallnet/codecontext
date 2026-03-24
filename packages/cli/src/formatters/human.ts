@@ -5,7 +5,7 @@ import type {
   ContextTag,
   StalenessStatus,
   Priority,
-} from "@codecontext/parser";
+} from "@recallnet/codecontext-parser";
 
 // ANSI escape codes
 const RESET = "\x1b[0m";

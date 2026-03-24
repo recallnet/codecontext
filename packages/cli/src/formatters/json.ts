@@ -1,4 +1,4 @@
-import type { FileContext, CtxFile } from "@codecontext/parser";
+import type { FileContext, CtxFile } from "@recallnet/codecontext-parser";
 
 interface SerializedCtxFile {
   id: string;

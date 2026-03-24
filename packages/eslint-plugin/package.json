@@ -1,5 +1,5 @@
 {
-  "name": "@codecontext/eslint-plugin",
+  "name": "@recallnet/codecontext-eslint-plugin",
   "version": "0.1.0",
   "private": false,
   "description": "ESLint rules for @context annotation freshness and validity",
@@ -32,7 +32,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@codecontext/parser": "workspace:*"
+    "@recallnet/codecontext-parser": "workspace:*"
   },
   "peerDependencies": {
     "eslint": ">=9.0.0"

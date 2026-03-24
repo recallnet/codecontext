@@ -1,5 +1,5 @@
 {
-  "name": "@codecontext/cli",
+  "name": "@recallnet/codecontext-cli",
   "version": "0.1.0",
   "private": false,
   "description": "CLI for querying @context annotations in source code",
@@ -25,7 +25,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@codecontext/parser": "workspace:*"
+    "@recallnet/codecontext-parser": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

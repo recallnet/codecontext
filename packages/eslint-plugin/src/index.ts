@@ -6,7 +6,7 @@ import noStaleContext from "./rules/no-stale-context.js";
 
 const plugin: ESLint.Plugin & { configs: Record<string, ESLint.ConfigData | any> } = {
   meta: {
-    name: "@codecontext/eslint-plugin",
+    name: "@recallnet/codecontext-eslint-plugin",
     version: "0.1.0",
   },
   rules: {

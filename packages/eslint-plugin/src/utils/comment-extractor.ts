@@ -4,7 +4,7 @@ import type { Rule } from "eslint";
  * Regex for the @context tag format:
  *   @context:<type>[:<subtype>] [#id] [!priority] — <summary>
  *
- * Mirrors the pattern from @codecontext/parser.
+ * Mirrors the pattern from @recallnet/codecontext-parser.
  */
 const CONTEXT_PATTERN =
   /^@context:(\w+)(?::(\w+))?\s*(?:#([\w-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$/;

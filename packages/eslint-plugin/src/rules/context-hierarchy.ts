@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
-import { isValidType, isValidSubtype, getValidSubtypes } from "@codecontext/parser";
-import type { ContextType } from "@codecontext/parser";
+import { isValidType, isValidSubtype, getValidSubtypes } from "@recallnet/codecontext-parser";
+import type { ContextType } from "@recallnet/codecontext-parser";
 import { extractContextTags } from "../utils/comment-extractor.js";
 
 const rule: Rule.RuleModule = {

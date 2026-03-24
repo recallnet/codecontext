@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
-import { buildFileContext } from "@codecontext/parser";
-import type { FileContext } from "@codecontext/parser";
+import { buildFileContext } from "@recallnet/codecontext-parser";
+import type { FileContext } from "@recallnet/codecontext-parser";
 import { formatFileContext } from "../formatters/human.js";
 
 export function runStale(filePath: string): void {

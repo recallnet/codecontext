@@ -20,7 +20,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@codecontext/parser':
+      '@recallnet/codecontext-parser':
         specifier: workspace:*
         version: link:../parser
     devDependencies:
@@ -39,7 +39,7 @@ importers:
 
   packages/eslint-plugin:
     dependencies:
-      '@codecontext/parser':
+      '@recallnet/codecontext-parser':
         specifier: workspace:*
         version: link:../parser
     devDependencies:

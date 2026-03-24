@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
-import { buildFileContext } from "@codecontext/parser";
-import type { Priority, ScopeBriefing, StalenessStatus } from "@codecontext/parser";
+import { buildFileContext } from "@recallnet/codecontext-parser";
+import type { Priority, ScopeBriefing, StalenessStatus } from "@recallnet/codecontext-parser";
 import { formatScopeBriefing } from "../formatters/human.js";
 
 const PRIORITY_ORDER: Record<string, number> = {
