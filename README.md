@@ -1,6 +1,6 @@
 # codecontext
 
-Decision context, attached to code where it matters.
+Decision context attached to code, with freshness checks when code changes.
 
 ---
 
@@ -26,6 +26,17 @@ if (message.timestamp > cutoff) {
 Now the constraint is visible before anyone edits the code, human or agent. If someone changes the code without re-verifying the attached context, the freshness gate fails.
 
 A test would help, and you should still want one. But tests and context do different jobs. A test proves that `>=` breaks behavior only if someone already wrote the exact boundary-case test. `@context` explains why the odd-looking `>` is intentional before an editor, reviewer, or agent "cleans it up." Tests protect behavior. `@context` protects intent.
+
+### Why Not Just Tests?
+
+Because tests and decision context solve different problems.
+
+- Tests tell you whether behavior is correct.
+- `@context` tells you why surprising-looking behavior is intentional.
+- Tests usually fail after someone changed the code.
+- `@context` shows up while they are editing the line, reading the diff, or reviewing the change.
+
+Good teams want both: tests to protect behavior, and attached context to protect intent.
 
 ## Why Everything Else Falls Short
 
@@ -61,6 +72,8 @@ codecontext does not replace these tools. It fills the gap between them:
 | **@context**    | **_Why this code is the way it is right now_**  |
 
 ## How It Works
+
+You attach rationale to code, then the CLI and linter force re-verification when the annotated code changes.
 
 ### 1. Annotate decisions in code
 
@@ -138,6 +151,8 @@ Examples live in [`examples/`](examples/) and include both TypeScript and Go sou
 
 ## Terminal Demos
 
+If you want to see the workflow before reading the rest, these three short demos show the briefing, registry, and freshness gate.
+
 These demos are generated from source-controlled VHS tapes in [`docs/demos/tapes/`](docs/demos/tapes/) and can be re-rendered with `pnpm demo:render`.
 
 ### Scope briefing
@@ -152,7 +167,7 @@ These demos are generated from source-controlled VHS tapes in [`docs/demos/tapes
 
 ![Freshness gate demo](docs/demos/gifs/stale-check.gif)
 
-## The Agent Integration (The Killer Feature)
+## Agent Workflow
 
 Coding agents are powerful but context-poor. They read code, but not the decision chain that made the code look this way. They see `>` and have no native way to know it is load-bearing.
 
