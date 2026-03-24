@@ -1,12 +1,12 @@
 # codecontext
 
-Decision context attached to code, with freshness checks when code changes.
+Repo-native decision context for coding agents, with freshness checks when code changes.
 
 ---
 
 ## The One-Character Bug That Cost $12,000
 
-Someone changed `>` to `>=`. Tests were green. Review was green. Deploy was green.
+An agent or engineer saw `>` and "cleaned it up" to `>=`. Tests were green. Review was green. Deploy was green.
 
 Three days later, 0.3% of transactions started processing twice. The payment gateway sometimes emits timestamps exactly on the cutoff boundary during clock-skew windows. The original author knew that. `>` was not an accident. But the reason was trapped in an 8-month-old commit message buried under 47 more commits.
 
@@ -27,7 +27,9 @@ Now the constraint is visible before anyone edits the code, human or agent. If s
 
 A test would help, and you should still want one. But tests and context do different jobs. A test proves that `>=` breaks behavior only if someone already wrote the exact boundary-case test. `@context` explains why the odd-looking `>` is intentional before an editor, reviewer, or agent "cleans it up." Tests protect behavior. `@context` protects intent.
 
-### Why Not Just Tests?
+Agents can read code and tests, but they still miss intent when the rationale is trapped in history instead of attached to the line they are editing.
+
+### Why Code And Tests Are Not Enough For Agents
 
 Because tests and decision context solve different problems.
 
@@ -35,8 +37,57 @@ Because tests and decision context solve different problems.
 - `@context` tells you why surprising-looking behavior is intentional.
 - Tests usually fail after someone changed the code.
 - `@context` shows up while they are editing the line, reading the diff, or reviewing the change.
+- Agents can read both code and tests, but they do not reliably reconstruct historical rationale from them.
 
 Good teams want both: tests to protect behavior, and attached context to protect intent.
+
+## Agent Workflow
+
+This is the core loop:
+
+```
+1. Brief the agent before edits
+2. Let it change code
+3. Check whether it invalidated attached decisions
+4. Force re-verification before the change lands
+```
+
+In practice:
+
+```bash
+$ npx codecontext --scope src/payments/gateway.ts
+$ <agent reads file and edits>
+$ npx codecontext --diff HEAD src/payments/gateway.ts
+```
+
+The `--json` flag produces structured output that agents and tools can consume directly:
+
+```bash
+$ npx codecontext --scope src/payments/gateway.ts --json
+```
+
+```json
+{
+  "file": "src/payments/gateway.ts",
+  "entries": [
+    {
+      "line": 42,
+      "type": "decision",
+      "id": "docs/context/gate-42.md",
+      "priority": "critical",
+      "status": "verified",
+      "summary": "strict > (not >=): upstream sends at-threshold values during clock skew",
+      "ctxFile": {
+        "body": "## Decision\n\nUse strict greater-than...",
+        "verified": "2025-11-15",
+        "traces": ["JIRA-1234", "INCIDENT-5678"]
+      }
+    }
+  ]
+}
+```
+
+The trust model is simple: the context is repo-native, versioned, reviewable in PRs, visible in diffs, and enforceable in hooks and lint. That makes it far more durable for agents than rationale hidden in commit archaeology, external docs, or memory files.
 
 ## Why Everything Else Falls Short
 
@@ -151,7 +202,7 @@ Examples live in [`examples/`](examples/) and include both TypeScript and Go sou
 
 ## Terminal Demos
 
-If you want to see the workflow before reading the rest, these three short demos show the briefing, registry, and freshness gate.
+If you want to see the workflow before reading the rest, these three short demos show the briefing, freshness gate, and registry.
 
 These demos are generated from source-controlled VHS tapes in [`docs/demos/tapes/`](docs/demos/tapes/) and can be re-rendered with `pnpm demo:render`.
 
@@ -159,54 +210,13 @@ These demos are generated from source-controlled VHS tapes in [`docs/demos/tapes
 
 ![Scope briefing demo](docs/demos/gifs/scope.gif)
 
-### Decision registry
-
-![Decision registry demo](docs/demos/gifs/report.gif)
-
 ### Freshness gate after a code change
 
 ![Freshness gate demo](docs/demos/gifs/stale-check.gif)
 
-## Agent Workflow
+### Decision registry
 
-Coding agents are powerful but context-poor. They read code, but not the decision chain that made the code look this way. They see `>` and have no native way to know it is load-bearing.
-
-codecontext gives them a simple briefing loop:
-
-```
-Agent workflow:
-1. npx codecontext --scope <file>     ← "what should I know?"
-2. Read the file                       ← "now I'll read the code"
-3. Make changes                        ← "informed by context"
-4. npx codecontext --diff HEAD <file>  ← "did I break any decisions?"
-```
-
-The `--json` flag produces structured output that agents and tools can consume directly:
-
-```bash
-$ npx codecontext --scope src/payments/gateway.ts --json
-```
-
-```json
-{
-  "file": "src/payments/gateway.ts",
-  "entries": [
-    {
-      "line": 42,
-      "type": "decision",
-      "id": "docs/context/gate-42.md",
-      "priority": "critical",
-      "status": "verified",
-      "summary": "strict > (not >=): upstream sends at-threshold values during clock skew",
-      "ctxFile": {
-        "body": "## Decision\n\nUse strict greater-than...",
-        "verified": "2025-11-15",
-        "traces": ["JIRA-1234", "INCIDENT-5678"]
-      }
-    }
-  ]
-}
-```
+![Decision registry demo](docs/demos/gifs/report.gif)
 
 A Claude skill is included in `skills/codecontext/` to automate this workflow: read context before edits, check invalidation after edits, and maintain annotations as code evolves.
 
@@ -401,7 +411,20 @@ pnpm add -D @recallnet/codecontext-eslint-plugin
 pnpm add -D @recallnet/codecontext-tsdoc
 ```
 
-### 3. Configure ESLint (optional)
+### 3. Run the core agent loop
+
+```bash
+# Brief the agent before editing
+npx codecontext --scope src/your-file.ts
+
+# Check intent after editing
+npx codecontext --diff HEAD src/your-file.ts
+
+# Enforce freshness in hooks
+npx codecontext --staged
+```
+
+### 4. Configure ESLint (optional)
 
 ```javascript
 // eslint.config.js
@@ -413,13 +436,13 @@ export default [
 ];
 ```
 
-### 4. Create context directory
+### 5. Create context directory
 
 ```bash
 mkdir -p docs/context
 ```
 
-### 5. Configure TSDoc (optional)
+### 6. Configure TSDoc (optional)
 
 ```json
 {
@@ -428,20 +451,10 @@ mkdir -p docs/context
 }
 ```
 
-### 6. Add your first `@context` tag
+### 7. Add your first `@context` tag
 
 ```typescript
 // @context decision !high — chose approach A over B because of X
-```
-
-### 7. Run the CLI
-
-```bash
-# Briefing before editing
-npx codecontext --scope src/your-file.ts
-
-# Check after editing
-npx codecontext --diff HEAD src/your-file.ts
 ```
 
 ### Pre-commit hook (recommended)
