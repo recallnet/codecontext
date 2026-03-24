@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import type { ContextTag, AnchoredContext, StalenessStatus } from "./types.js";
+
+import type { AnchoredContext, ContextTag } from "./types.js";
 
 export interface StalenessCache {
   version: 1;
@@ -24,8 +25,10 @@ export function createEmptyCache(): StalenessCache {
  */
 function cacheKey(tag: ContextTag): string {
   const base = tag.location.file;
-  if (tag.id) return `${base}:#${tag.id}`;
-  return `${base}:${tag.type}:L${tag.location.line}`;
+  if (tag.id) {
+    return `${base}:#${tag.id}`;
+  }
+  return `${base}:${tag.type}:L${String(tag.location.line)}`;
 }
 
 /**
@@ -55,27 +58,29 @@ export function hashBlock(block: string): string {
  * statement. For blocks (tag above a function), this captures until
  * the block ends.
  */
-export function extractBlock(
-  lines: string[],
-  tagLineIndex: number,
-): string {
+export function extractBlock(lines: string[], tagLineIndex: number): string {
   const blockLines: string[] = [];
   let consecutiveBlanks = 0;
 
   // Find the indentation level of the tag line
-  const tagIndent = lines[tagLineIndex].search(/\S/);
+  const tagLine = lines[tagLineIndex];
+  const tagIndent = tagLine ? tagLine.search(/\S/) : 0;
 
   for (let i = tagLineIndex + 1; i < lines.length; i++) {
-    const line = lines[i];
+    const line = lines[i] ?? "";
     const trimmed = line.trim();
 
     // Stop at another @context tag
-    if (trimmed.includes("@context:")) break;
+    if (trimmed.includes("@context:")) {
+      break;
+    }
 
     // Track consecutive blank lines
     if (trimmed === "") {
       consecutiveBlanks++;
-      if (consecutiveBlanks >= 2) break;
+      if (consecutiveBlanks >= 2) {
+        break;
+      }
       blockLines.push(line);
       continue;
     }
@@ -100,31 +105,27 @@ export function extractBlock(
 export function computeStaleness(
   tags: ContextTag[],
   sourceLines: string[],
-  cache: StalenessCache,
+  cache: StalenessCache
 ): AnchoredContext[] {
-  return tags.map((tag) => {
+  return tags.map((tag): AnchoredContext => {
     const key = cacheKey(tag);
     const block = extractBlock(sourceLines, tag.location.line - 1);
     const currentHash = hashBlock(block);
+    // eslint-disable-next-line security/detect-object-injection
     const cached = cache.entries[key];
-
-    let status: StalenessStatus;
-    let verifiedAt: string | undefined;
 
     if (!cached) {
       // First time seeing this tag — treat as verified
-      status = "verified";
-    } else if (cached.blockHash === currentHash) {
-      // Block hasn't changed since last verification
-      status = "verified";
-      verifiedAt = cached.verifiedAt;
-    } else {
-      // Block changed — check how long ago it was verified
-      status = "stale";
-      verifiedAt = cached.verifiedAt;
+      return { tag, blockHash: currentHash, status: "verified" };
     }
 
-    return { tag, blockHash: currentHash, status, verifiedAt };
+    if (cached.blockHash === currentHash) {
+      // Block hasn't changed since last verification
+      return { tag, blockHash: currentHash, status: "verified", verifiedAt: cached.verifiedAt };
+    }
+
+    // Block changed — mark as stale
+    return { tag, blockHash: currentHash, status: "stale", verifiedAt: cached.verifiedAt };
   });
 }
 
@@ -132,15 +133,13 @@ export function computeStaleness(
  * Update the cache with current verification data.
  * Call this after a user confirms context is still accurate.
  */
-export function updateCache(
-  cache: StalenessCache,
-  anchored: AnchoredContext[],
-): StalenessCache {
+export function updateCache(cache: StalenessCache, anchored: AnchoredContext[]): StalenessCache {
   const updated = { ...cache, entries: { ...cache.entries } };
   const now = new Date().toISOString();
 
   for (const entry of anchored) {
     const key = cacheKey(entry.tag);
+    // eslint-disable-next-line security/detect-object-injection
     updated.entries[key] = {
       blockHash: entry.blockHash,
       verifiedAt: now,

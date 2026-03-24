@@ -7,6 +7,7 @@ import type { Rule } from "eslint";
  * Mirrors the pattern from @recallnet/codecontext-parser.
  */
 const CONTEXT_PATTERN =
+  // eslint-disable-next-line security/detect-unsafe-regex
   /^@context:(\w+)(?::(\w+))?\s*(?:#([\w-]+))?\s*(?:!(critical|high|low))?\s*(?:—|--)\s*(.+)$/;
 
 export interface ExtractedTag {
@@ -27,8 +28,43 @@ export interface ExtractedTag {
  * block comments may contain continuation lines with leading ` * `.
  */
 function stripBlockContinuation(line: string): string {
-  const m = line.match(/^\s*\*?\s?(.*)$/);
-  return m ? m[1] : line;
+  const m = /^\s*\*?\s?(.*)$/.exec(line);
+  return m ? (m[1] ?? line) : line;
+}
+
+function parseTag(
+  raw: string
+): { type: string; subtype?: string; id?: string; priority?: string; summary: string } | null {
+  const match = CONTEXT_PATTERN.exec(raw);
+  if (!match) {
+    return null;
+  }
+
+  const [, type, subtype, id, priority, summary] = match;
+  if (!type || !summary) {
+    return null;
+  }
+
+  const result: {
+    type: string;
+    subtype?: string;
+    id?: string;
+    priority?: string;
+    summary: string;
+  } = {
+    type,
+    summary: summary.trim(),
+  };
+  if (subtype) {
+    result.subtype = subtype;
+  }
+  if (id) {
+    result.id = id;
+  }
+  if (priority) {
+    result.priority = priority;
+  }
+  return result;
 }
 
 /**
@@ -41,25 +77,27 @@ export function extractContextTags(context: Rule.RuleContext): ExtractedTag[] {
 
   for (const comment of comments) {
     const lines = comment.value.split("\n");
-    const startLine = comment.loc!.start.line;
+    const commentLoc = comment.loc;
+    const startLine = commentLoc ? commentLoc.start.line : 1;
+    const startColumn = commentLoc ? commentLoc.start.column : 0;
 
     for (let i = 0; i < lines.length; i++) {
-      const raw = stripBlockContinuation(lines[i]).trim();
-      if (!raw.includes("@context:")) continue;
+      // eslint-disable-next-line security/detect-object-injection
+      const raw = stripBlockContinuation(lines[i] ?? "").trim();
+      if (!raw.includes("@context:")) {
+        continue;
+      }
 
-      const match = raw.match(CONTEXT_PATTERN);
-      if (!match) continue;
+      const parsed = parseTag(raw);
+      if (!parsed) {
+        continue;
+      }
 
-      const [, type, subtype, id, priority, summary] = match;
       tags.push({
         raw,
-        type,
-        subtype: subtype || undefined,
-        id: id || undefined,
-        priority: priority || undefined,
-        summary: summary.trim(),
+        ...parsed,
         line: startLine + i,
-        column: comment.loc!.start.column,
+        column: startColumn,
         comment,
       });
     }

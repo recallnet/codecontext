@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { parseCtxFile, CtxFileError } from "../src/ctx-file-parser.js";
 
 describe("parseCtxFile", () => {
@@ -92,50 +93,24 @@ describe("parseCtxFile", () => {
   });
 
   it("throws CtxFileError for missing id", () => {
-    const content = [
-      "---",
-      "type: decision",
-      "status: active",
-      "---",
-      "",
-      "Body text.",
-    ].join("\n");
+    const content = ["---", "type: decision", "status: active", "---", "", "Body text."].join("\n");
 
     expect(() => parseCtxFile(content, filePath)).toThrow(CtxFileError);
-    expect(() => parseCtxFile(content, filePath)).toThrow(
-      /Missing or invalid 'id'/,
-    );
+    expect(() => parseCtxFile(content, filePath)).toThrow(/Missing or invalid 'id'/);
   });
 
   it("throws CtxFileError for invalid type", () => {
-    const content = [
-      "---",
-      "id: bad-type",
-      "type: banana",
-      "---",
-      "",
-      "Body text.",
-    ].join("\n");
+    const content = ["---", "id: bad-type", "type: banana", "---", "", "Body text."].join("\n");
 
     expect(() => parseCtxFile(content, filePath)).toThrow(CtxFileError);
-    expect(() => parseCtxFile(content, filePath)).toThrow(
-      /Missing or invalid 'type'/,
-    );
+    expect(() => parseCtxFile(content, filePath)).toThrow(/Missing or invalid 'type'/);
   });
 
   it("throws CtxFileError for missing type", () => {
-    const content = [
-      "---",
-      "id: no-type",
-      "---",
-      "",
-      "Body text.",
-    ].join("\n");
+    const content = ["---", "id: no-type", "---", "", "Body text."].join("\n");
 
     expect(() => parseCtxFile(content, filePath)).toThrow(CtxFileError);
-    expect(() => parseCtxFile(content, filePath)).toThrow(
-      /Missing or invalid 'type'/,
-    );
+    expect(() => parseCtxFile(content, filePath)).toThrow(/Missing or invalid 'type'/);
   });
 
   it("throws CtxFileError for invalid status", () => {
@@ -150,20 +125,11 @@ describe("parseCtxFile", () => {
     ].join("\n");
 
     expect(() => parseCtxFile(content, filePath)).toThrow(CtxFileError);
-    expect(() => parseCtxFile(content, filePath)).toThrow(
-      /Invalid status "archived"/,
-    );
+    expect(() => parseCtxFile(content, filePath)).toThrow(/Invalid status "archived"/);
   });
 
   it("defaults status to 'active' when omitted", () => {
-    const content = [
-      "---",
-      "id: no-status",
-      "type: decision",
-      "---",
-      "",
-      "Body text.",
-    ].join("\n");
+    const content = ["---", "id: no-status", "type: decision", "---", "", "Body text."].join("\n");
 
     const result = parseCtxFile(content, filePath);
     expect(result.frontmatter.status).toBe("active");
@@ -215,13 +181,7 @@ describe("parseCtxFile", () => {
   });
 
   it("CtxFileError includes filePath in message", () => {
-    const content = [
-      "---",
-      "type: decision",
-      "---",
-      "",
-      "Body.",
-    ].join("\n");
+    const content = ["---", "type: decision", "---", "", "Body."].join("\n");
 
     try {
       parseCtxFile(content, filePath);

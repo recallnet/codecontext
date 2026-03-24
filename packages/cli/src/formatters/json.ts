@@ -1,4 +1,4 @@
-import type { FileContext, CtxFile } from "@recallnet/codecontext-parser";
+import type { CtxFile, FileContext } from "@recallnet/codecontext-parser";
 
 interface SerializedCtxFile {
   id: string;
@@ -31,6 +31,7 @@ function serializeCtxFile(ctxFile: CtxFile): SerializedCtxFile {
 export function formatFileContextJson(ctx: FileContext): string {
   const resolvedCtxFiles: Record<string, SerializedCtxFile> = {};
   for (const [id, ctxFile] of ctx.resolvedCtxFiles) {
+    // eslint-disable-next-line security/detect-object-injection
     resolvedCtxFiles[id] = serializeCtxFile(ctxFile);
   }
 

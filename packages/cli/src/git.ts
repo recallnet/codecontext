@@ -17,7 +17,7 @@ export function getProjectRoot(): string {
  * Get changed line ranges from git diff for a specific file.
  * Returns ranges of lines that were added or modified.
  */
-export function getGitDiffLines(filePath: string, ref: string = "HEAD"): LineRange[] {
+export function getGitDiffLines(filePath: string, ref = "HEAD"): LineRange[] {
   const absPath = resolve(filePath);
   const ranges: LineRange[] = [];
 
@@ -37,11 +37,12 @@ export function getGitDiffLines(filePath: string, ref: string = "HEAD"): LineRan
   }
 
   // Parse unified diff hunk headers: @@ -old,count +new,count @@
+  // eslint-disable-next-line security/detect-unsafe-regex
   const hunkRegex = /^@@\s+-\d+(?:,\d+)?\s+\+(\d+)(?:,(\d+))?\s+@@/gm;
   let match: RegExpExecArray | null;
 
   while ((match = hunkRegex.exec(output)) !== null) {
-    const start = parseInt(match[1], 10);
+    const start = parseInt(match[1] ?? "0", 10);
     const count = match[2] !== undefined ? parseInt(match[2], 10) : 1;
     if (count > 0) {
       ranges.push({ start, end: start + count - 1 });

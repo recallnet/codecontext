@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== Pre-push checks ==="
+
+# ── Check 1: No uncommitted changes ─────────────────────────────────
+echo "[1/5] Checking for uncommitted changes..."
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "❌ Uncommitted changes detected. Commit or stash before pushing."
+  exit 1
+fi
+
+# ── Check 2: Full build ─────────────────────────────────────────────
+echo "[2/5] Building all packages..."
+npx turbo build
+
+# ── Check 3: Full lint ──────────────────────────────────────────────
+echo "[3/5] Linting..."
+npx turbo lint
+
+# ── Check 4: Full type-check ────────────────────────────────────────
+echo "[4/5] Type-checking..."
+npx turbo typecheck
+
+# ── Check 5: Full test suite ────────────────────────────────────────
+echo "[5/5] Running all tests..."
+npx turbo test
+
+echo "✅ All pre-push checks passed"

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import {
   hashBlock,
   extractBlock,
@@ -106,11 +107,7 @@ describe("extractBlock", () => {
   });
 
   it("captures until end of file when no terminator", () => {
-    const lines = [
-      "// @context:decision — Last function",
-      "function last() {",
-      "  return true;",
-    ];
+    const lines = ["// @context:decision — Last function", "function last() {", "  return true;"];
 
     const block = extractBlock(lines, 0);
     expect(block).toContain("function last()");
@@ -240,11 +237,7 @@ describe("computeStaleness", () => {
       id: undefined,
       location: { file: "test.ts", line: 3, column: 1 },
     });
-    const sourceLines = [
-      "",
-      "// @context:decision — No id tag",
-      "const x = 1;",
-    ];
+    const sourceLines = ["", "// @context:decision — No id tag", "const x = 1;"];
 
     const cache = createEmptyCache();
     const first = computeStaleness([tag], sourceLines, cache);
@@ -267,10 +260,7 @@ describe("createEmptyCache", () => {
 describe("updateCache", () => {
   it("stores current hashes and verifiedAt timestamps", () => {
     const tag = makeTag({ id: "cached-tag" });
-    const sourceLines = [
-      "// @context:decision — Test tag",
-      "function foo() { return 1; }",
-    ];
+    const sourceLines = ["// @context:decision — Test tag", "function foo() { return 1; }"];
 
     const cache = createEmptyCache();
     const results = computeStaleness([tag], sourceLines, cache);
@@ -282,16 +272,13 @@ describe("updateCache", () => {
     expect(updated.entries[key].verifiedAt).toBeTruthy();
     // verifiedAt should be a valid ISO date string
     expect(new Date(updated.entries[key].verifiedAt).toISOString()).toBe(
-      updated.entries[key].verifiedAt,
+      updated.entries[key].verifiedAt
     );
   });
 
   it("does not mutate the original cache", () => {
     const tag = makeTag({ id: "immutable-test" });
-    const sourceLines = [
-      "// @context:decision — Test tag",
-      "const x = 1;",
-    ];
+    const sourceLines = ["// @context:decision — Test tag", "const x = 1;"];
 
     const cache = createEmptyCache();
     const results = computeStaleness([tag], sourceLines, cache);

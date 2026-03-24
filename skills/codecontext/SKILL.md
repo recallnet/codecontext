@@ -91,29 +91,29 @@ Add `@context` when:
 Do not add `@context` for:
 
 - Trivial or self-evident code. A tag saying "this function adds two numbers" adds noise.
-- TODOs or future work. Use `// TODO` for that. `@context` documents *current* decisions, not aspirations.
-- Restating what the code already says. If the code is `retryCount = 3`, don't add a tag saying "retry count is 3." Explain *why* 3.
+- TODOs or future work. Use `// TODO` for that. `@context` documents _current_ decisions, not aspirations.
+- Restating what the code already says. If the code is `retryCount = 3`, don't add a tag saying "retry count is 3." Explain _why_ 3.
 
 ### Choosing the Type
 
-| Situation | Type |
-|-----------|------|
-| Chose between alternatives | `decision` or `decision:tradeoff` |
-| Constrained by external system | `decision:constraint` |
-| Based on an assumption | `decision:assumption` |
-| Known performance concern | `risk:perf` |
-| Known security concern | `risk:security` |
-| Browser/platform compat issue | `risk:compat` |
-| Traces to product requirement | `requirement` |
-| Cross-reference to other code/docs | `related` |
-| Surprising code that needs backstory | `history` |
-| Extended explanation | `doc` |
+| Situation                            | Type                              |
+| ------------------------------------ | --------------------------------- |
+| Chose between alternatives           | `decision` or `decision:tradeoff` |
+| Constrained by external system       | `decision:constraint`             |
+| Based on an assumption               | `decision:assumption`             |
+| Known performance concern            | `risk:perf`                       |
+| Known security concern               | `risk:security`                   |
+| Browser/platform compat issue        | `risk:compat`                     |
+| Traces to product requirement        | `requirement`                     |
+| Cross-reference to other code/docs   | `related`                         |
+| Surprising code that needs backstory | `history`                         |
+| Extended explanation                 | `doc`                             |
 
 ### Choosing the Priority
 
 - `!critical` -- "Read this or you will break something." Use sparingly. Reserve for constraints learned from incidents or invariants that are non-obvious and load-bearing.
 - `!high` -- "You should understand this before changing nearby code."
-- *(no priority)* -- Standard relevance. The default.
+- _(no priority)_ -- Standard relevance. The default.
 - `!low` -- Background information. Nice to know, not essential.
 
 ### When to Create a .ctx.md File
@@ -172,39 +172,39 @@ Tag format:
 
 Types and subtypes:
 
-| Type | Subtypes |
-|------|----------|
-| `decision` | `tradeoff`, `constraint`, `assumption` |
-| `requirement` | -- |
-| `risk` | `perf`, `security`, `compat` |
-| `related` | -- |
-| `history` | -- |
-| `doc` | -- |
+| Type          | Subtypes                               |
+| ------------- | -------------------------------------- |
+| `decision`    | `tradeoff`, `constraint`, `assumption` |
+| `requirement` | --                                     |
+| `risk`        | `perf`, `security`, `compat`           |
+| `related`     | --                                     |
+| `history`     | --                                     |
+| `doc`         | --                                     |
 
-Priority levels: `!critical`, `!high`, *(none)*, `!low`
+Priority levels: `!critical`, `!high`, _(none)_, `!low`
 
 Status values (in .ctx.md frontmatter): `active`, `superseded`, `deprecated`
 
 CLI commands:
 
-| Command | Purpose |
-|---------|---------|
-| `npx codecontext --scope <file>` | Pre-edit briefing |
+| Command                              | Purpose                   |
+| ------------------------------------ | ------------------------- |
+| `npx codecontext --scope <file>`     | Pre-edit briefing         |
 | `npx codecontext --diff HEAD <file>` | Post-edit staleness check |
-| `npx codecontext --stale <file>` | Show stale entries only |
-| `npx codecontext --staged` | Pre-commit hook |
-| `npx codecontext <file>` | Show all annotations |
-| `npx codecontext <file> --json` | JSON output for tools |
+| `npx codecontext --stale <file>`     | Show stale entries only   |
+| `npx codecontext --staged`           | Pre-commit hook           |
+| `npx codecontext <file>`             | Show all annotations      |
+| `npx codecontext <file> --json`      | JSON output for tools     |
 
 ## Anti-patterns
 
 **Don't annotate every function.** Context tags are for non-obvious decisions. If every function has one, developers stop reading them. Signal degrades to noise.
 
-**Don't use @context for TODOs.** `@context` documents why code *is* the way it is. Use `// TODO` or issue trackers for what it should become.
+**Don't use @context for TODOs.** `@context` documents why code _is_ the way it is. Use `// TODO` or issue trackers for what it should become.
 
 **Don't duplicate what the code says.** `@context:doc — This function returns a boolean` is worse than nothing. It's one more thing to keep in sync for zero informational value.
 
-**Don't add context retroactively without understanding the original decision.** If you don't know *why* the code uses `>` instead of `>=`, don't guess in a `@context` tag. Guessing produces confident-sounding misinformation. Investigate first, or leave the code unannotated.
+**Don't add context retroactively without understanding the original decision.** If you don't know _why_ the code uses `>` instead of `>=`, don't guess in a `@context` tag. Guessing produces confident-sounding misinformation. Investigate first, or leave the code unannotated.
 
 **Don't use !critical for everything.** If every tag is critical, none of them are. Reserve `!critical` for constraints learned from production incidents or invariants where violation causes data loss, security issues, or silent corruption.
 

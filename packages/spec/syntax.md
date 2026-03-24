@@ -154,7 +154,7 @@ continuation    ::= "@context+" separator summary
 
 ### Em-dash vs. Double Hyphen
 
-The canonical separator is the em-dash character (U+2014: `—`). As an ASCII-compatible fallback, parsers MUST also accept a space-surrounded double hyphen (` -- `):
+The canonical separator is the em-dash character (U+2014: `—`). As an ASCII-compatible fallback, parsers MUST also accept a space-surrounded double hyphen (`--`):
 
 ```python
 # @context:decision — Using em-dash separator (canonical)
@@ -164,6 +164,7 @@ The canonical separator is the em-dash character (U+2014: `—`). As an ASCII-co
 A parser MUST normalize both forms to the same internal representation. When serializing, a tool SHOULD use the em-dash form.
 
 The following are NOT valid separators:
+
 - En-dash (U+2013: `--`) without surrounding spaces
 - A single hyphen (`-`)
 - A triple hyphen (`---`)

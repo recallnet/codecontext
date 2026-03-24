@@ -23,7 +23,7 @@ if (message.timestamp > cutoff) {
 }
 ```
 
-Now anyone — human or AI agent — sees the constraint *before* they touch the code. And if they change it anyway, the staleness system flags the annotation for review.
+Now anyone — human or AI agent — sees the constraint _before_ they touch the code. And if they change it anyway, the staleness system flags the annotation for review.
 
 ## Why Everything Else Falls Short
 
@@ -31,7 +31,7 @@ You already have places to put decisions. They all fail at one thing: **being in
 
 ### Commit Logs
 
-Commit logs record *what changed*, not *why the current code looks this way*. After 50 commits touch a function, the original rationale is archaeology. You'd need to `git blame` every line, then `git log` each blame result, then hope the commit message explains the *decision* and not just "fix threshold comparison."
+Commit logs record _what changed_, not _why the current code looks this way_. After 50 commits touch a function, the original rationale is archaeology. You'd need to `git blame` every line, then `git log` each blame result, then hope the commit message explains the _decision_ and not just "fix threshold comparison."
 
 `@context` lives with the code. When the code moves, it moves. When the code changes, it gets flagged.
 
@@ -51,12 +51,12 @@ AI memory is the newest entrant and the most dangerous. It's a shadow knowledge 
 
 codecontext doesn't replace any of these. It fills the gap between them:
 
-| Tool | What it's for |
-|------|--------------|
-| **Commit logs** | *What changed* and *when* |
-| **Wikis** | *High-level architecture* and *system design* |
-| **AI memory** | *Agent workflow preferences* and *user context* |
-| **@context** | ***Why this code is the way it is right now*** |
+| Tool            | What it's for                                   |
+| --------------- | ----------------------------------------------- |
+| **Commit logs** | _What changed_ and _when_                       |
+| **Wikis**       | _High-level architecture_ and _system design_   |
+| **AI memory**   | _Agent workflow preferences_ and _user context_ |
+| **@context**    | **_Why this code is the way it is right now_**  |
 
 ## How It Works
 
@@ -214,33 +214,33 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 @context:<type>[:<subtype>] [#id] [!priority] — <summary>
 ```
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `type` | Yes | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
-| `subtype` | No | Narrows the type (e.g., `decision:tradeoff`, `risk:security`) |
-| `#id` | No | Links to a `docs/context/<id>.ctx.md` file |
-| `!priority` | No | `!critical`, `!high`, or `!low` |
-| `summary` | Yes | Human-readable description after the em-dash |
+| Field       | Required | Description                                                    |
+| ----------- | -------- | -------------------------------------------------------------- |
+| `type`      | Yes      | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
+| `subtype`   | No       | Narrows the type (e.g., `decision:tradeoff`, `risk:security`)  |
+| `#id`       | No       | Links to a `docs/context/<id>.ctx.md` file                     |
+| `!priority` | No       | `!critical`, `!high`, or `!low`                                |
+| `summary`   | Yes      | Human-readable description after the em-dash                   |
 
 ### Type Taxonomy
 
-| Type | Subtypes | Use When |
-|------|----------|----------|
-| `decision` | `tradeoff`, `constraint`, `assumption` | Code reflects a deliberate choice among alternatives |
-| `requirement` | — | Code traces to a product requirement, compliance rule, or external spec |
-| `risk` | `perf`, `security`, `compat` | Code carries a known risk future editors should understand |
-| `related` | — | Cross-reference to related context elsewhere in the codebase |
-| `history` | — | Current form would be surprising without knowing what changed |
-| `doc` | — | Points to extended documentation beyond what a normal comment covers |
+| Type          | Subtypes                               | Use When                                                                |
+| ------------- | -------------------------------------- | ----------------------------------------------------------------------- |
+| `decision`    | `tradeoff`, `constraint`, `assumption` | Code reflects a deliberate choice among alternatives                    |
+| `requirement` | —                                      | Code traces to a product requirement, compliance rule, or external spec |
+| `risk`        | `perf`, `security`, `compat`           | Code carries a known risk future editors should understand              |
+| `related`     | —                                      | Cross-reference to related context elsewhere in the codebase            |
+| `history`     | —                                      | Current form would be surprising without knowing what changed           |
+| `doc`         | —                                      | Points to extended documentation beyond what a normal comment covers    |
 
 ### Priority Levels
 
-| Priority | Meaning |
-|----------|---------|
+| Priority    | Meaning                                                    |
+| ----------- | ---------------------------------------------------------- |
 | `!critical` | Read this before modifying or you **will** break something |
-| `!high` | Should read — reduces risk of unintended consequences |
-| *(omitted)* | Standard relevance |
-| `!low` | Background context, informational |
+| `!high`     | Should read — reduces risk of unintended consequences      |
+| _(omitted)_ | Standard relevance                                         |
+| `!low`      | Background context, informational                          |
 
 ## Extended Context Files (.ctx.md)
 
@@ -289,25 +289,25 @@ transactions during peak hours, totaling $12,000 in Q4.
 npm install -D @recallnet/codecontext-eslint-plugin
 ```
 
-| Rule | Default | Description |
-|------|---------|-------------|
-| `codecontext/context-hierarchy` | error | Type/subtype combinations must be valid |
-| `codecontext/valid-context-refs` | error | `#id` must resolve to an existing `.ctx.md` file |
-| `codecontext/require-context-for-complex` | warn | Complex functions (cyclomatic complexity > 5) should have `@context` |
-| `codecontext/no-stale-context` | warn | `@context:history` dates older than 90 days trigger a warning |
+| Rule                                      | Default | Description                                                          |
+| ----------------------------------------- | ------- | -------------------------------------------------------------------- |
+| `codecontext/context-hierarchy`           | error   | Type/subtype combinations must be valid                              |
+| `codecontext/valid-context-refs`          | error   | `#id` must resolve to an existing `.ctx.md` file                     |
+| `codecontext/require-context-for-complex` | warn    | Complex functions (cyclomatic complexity > 5) should have `@context` |
+| `codecontext/no-stale-context`            | warn    | `@context:history` dates older than 90 days trigger a warning        |
 
 ## Language Support
 
 codecontext is a **language-agnostic specification**. The `@context` tag works inside whatever comment syntax your language supports. The parser already handles all of these:
 
-| Comment Style | Languages |
-|--------------|-----------|
-| `//` | JavaScript, TypeScript, Go, Rust, C, C++, Java, Kotlin, Swift, C# |
-| `#` | Python, Ruby, Shell, YAML, Perl, Elixir |
-| `--` | SQL, Lua, Haskell |
-| `/* */` | CSS, C, Go, Rust (also block comments in most C-family languages) |
-| `<!-- -->` | HTML, XML, SVG |
-| `{/* */}` | JSX, TSX |
+| Comment Style | Languages                                                         |
+| ------------- | ----------------------------------------------------------------- |
+| `//`          | JavaScript, TypeScript, Go, Rust, C, C++, Java, Kotlin, Swift, C# |
+| `#`           | Python, Ruby, Shell, YAML, Perl, Elixir                           |
+| `--`          | SQL, Lua, Haskell                                                 |
+| `/* */`       | CSS, C, Go, Rust (also block comments in most C-family languages) |
+| `<!-- -->`    | HTML, XML, SVG                                                    |
+| `{/* */}`     | JSX, TSX                                                          |
 
 The TypeScript implementation is the first. The parser and CLI already work on files in any of these languages. Language-specific packages (linter plugins for Ruff, clippy, golangci-lint) are the only per-language pieces — everything else is universal.
 
@@ -315,28 +315,73 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| [`@recallnet/codecontext-cli`](packages/cli) | CLI tool — query, scope, diff, stale-check |
-| [`@recallnet/codecontext-parser`](packages/parser) | Core parser for `@context` tags and `.ctx.md` files |
-| [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity |
-| [`@recallnet/codecontext-spec`](packages/spec) | Language-agnostic specification |
+| Package                                                          | Description                                         |
+| ---------------------------------------------------------------- | --------------------------------------------------- |
+| [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check          |
+| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and `.ctx.md` files |
+| [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity             |
+| [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                     |
 
 ## Quick Start
 
+### 1. Configure the GitHub Packages registry
+
+Packages are published to GitHub Packages under the `@recallnet` scope. Add this to your project's `.npmrc`:
+
+```ini
+@recallnet:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+You'll need a GitHub personal access token with `read:packages` scope. Set it as the `GITHUB_TOKEN` environment variable, or use `npm login --registry=https://npm.pkg.github.com`.
+
+### 2. Install
+
 ```bash
-# Install
-pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-eslint-plugin
+pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-parser
+# Optional: ESLint plugin for freshness enforcement
+pnpm add -D @recallnet/codecontext-eslint-plugin
+```
 
-# Add to ESLint
-echo 'import codecontext from "@recallnet/codecontext-eslint-plugin";
-export default [codecontext.configs.recommended];' > eslint.config.js
+### 3. Configure ESLint (optional)
 
-# Create context directory
+```javascript
+// eslint.config.js
+import codecontext from "@recallnet/codecontext-eslint-plugin";
+
+export default [
+  codecontext.configs.recommended,
+  // ... your other config
+];
+```
+
+### 4. Create context directory
+
+```bash
 mkdir -p docs/context
+```
 
-# Add your first @context tag to any file, then:
-npx codecontext --scope <your-file>
+### 5. Add your first `@context` tag
+
+```typescript
+// @context:decision !high — chose approach A over B because of X
+```
+
+### 6. Run the CLI
+
+```bash
+# Briefing before editing
+npx codecontext --scope src/your-file.ts
+
+# Check after editing
+npx codecontext --diff HEAD src/your-file.ts
+```
+
+### Pre-commit hook (recommended)
+
+```bash
+# .husky/pre-commit or .git/hooks/pre-commit
+npx codecontext --staged
 ```
 
 ## License

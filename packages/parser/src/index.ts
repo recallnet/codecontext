@@ -28,12 +28,7 @@ export {
 export { parseCtxFile, CtxFileError } from "./ctx-file-parser.js";
 
 // Taxonomy
-export {
-  TAXONOMY,
-  isValidType,
-  isValidSubtype,
-  getValidSubtypes,
-} from "./taxonomy.js";
+export { TAXONOMY, isValidType, isValidSubtype, getValidSubtypes } from "./taxonomy.js";
 
 // Staleness
 export {

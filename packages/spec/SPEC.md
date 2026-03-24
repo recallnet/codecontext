@@ -5,18 +5,18 @@
 
 ## Abstract
 
-codecontext is a specification for embedding structured decision context directly in source code comments, designed for both human readability and machine consumption. By using a universal `@context` tag syntax that works within any programming language's native comment delimiters, codecontext enables developers, tools, and AI agents to capture, discover, and reason about the *why* behind code — tradeoffs, constraints, risks, and historical decisions — without leaving the source file. Companion `.ctx.md` files provide extended context when inline comments are insufficient.
+codecontext is a specification for embedding structured decision context directly in source code comments, designed for both human readability and machine consumption. By using a universal `@context` tag syntax that works within any programming language's native comment delimiters, codecontext enables developers, tools, and AI agents to capture, discover, and reason about the _why_ behind code — tradeoffs, constraints, risks, and historical decisions — without leaving the source file. Companion `.ctx.md` files provide extended context when inline comments are insufficient.
 
 ## Terminology
 
-| Term | Definition |
-|------|------------|
-| **Context tag** | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional ID, optional priority, and a human-readable summary. |
-| **Context file** | A Markdown file with the extension `.ctx.md` that provides extended context for a decision or annotation. Context files use YAML frontmatter for structured metadata and a Markdown body for prose. |
+| Term              | Definition                                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Context tag**   | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional ID, optional priority, and a human-readable summary.                              |
+| **Context file**  | A Markdown file with the extension `.ctx.md` that provides extended context for a decision or annotation. Context files use YAML frontmatter for structured metadata and a Markdown body for prose.                                        |
 | **Logical block** | The contiguous region of code immediately following a context tag. The logical block is the scope to which the tag applies. Block boundaries are language-dependent (e.g., the next function, class, statement, or brace-delimited block). |
-| **Anchor** | The association between a context tag and its logical block. The anchor is what makes staleness detection possible: when the logical block changes, the anchor's hash changes. |
-| **Staleness** | The condition where the logical block associated with a context tag has been modified since the tag was last verified. Staleness indicates that the context may no longer accurately describe the code. |
-| **Verification** | The act of confirming that a context tag still accurately describes its logical block. Verification updates the content hash stored in the cache. |
+| **Anchor**        | The association between a context tag and its logical block. The anchor is what makes staleness detection possible: when the logical block changes, the anchor's hash changes.                                                             |
+| **Staleness**     | The condition where the logical block associated with a context tag has been modified since the tag was last verified. Staleness indicates that the context may no longer accurately describe the code.                                    |
+| **Verification**  | The act of confirming that a context tag still accurately describes its logical block. Verification updates the content hash stored in the cache.                                                                                          |
 
 ## Comment Syntax
 
@@ -28,13 +28,13 @@ A context tag is a single annotation with the following structure:
 
 ### Fields
 
-| Field | Required | Format | Description |
-|-------|----------|--------|-------------|
-| `type` | Yes | Lowercase alphanumeric | The primary classification of the context. See Type Taxonomy. |
-| `subtype` | No | Lowercase alphanumeric | A secondary classification within the type. |
-| `#id` | No | `#` followed by `[a-z0-9-]+` | A reference to a `.ctx.md` file for extended context. |
-| `!priority` | No | `!critical`, `!high`, or `!low` | The importance level of the annotation. |
-| `summary` | Yes | Free-form text | A human-readable description of the context. Follows an em-dash (`—`) separator. |
+| Field       | Required | Format                          | Description                                                                      |
+| ----------- | -------- | ------------------------------- | -------------------------------------------------------------------------------- |
+| `type`      | Yes      | Lowercase alphanumeric          | The primary classification of the context. See Type Taxonomy.                    |
+| `subtype`   | No       | Lowercase alphanumeric          | A secondary classification within the type.                                      |
+| `#id`       | No       | `#` followed by `[a-z0-9-]+`    | A reference to a `.ctx.md` file for extended context.                            |
+| `!priority` | No       | `!critical`, `!high`, or `!low` | The importance level of the annotation.                                          |
+| `summary`   | Yes      | Free-form text                  | A human-readable description of the context. Follows an em-dash (`—`) separator. |
 
 ### Universal Comment Embedding
 
@@ -70,18 +70,19 @@ A context tag MUST appear on a single logical line. Multi-line context is achiev
 
 ## Type Taxonomy
 
-| Type | Subtypes | Description |
-|------|----------|-------------|
-| `decision` | `tradeoff`, `constraint`, `assumption` | Records a design or implementation decision and its rationale. |
-| `requirement` | *(none)* | Links code to a functional or non-functional requirement. |
-| `risk` | `perf`, `security`, `compat` | Flags a known risk or concern associated with the code. |
-| `related` | *(none)* | Points to related code, documentation, or external resources. |
-| `history` | *(none)* | Records historical context — what changed, when, and why. |
-| `doc` | *(none)* | Provides supplementary documentation that aids understanding. |
+| Type          | Subtypes                               | Description                                                    |
+| ------------- | -------------------------------------- | -------------------------------------------------------------- |
+| `decision`    | `tradeoff`, `constraint`, `assumption` | Records a design or implementation decision and its rationale. |
+| `requirement` | _(none)_                               | Links code to a functional or non-functional requirement.      |
+| `risk`        | `perf`, `security`, `compat`           | Flags a known risk or concern associated with the code.        |
+| `related`     | _(none)_                               | Points to related code, documentation, or external resources.  |
+| `history`     | _(none)_                               | Records historical context — what changed, when, and why.      |
+| `doc`         | _(none)_                               | Provides supplementary documentation that aids understanding.  |
 
 ### Type Descriptions
 
 **decision** — Use when code reflects a deliberate choice among alternatives.
+
 - `decision:tradeoff` — A choice that sacrifices one quality for another.
 - `decision:constraint` — A choice imposed by an external constraint (API limitation, regulatory requirement, dependency behavior).
 - `decision:assumption` — A choice predicated on an assumption that may change.
@@ -89,6 +90,7 @@ A context tag MUST appear on a single logical line. Multi-line context is achiev
 **requirement** — Use to trace code back to a product requirement, user story, or specification item.
 
 **risk** — Use to flag code that carries known risk.
+
 - `risk:perf` — Performance risk (algorithmic complexity, resource consumption, latency).
 - `risk:security` — Security risk (input validation, authentication, data exposure).
 - `risk:compat` — Compatibility risk (browser support, API versioning, platform differences).
@@ -101,12 +103,12 @@ A context tag MUST appear on a single logical line. Multi-line context is achiev
 
 ## Priority Levels
 
-| Priority | Syntax | Semantics |
-|----------|--------|-----------|
+| Priority | Syntax      | Semantics                                                                                                                                |
+| -------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Critical | `!critical` | MUST read before modifying the associated code. Failure to understand this context risks introducing a defect or violating a constraint. |
-| High | `!high` | SHOULD read before modifying. Understanding this context significantly reduces the risk of unintended consequences. |
-| Low | `!low` | Informational. Useful background context but not essential for safe modification. |
-| *(none)* | *(omitted)* | Standard priority. The context is relevant but does not carry special urgency. |
+| High     | `!high`     | SHOULD read before modifying. Understanding this context significantly reduces the risk of unintended consequences.                      |
+| Low      | `!low`      | Informational. Useful background context but not essential for safe modification.                                                        |
+| _(none)_ | _(omitted)_ | Standard priority. The context is relevant but does not carry special urgency.                                                           |
 
 A conforming tool SHOULD surface `!critical` tags prominently when a developer is editing the associated logical block.
 
@@ -130,26 +132,26 @@ See [ctx-files.md](ctx-files.md) for the `.ctx.md` file format.
 
 codecontext is language-agnostic. The specification does NOT prescribe which comment form to use — any comment form supported by the language is valid. The following table lists common languages and their comment forms:
 
-| Language | Line Comment | Block Comment |
-|----------|-------------|---------------|
-| JavaScript / TypeScript | `//` | `/* */` |
-| Go | `//` | `/* */` |
-| Rust | `//` | `/* */` |
-| C / C++ | `//` | `/* */` |
-| Java / Kotlin | `//` | `/* */` |
-| C# | `//` | `/* */` |
-| Swift | `//` | `/* */` |
-| Python | `#` | *(none; `"""` is a string literal, not a comment)* |
-| Ruby | `#` | `=begin ... =end` |
-| Shell (Bash, Zsh) | `#` | *(none)* |
-| YAML | `#` | *(none)* |
-| SQL | `--` | `/* */` |
-| Lua | `--` | `--[[ ]]` |
-| Haskell | `--` | `{- -}` |
-| HTML / XML | *(none)* | `<!-- -->` |
-| CSS | *(none)* | `/* */` |
-| Lisp / Clojure | `;;` | *(none)* |
-| Erlang / Elixir | `#` or `%` | *(none)* |
+| Language                | Line Comment | Block Comment                                      |
+| ----------------------- | ------------ | -------------------------------------------------- |
+| JavaScript / TypeScript | `//`         | `/* */`                                            |
+| Go                      | `//`         | `/* */`                                            |
+| Rust                    | `//`         | `/* */`                                            |
+| C / C++                 | `//`         | `/* */`                                            |
+| Java / Kotlin           | `//`         | `/* */`                                            |
+| C#                      | `//`         | `/* */`                                            |
+| Swift                   | `//`         | `/* */`                                            |
+| Python                  | `#`          | _(none; `"""` is a string literal, not a comment)_ |
+| Ruby                    | `#`          | `=begin ... =end`                                  |
+| Shell (Bash, Zsh)       | `#`          | _(none)_                                           |
+| YAML                    | `#`          | _(none)_                                           |
+| SQL                     | `--`         | `/* */`                                            |
+| Lua                     | `--`         | `--[[ ]]`                                          |
+| Haskell                 | `--`         | `{- -}`                                            |
+| HTML / XML              | _(none)_     | `<!-- -->`                                         |
+| CSS                     | _(none)_     | `/* */`                                            |
+| Lisp / Clojure          | `;;`         | _(none)_                                           |
+| Erlang / Elixir         | `#` or `%`   | _(none)_                                           |
 
 ### Adaptation Rules
 
@@ -216,14 +218,14 @@ Projects MAY define custom types and subtypes by creating a `codecontext.json` c
 
 ### Configuration Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `version` | string | `"1.0"` | The specification version this config targets. |
-| `contextDir` | string | `"docs/context"` | Path to the context directory, relative to project root. |
-| `stalenessThresholdDays` | number | `30` | Number of days after which a stale tag enters `review-required` status. |
-| `customTypes` | object | `{}` | Map of custom type names to their definitions. |
-| `hashAlgorithm` | string | `"sha256"` | Hash algorithm for content-addressable staleness tracking. |
-| `hashLength` | number | `16` | Number of hex characters to retain from the hash. |
+| Field                    | Type   | Default          | Description                                                             |
+| ------------------------ | ------ | ---------------- | ----------------------------------------------------------------------- |
+| `version`                | string | `"1.0"`          | The specification version this config targets.                          |
+| `contextDir`             | string | `"docs/context"` | Path to the context directory, relative to project root.                |
+| `stalenessThresholdDays` | number | `30`             | Number of days after which a stale tag enters `review-required` status. |
+| `customTypes`            | object | `{}`             | Map of custom type names to their definitions.                          |
+| `hashAlgorithm`          | string | `"sha256"`       | Hash algorithm for content-addressable staleness tracking.              |
+| `hashLength`             | number | `16`             | Number of hex characters to retain from the hash.                       |
 
 Custom types MUST NOT collide with the built-in types defined in this specification. A conforming parser SHOULD reject configurations that attempt to redefine built-in types.
 

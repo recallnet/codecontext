@@ -55,7 +55,7 @@ Before hashing, the logical block's text MUST be normalized:
 5. **Remove comment-only lines** from the block. (Changes to comments within the block do not affect the hash.)
 6. **Strip blank lines** within the block. (Formatting changes do not affect the hash.)
 
-The goal of normalization is to produce a stable hash that changes only when the *semantic content* of the code changes, not when formatting or comments are modified.
+The goal of normalization is to produce a stable hash that changes only when the _semantic content_ of the code changes, not when formatting or comments are modified.
 
 ### Hash Computation
 
@@ -187,15 +187,15 @@ The staleness cache is stored in `.codecontext-cache.json` at the project root. 
 
 ### Entry Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `line` | number | The 1-based line number of the `@context` tag in the source file. |
-| `tag` | string | The full context tag text (without the summary), used for identification when line numbers shift. |
-| `hash` | string | The truncated content hash of the logical block. |
-| `verifiedAt` | string (ISO 8601) | Timestamp of the last verification. |
-| `verifiedBy` | string | What performed the verification: `"cli"`, `"pre-commit"`, `"ci"`, `"ide"`, or a custom identifier. |
-| `blockStart` | number | The 1-based start line of the logical block. |
-| `blockEnd` | number | The 1-based end line of the logical block (inclusive). |
+| Field        | Type              | Description                                                                                        |
+| ------------ | ----------------- | -------------------------------------------------------------------------------------------------- |
+| `line`       | number            | The 1-based line number of the `@context` tag in the source file.                                  |
+| `tag`        | string            | The full context tag text (without the summary), used for identification when line numbers shift.  |
+| `hash`       | string            | The truncated content hash of the logical block.                                                   |
+| `verifiedAt` | string (ISO 8601) | Timestamp of the last verification.                                                                |
+| `verifiedBy` | string            | What performed the verification: `"cli"`, `"pre-commit"`, `"ci"`, `"ide"`, or a custom identifier. |
+| `blockStart` | number            | The 1-based start line of the logical block.                                                       |
+| `blockEnd`   | number            | The 1-based end line of the logical block (inclusive).                                             |
 
 ### Cache Regeneration
 

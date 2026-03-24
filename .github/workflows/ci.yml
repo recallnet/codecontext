@@ -1,10 +1,3 @@
-# CI — runs on every push to main and every PR targeting main.
-#
-# Jobs:
-#   build        — Full monorepo build to catch compile errors
-#   test         — Unit tests across all packages
-#   typecheck    — TypeScript type checking
-
 name: CI
 
 on:
@@ -14,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  lint-and-typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,10 +20,16 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - name: Lint
+        run: pnpm lint
+      - name: Type-check
+        run: pnpm typecheck
+      - name: Format check
+        run: pnpm format:check
 
   test:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [lint-and-typecheck]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
@@ -42,9 +41,10 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm test
+      - name: Run tests with coverage
+        run: pnpm test:coverage
 
-  typecheck:
+  build-verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,5 +56,36 @@ jobs:
           node-version: 22
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm typecheck
+      - name: Build all packages
+        run: pnpm build
+      - name: Verify CLI entry point
+        run: node packages/cli/dist/index.js --help
+      - name: Verify parser exports
+        run: node -e "import('@recallnet/codecontext-parser').then(m => { if (!m.parseContextTags) throw new Error('Missing export'); console.log('Parser exports OK'); })"
+      - name: Verify ESLint plugin exports
+        run: node -e "import('@recallnet/codecontext-eslint-plugin').then(m => { if (!m.default?.rules) throw new Error('Missing rules'); console.log('ESLint plugin exports OK'); })"
+
+  changeset-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Check for changesets
+        run: |
+          CHANGED=$(git diff --name-only origin/main...HEAD | grep -E '^packages/(parser|cli|eslint-plugin)/src/' || true)
+          if [ -n "$CHANGED" ]; then
+            CHANGESETS=$(git diff --name-only origin/main...HEAD | grep -E '^\.changeset/.*\.md$' || true)
+            if [ -z "$CHANGESETS" ]; then
+              echo "::warning::Source files changed in publishable packages but no changeset found. Run 'pnpm changeset' before merging."
+            fi
+          fi

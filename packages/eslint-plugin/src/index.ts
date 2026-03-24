@@ -1,10 +1,11 @@
 import type { ESLint } from "eslint";
-import contextHierarchy from "./rules/context-hierarchy.js";
-import validContextRefs from "./rules/valid-context-refs.js";
-import requireContextForComplex from "./rules/require-context-for-complex.js";
-import noStaleContext from "./rules/no-stale-context.js";
 
-const plugin: ESLint.Plugin & { configs: Record<string, ESLint.ConfigData | any> } = {
+import contextHierarchy from "./rules/context-hierarchy.js";
+import noStaleContext from "./rules/no-stale-context.js";
+import requireContextForComplex from "./rules/require-context-for-complex.js";
+import validContextRefs from "./rules/valid-context-refs.js";
+
+const plugin: ESLint.Plugin & { configs: Record<string, unknown> } = {
   meta: {
     name: "@recallnet/codecontext-eslint-plugin",
     version: "0.1.0",
@@ -18,7 +19,7 @@ const plugin: ESLint.Plugin & { configs: Record<string, ESLint.ConfigData | any>
   configs: {},
 };
 
-plugin.configs.recommended = {
+plugin.configs["recommended"] = {
   plugins: {
     codecontext: plugin,
   },

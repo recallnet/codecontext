@@ -1,12 +1,6 @@
 // --- Context tag types ---
 
-export type ContextType =
-  | "decision"
-  | "requirement"
-  | "risk"
-  | "related"
-  | "history"
-  | "doc";
+export type ContextType = "decision" | "requirement" | "risk" | "related" | "history" | "doc";
 
 export type DecisionSubtype = "tradeoff" | "constraint" | "assumption";
 export type RiskSubtype = "perf" | "security" | "compat";
@@ -83,9 +77,9 @@ export interface FileContext {
 export interface ScopeBriefing {
   file: string;
   /** All entries sorted by priority (critical first) */
-  entries: Array<{
+  entries: {
     tag: ContextTag;
     status: StalenessStatus;
     ctxFile?: CtxFile;
-  }>;
+  }[];
 }

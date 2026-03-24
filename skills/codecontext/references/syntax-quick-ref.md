@@ -54,12 +54,12 @@
 
 ## Priority Levels
 
-| Level | Syntax | When to Use |
-|-------|--------|-------------|
+| Level    | Syntax      | When to Use                                               |
+| -------- | ----------- | --------------------------------------------------------- |
 | Critical | `!critical` | Misunderstanding causes a defect. Learned from incidents. |
-| High | `!high` | Important for safe modification. |
-| Standard | *(omit)* | Relevant but not urgent. |
-| Low | `!low` | Background information. |
+| High     | `!high`     | Important for safe modification.                          |
+| Standard | _(omit)_    | Relevant but not urgent.                                  |
+| Low      | `!low`      | Background information.                                   |
 
 ## ID References
 
@@ -107,14 +107,14 @@ External factors that shaped or limit this decision.
 
 ### Frontmatter Fields
 
-| Field | Required | Values |
-|-------|----------|--------|
-| `id` | Yes | Lowercase alphanumeric with hyphens (`[a-z0-9-]+`) |
-| `type` | Yes | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
-| `status` | No | `active` (default), `superseded`, `deprecated` |
-| `verified` | No | ISO date (YYYY-MM-DD) |
-| `owners` | No | List of owner handles |
-| `traces` | No | List of external references |
+| Field      | Required | Values                                                         |
+| ---------- | -------- | -------------------------------------------------------------- |
+| `id`       | Yes      | Lowercase alphanumeric with hyphens (`[a-z0-9-]+`)             |
+| `type`     | Yes      | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
+| `status`   | No       | `active` (default), `superseded`, `deprecated`                 |
+| `verified` | No       | ISO date (YYYY-MM-DD)                                          |
+| `owners`   | No       | List of owner handles                                          |
+| `traces`   | No       | List of external references                                    |
 
 ## CLI Commands
 
@@ -143,11 +143,11 @@ npx codecontext src/gateway.ts --json
 
 ## Comment Style by Language
 
-| Language | Syntax |
-|----------|--------|
-| JS / TS / Go / Rust / C / Java | `// @context:...` |
-| Python / Ruby / Shell / YAML | `# @context:...` |
-| SQL / Lua / Haskell | `-- @context:...` |
-| HTML / XML | `<!-- @context:... -->` |
-| CSS | `/* @context:... */` |
-| Lisp / Clojure | `;; @context:...` |
+| Language                       | Syntax                  |
+| ------------------------------ | ----------------------- |
+| JS / TS / Go / Rust / C / Java | `// @context:...`       |
+| Python / Ruby / Shell / YAML   | `# @context:...`        |
+| SQL / Lua / Haskell            | `-- @context:...`       |
+| HTML / XML                     | `<!-- @context:... -->` |
+| CSS                            | `/* @context:... */`    |
+| Lisp / Clojure                 | `;; @context:...`       |

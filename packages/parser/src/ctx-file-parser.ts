@@ -1,11 +1,12 @@
 import matter from "gray-matter";
-import type { CtxFile, CtxFileFrontmatter, CtxFileSection } from "./types.js";
+
 import { isValidType } from "./taxonomy.js";
+import type { CtxFile, CtxFileFrontmatter, CtxFileSection } from "./types.js";
 
 export class CtxFileError extends Error {
   constructor(
     message: string,
-    public filePath: string,
+    public filePath: string
   ) {
     super(`${filePath}: ${message}`);
     this.name = "CtxFileError";
@@ -19,39 +20,51 @@ export function parseCtxFile(content: string, filePath: string): CtxFile {
   const { data, content: body } = matter(content);
 
   // Validate required frontmatter fields
-  if (!data.id || typeof data.id !== "string") {
+  const rawId = data["id"] as unknown;
+  if (!rawId || typeof rawId !== "string") {
     throw new CtxFileError("Missing or invalid 'id' in frontmatter", filePath);
   }
 
-  if (!data.type || !isValidType(data.type)) {
+  const rawType = data["type"] as unknown;
+  if (!rawType || typeof rawType !== "string" || !isValidType(rawType)) {
     throw new CtxFileError(
-      `Missing or invalid 'type' in frontmatter: "${data.type}"`,
-      filePath,
+      `Missing or invalid 'type' in frontmatter: "${String(rawType)}"`,
+      filePath
     );
   }
 
-  const status = data.status ?? "active";
+  const rawStatus = data["status"] as unknown;
+  const status = typeof rawStatus === "string" ? rawStatus : "active";
   if (!["active", "superseded", "deprecated"].includes(status)) {
     throw new CtxFileError(
       `Invalid status "${status}". Must be: active, superseded, or deprecated`,
-      filePath,
+      filePath
     );
   }
 
+  const rawVerified = data["verified"] as unknown;
+  const rawOwners = data["owners"] as unknown;
+  const rawTraces = data["traces"] as unknown;
+
   const frontmatter: CtxFileFrontmatter = {
-    id: data.id,
-    type: data.type,
-    status,
-    verified: data.verified ? String(data.verified) : "",
-    owners: Array.isArray(data.owners)
-      ? data.owners.map(String)
-      : typeof data.owners === "string"
-        ? [data.owners]
+    id: rawId,
+    type: rawType,
+    status: status as CtxFileFrontmatter["status"],
+    verified:
+      rawVerified instanceof Date
+        ? rawVerified.toISOString()
+        : typeof rawVerified === "string"
+          ? rawVerified
+          : "",
+    owners: Array.isArray(rawOwners)
+      ? (rawOwners as unknown[]).map(String)
+      : typeof rawOwners === "string"
+        ? [rawOwners]
         : [],
-    traces: Array.isArray(data.traces)
-      ? data.traces.map(String)
-      : typeof data.traces === "string"
-        ? [data.traces]
+    traces: Array.isArray(rawTraces)
+      ? (rawTraces as unknown[]).map(String)
+      : typeof rawTraces === "string"
+        ? [rawTraces]
         : [],
   };
 
@@ -70,7 +83,7 @@ function parseSections(body: string): CtxFileSection[] {
   let currentContent: string[] = [];
 
   for (const line of lines) {
-    const headingMatch = line.match(/^##\s+(.+)$/);
+    const headingMatch = /^##\s+(.+)$/.exec(line);
     if (headingMatch) {
       if (currentHeading) {
         sections.push({
@@ -78,7 +91,7 @@ function parseSections(body: string): CtxFileSection[] {
           content: currentContent.join("\n").trim(),
         });
       }
-      currentHeading = headingMatch[1];
+      currentHeading = headingMatch[1] ?? "";
       currentContent = [];
     } else {
       currentContent.push(line);

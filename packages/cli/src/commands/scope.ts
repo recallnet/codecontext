@@ -1,6 +1,8 @@
 import { resolve } from "node:path";
+
 import { buildFileContext } from "@recallnet/codecontext-parser";
 import type { Priority, ScopeBriefing, StalenessStatus } from "@recallnet/codecontext-parser";
+
 import { formatScopeBriefing } from "../formatters/human.js";
 
 const PRIORITY_ORDER: Record<string, number> = {
@@ -11,6 +13,7 @@ const PRIORITY_ORDER: Record<string, number> = {
 
 function priorityRank(p?: Priority): number {
   if (!p) return 2; // unset sorts between high and low
+  // eslint-disable-next-line security/detect-object-injection
   return PRIORITY_ORDER[p] ?? 2;
 }
 
@@ -26,11 +29,14 @@ export function runScope(filePath: string): void {
 
   // Build entries sorted by priority
   const entries = ctx.tags
-    .map((tag) => ({
-      tag,
-      status: statusByLine.get(tag.location.line) ?? ("review-required" as StalenessStatus),
-      ctxFile: tag.id ? ctx.resolvedCtxFiles.get(tag.id) : undefined,
-    }))
+    .map((tag) => {
+      const ctxFile = tag.id ? ctx.resolvedCtxFiles.get(tag.id) : undefined;
+      const base = {
+        tag,
+        status: statusByLine.get(tag.location.line) ?? ("review-required" as StalenessStatus),
+      };
+      return ctxFile ? { ...base, ctxFile } : base;
+    })
     .sort((a, b) => priorityRank(a.tag.priority) - priorityRank(b.tag.priority));
 
   const briefing: ScopeBriefing = {
@@ -38,5 +44,6 @@ export function runScope(filePath: string): void {
     entries,
   };
 
+  // eslint-disable-next-line no-console
   console.log(formatScopeBriefing(briefing));
 }

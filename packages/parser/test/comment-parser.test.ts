@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {
-  parseContextTags,
-  stripCommentDelimiters,
-} from "../src/comment-parser.js";
+
+import { parseContextTags, stripCommentDelimiters } from "../src/comment-parser.js";
 
 describe("parseContextTags", () => {
   const file = "test.ts";
@@ -30,9 +28,7 @@ describe("parseContextTags", () => {
     expect(tag.subtype).toBe("tradeoff");
     expect(tag.id).toBe("auth-choice");
     expect(tag.priority).toBe("critical");
-    expect(tag.summary).toBe(
-      "Chose JWT over sessions for stateless scaling",
-    );
+    expect(tag.summary).toBe("Chose JWT over sessions for stateless scaling");
   });
 
   it("parses multiple tags from one file", () => {
@@ -81,11 +77,7 @@ describe("parseContextTags", () => {
     });
 
     it("parses block comment continuation line ( * )", () => {
-      const source = [
-        "/**",
-        " * @context:decision — Block continuation style",
-        " */",
-      ].join("\n");
+      const source = ["/**", " * @context:decision — Block continuation style", " */"].join("\n");
       const { tags, errors } = parseContextTags(source, file);
       expect(errors).toHaveLength(0);
       expect(tags).toHaveLength(1);
@@ -158,9 +150,7 @@ describe("parseContextTags", () => {
       const { tags, errors } = parseContextTags(source, file);
       expect(tags).toHaveLength(0);
       expect(errors).toHaveLength(1);
-      expect(errors[0].message).toMatch(
-        /Invalid subtype "notreal" for type "decision"/,
-      );
+      expect(errors[0].message).toMatch(/Invalid subtype "notreal" for type "decision"/);
     });
   });
 
@@ -210,9 +200,7 @@ describe("stripCommentDelimiters", () => {
   });
 
   it("strips block continuation line ( * )", () => {
-    expect(stripCommentDelimiters(" * continuation text")).toBe(
-      "continuation text",
-    );
+    expect(stripCommentDelimiters(" * continuation text")).toBe("continuation text");
   });
 
   it("strips # hash comment", () => {

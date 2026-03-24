@@ -51,12 +51,9 @@ export function isValidType(type: string): type is ContextType {
   return VALID_TYPES.has(type);
 }
 
-export function isValidSubtype(
-  type: ContextType,
-  subtype: string,
-): subtype is ContextSubtype {
+export function isValidSubtype(type: ContextType, subtype: string): subtype is ContextSubtype {
   const subtypes = VALID_SUBTYPES.get(type);
-  return subtypes !== undefined && subtypes.has(subtype);
+  return subtypes?.has(subtype) ?? false;
 }
 
 export function getValidSubtypes(type: ContextType): string[] {

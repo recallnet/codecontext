@@ -10,6 +10,7 @@ Context files provide extended decision context when inline `@context` tags are 
 Context files MUST be named `<id>.ctx.md`, where `<id>` matches the ID used in `@context` tags (pattern: `[a-z0-9]+(-[a-z0-9]+)*`).
 
 Examples:
+
 - `cache-strategy.ctx.md`
 - `auth-flow.ctx.md`
 - `orm-choice.ctx.md`
@@ -53,21 +54,21 @@ traces:
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | The unique identifier for this context. MUST match the filename (without `.ctx.md`). Pattern: `[a-z0-9]+(-[a-z0-9]+)*`. |
-| `type` | string | The context type. MUST be one of the types defined in the spec or a custom type defined in `codecontext.json`. |
+| Field  | Type   | Description                                                                                                             |
+| ------ | ------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `id`   | string | The unique identifier for this context. MUST match the filename (without `.ctx.md`). Pattern: `[a-z0-9]+(-[a-z0-9]+)*`. |
+| `type` | string | The context type. MUST be one of the types defined in the spec or a custom type defined in `codecontext.json`.          |
 
 ### Optional Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `status` | string | `"active"` | The lifecycle status of this context. One of: `active`, `superseded`, `deprecated`. |
-| `verified` | string (ISO 8601 date) | *(none)* | The date when this context was last verified as accurate. Format: `YYYY-MM-DD`. |
-| `owners` | string[] | `[]` | People or teams responsible for this context. Typically usernames prefixed with `@`. |
-| `traces` | string[] | `[]` | External references (issue tracker IDs, RFC numbers, URLs) that relate to this context. |
-| `superseded-by` | string | *(none)* | When `status` is `superseded`, the ID of the context file that replaces this one. |
-| `tags` | string[] | `[]` | Freeform tags for categorization and search. |
+| Field           | Type                   | Default    | Description                                                                             |
+| --------------- | ---------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| `status`        | string                 | `"active"` | The lifecycle status of this context. One of: `active`, `superseded`, `deprecated`.     |
+| `verified`      | string (ISO 8601 date) | _(none)_   | The date when this context was last verified as accurate. Format: `YYYY-MM-DD`.         |
+| `owners`        | string[]               | `[]`       | People or teams responsible for this context. Typically usernames prefixed with `@`.    |
+| `traces`        | string[]               | `[]`       | External references (issue tracker IDs, RFC numbers, URLs) that relate to this context. |
+| `superseded-by` | string                 | _(none)_   | When `status` is `superseded`, the ID of the context file that replaces this one.       |
+| `tags`          | string[]               | `[]`       | Freeform tags for categorization and search.                                            |
 
 ### Field Validation
 
@@ -156,13 +157,13 @@ this use case. CDN caching may be added later for public-facing pages.
 
 For types other than `decision`, the recommended sections differ:
 
-| Type | Recommended Sections |
-|------|---------------------|
-| `requirement` | Context, Specification, Acceptance Criteria |
-| `risk` | Description, Impact, Likelihood, Mitigations |
-| `related` | Context, References |
-| `history` | Background, Timeline, Outcome |
-| `doc` | *(Free-form; no prescribed sections)* |
+| Type          | Recommended Sections                         |
+| ------------- | -------------------------------------------- |
+| `requirement` | Context, Specification, Acceptance Criteria  |
+| `risk`        | Description, Impact, Likelihood, Mitigations |
+| `related`     | Context, References                          |
+| `history`     | Background, Timeline, Outcome                |
+| `doc`         | _(Free-form; no prescribed sections)_        |
 
 These are recommendations, not requirements. A conforming parser MUST NOT reject a `.ctx.md` file based on which Markdown sections are present or absent.
 

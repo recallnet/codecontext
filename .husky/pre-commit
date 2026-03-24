@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== Pre-commit checks ==="
+
+# ── Stage 0: lint-staged (format staged files) ──────────────────────
+echo "[0/8] Formatting staged files..."
+npx lint-staged
+
+# ── Stage 1: Lockfile sync ──────────────────────────────────────────
+echo "[1/8] Checking lockfile sync..."
+pnpm install --frozen-lockfile --ignore-scripts 2>/dev/null || {
+  echo "❌ pnpm-lock.yaml is out of sync. Run 'pnpm install' and stage the lockfile."
+  exit 1
+}
+
+# ── Stage 2: Type-check (affected packages) ─────────────────────────
+echo "[2/8] Type-checking..."
+npx turbo typecheck
+
+# ── Stage 3: Lint (affected packages) ───────────────────────────────
+echo "[3/8] Linting..."
+npx turbo lint
+
+# ── Stage 4: Build ──────────────────────────────────────────────────
+echo "[4/8] Building..."
+npx turbo build
+
+# ── Stage 5: Tests ──────────────────────────────────────────────────
+echo "[5/8] Running tests..."
+npx turbo test
+
+# ── Stage 6: Hardcoded secrets check ────────────────────────────────
+echo "[6/8] Checking for hardcoded secrets..."
+SECRETS_FOUND=0
+git diff --cached --name-only --diff-filter=d | while read -r file; do
+  if [[ "$file" =~ \.(ts|tsx|js|jsx|mjs|cjs)$ ]]; then
+    if git show ":$file" 2>/dev/null | grep -inE '(api[_-]?key|secret[_-]?key|password|token)\s*[:=]\s*["\x27][A-Za-z0-9+/=]{8,}' | grep -v '// eslint-disable' | grep -v 'process\.env' | grep -v 'import' >/dev/null 2>&1; then
+      echo "⚠️  Possible hardcoded secret in: $file"
+      SECRETS_FOUND=1
+    fi
+  fi
+done
+if [ "$SECRETS_FOUND" -eq 1 ]; then
+  echo "❌ Potential secrets detected. Use environment variables instead."
+  exit 1
+fi
+
+# ── Stage 7: Console.log warnings ───────────────────────────────────
+echo "[7/8] Checking for console.log statements..."
+CONSOLE_FOUND=0
+git diff --cached --name-only --diff-filter=d | while read -r file; do
+  if [[ "$file" =~ \.(ts|tsx)$ ]] && [[ ! "$file" =~ \.test\. ]] && [[ ! "$file" =~ \.spec\. ]]; then
+    if git show ":$file" 2>/dev/null | grep -n 'console\.log\b' >/dev/null 2>&1; then
+      echo "⚠️  console.log found in: $file"
+      CONSOLE_FOUND=1
+    fi
+  fi
+done
+if [ "$CONSOLE_FOUND" -eq 1 ]; then
+  echo "⚠️  Warning: console.log statements found (non-blocking)"
+fi
+
+# ── Stage 8: Changeset requirement ──────────────────────────────────
+# Check if any publishable package files changed without a changeset
+CHANGED_PACKAGES=$(git diff --cached --name-only | grep -E '^packages/(parser|cli|eslint-plugin)/src/' || true)
+if [ -n "$CHANGED_PACKAGES" ]; then
+  CHANGESETS=$(git diff --cached --name-only | grep -E '^\.changeset/.*\.md$' || true)
+  if [ -z "$CHANGESETS" ]; then
+    echo "⚠️  Warning: Source files changed in publishable packages but no changeset found."
+    echo "   Run 'pnpm changeset' to create one before merging to main."
+  fi
+fi
+
+echo "✅ All pre-commit checks passed"

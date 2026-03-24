@@ -1,7 +1,99 @@
 import type { Rule } from "eslint";
 import type { Node } from "estree";
 
-const CONTEXT_MARKER = /@context:/;
+/**
+ * Check if a node is a function node (to avoid descending into nested functions).
+ */
+function isFunctionNode(n: Node): boolean {
+  return (
+    n.type === "FunctionDeclaration" ||
+    n.type === "FunctionExpression" ||
+    n.type === "ArrowFunctionExpression"
+  );
+}
+
+/**
+ * Check if a node type contributes to cyclomatic complexity.
+ */
+function getComplexityIncrease(n: Node): number {
+  switch (n.type) {
+    case "IfStatement":
+    case "ConditionalExpression":
+    case "ForStatement":
+    case "ForInStatement":
+    case "ForOfStatement":
+    case "WhileStatement":
+    case "DoWhileStatement":
+    case "CatchClause":
+      return 1;
+    case "SwitchCase": {
+      const switchCase = n as Node & { test?: unknown };
+      return switchCase.test !== null && switchCase.test !== undefined ? 1 : 0;
+    }
+    case "LogicalExpression": {
+      const logicalExpr = n as Node & { operator?: string };
+      const op = logicalExpr.operator;
+      return op === "&&" || op === "||" || op === "??" ? 1 : 0;
+    }
+    default:
+      return 0;
+  }
+}
+
+function isNodeLike(value: unknown): value is Node {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    typeof (value as Node).type === "string"
+  );
+}
+
+function isWalkableNode(value: unknown): value is Node {
+  return isNodeLike(value) && !isFunctionNode(value);
+}
+
+function getChildComplexity(child: unknown): number {
+  if (!child || typeof child !== "object") {
+    return 0;
+  }
+  if (Array.isArray(child)) {
+    let sum = 0;
+    for (const item of child) {
+      if (isWalkableNode(item)) {
+        sum += computeComplexity(item);
+      }
+    }
+    return sum;
+  }
+  if (isWalkableNode(child)) {
+    return computeComplexity(child);
+  }
+  return 0;
+}
+
+/**
+ * Walk the AST and compute cyclomatic complexity, skipping nested function nodes.
+ */
+function computeComplexity(node: Node): number {
+  let complexity = getComplexityIncrease(node);
+
+  for (const key of Object.keys(node)) {
+    if (key === "parent") {
+      continue;
+    }
+    // eslint-disable-next-line security/detect-object-injection
+    const child = (node as unknown as Record<string, unknown>)[key];
+    complexity += getChildComplexity(child);
+  }
+
+  return complexity;
+}
+
+function hasContextInComments(sourceCode: Rule.RuleContext["sourceCode"], node: Node): boolean {
+  const comments = sourceCode.getCommentsBefore(node);
+  return comments.some((c) => c.value.includes("@context:"));
+}
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -33,91 +125,31 @@ const rule: Rule.RuleModule = {
     const threshold = options.complexityThreshold ?? 5;
 
     function checkFunction(node: Node & Rule.NodeParentExtension) {
-      // Count cyclomatic complexity by walking the function body
-      let complexity = 1; // Base complexity
-
-      function walk(n: Node) {
-        switch (n.type) {
-          case "IfStatement":
-          case "ConditionalExpression":
-          case "ForStatement":
-          case "ForInStatement":
-          case "ForOfStatement":
-          case "WhileStatement":
-          case "DoWhileStatement":
-            complexity++;
-            break;
-          case "SwitchCase":
-            // Don't count the default case
-            if ((n as any).test !== null) {
-              complexity++;
-            }
-            break;
-          case "CatchClause":
-            complexity++;
-            break;
-          case "LogicalExpression":
-            if (
-              (n as any).operator === "&&" ||
-              (n as any).operator === "||" ||
-              (n as any).operator === "??"
-            ) {
-              complexity++;
-            }
-            break;
-        }
-
-        // Walk children (but don't descend into nested functions)
-        for (const key of Object.keys(n)) {
-          if (key === "parent") continue;
-          const child = (n as any)[key];
-          if (child && typeof child === "object") {
-            if (Array.isArray(child)) {
-              for (const item of child) {
-                if (item && typeof item.type === "string" && !isFunctionNode(item)) {
-                  walk(item);
-                }
-              }
-            } else if (typeof child.type === "string" && !isFunctionNode(child)) {
-              walk(child);
-            }
-          }
-        }
-      }
-
-      function isFunctionNode(n: Node): boolean {
-        return (
-          n.type === "FunctionDeclaration" ||
-          n.type === "FunctionExpression" ||
-          n.type === "ArrowFunctionExpression"
-        );
-      }
-
-      // Walk the function body
       const body =
         node.type === "ArrowFunctionExpression"
-          ? node.body
-          : (node as any).body;
+          ? (node as unknown as { body: Node }).body
+          : (node as unknown as { body?: Node }).body;
 
-      if (body) {
-        walk(body);
+      if (!body) {
+        return;
       }
 
-      if (complexity <= threshold) return;
+      const complexity = 1 + computeComplexity(body);
+      if (complexity <= threshold) {
+        return;
+      }
 
-      // Check if leading comments contain @context
-      const sourceCode = context.sourceCode;
-      const comments = sourceCode.getCommentsBefore(node);
-      const hasContext = comments.some((c) => CONTEXT_MARKER.test(c.value));
-
-      if (hasContext) return;
+      if (hasContextInComments(context.sourceCode, node)) {
+        return;
+      }
 
       // Also check comments inside the function at the top (first statement)
-      if (body && body.type === "BlockStatement" && body.body.length > 0) {
-        const firstStatement = body.body[0];
-        const innerComments = sourceCode.getCommentsBefore(firstStatement);
-        const hasInnerContext = innerComments.some((c) => CONTEXT_MARKER.test(c.value));
-        if (hasInnerContext) return;
+      const blockBody = body as Node & { body?: Node[] };
+      if (body.type === "BlockStatement" && blockBody.body && blockBody.body.length > 0) {
+        const firstStatement = blockBody.body[0];
+        if (firstStatement && hasContextInComments(context.sourceCode, firstStatement)) {
+          return;
+        }
       }
 
       context.report({

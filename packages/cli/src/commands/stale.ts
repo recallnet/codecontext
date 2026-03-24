@@ -1,6 +1,8 @@
 import { resolve } from "node:path";
+
 import { buildFileContext } from "@recallnet/codecontext-parser";
 import type { FileContext } from "@recallnet/codecontext-parser";
+
 import { formatFileContext } from "../formatters/human.js";
 
 export function runStale(filePath: string): void {
@@ -9,10 +11,11 @@ export function runStale(filePath: string): void {
 
   // Filter to only stale or review-required entries
   const staleAnchored = ctx.anchored.filter(
-    (a) => a.status === "stale" || a.status === "review-required",
+    (a) => a.status === "stale" || a.status === "review-required"
   );
 
   if (staleAnchored.length === 0) {
+    // eslint-disable-next-line no-console
     console.log("All context entries are verified.");
     return;
   }
@@ -21,10 +24,14 @@ export function runStale(filePath: string): void {
   const staleTags = ctx.tags.filter((t) => staleLines.has(t.location.line));
 
   // Collect only referenced ctx files
-  const filteredCtxFiles = new Map<string, typeof ctx.resolvedCtxFiles extends Map<string, infer V> ? V : never>();
+  const filteredCtxFiles = new Map<
+    string,
+    typeof ctx.resolvedCtxFiles extends Map<string, infer V> ? V : never
+  >();
   for (const tag of staleTags) {
-    if (tag.id && ctx.resolvedCtxFiles.has(tag.id)) {
-      filteredCtxFiles.set(tag.id, ctx.resolvedCtxFiles.get(tag.id)!);
+    const ctxFile = tag.id ? ctx.resolvedCtxFiles.get(tag.id) : undefined;
+    if (tag.id && ctxFile) {
+      filteredCtxFiles.set(tag.id, ctxFile);
     }
   }
 
@@ -35,5 +42,6 @@ export function runStale(filePath: string): void {
     anchored: staleAnchored,
   };
 
+  // eslint-disable-next-line no-console
   console.log(formatFileContext(filtered));
 }

@@ -1,7 +1,9 @@
-import type { Rule } from "eslint";
-import { extractContextTags } from "../utils/comment-extractor.js";
 import fs from "node:fs";
 import path from "node:path";
+
+import type { Rule } from "eslint";
+
+import { extractContextTags } from "../utils/comment-extractor.js";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -10,8 +12,7 @@ const rule: Rule.RuleModule = {
       description: "Check that #id references in @context comments resolve to .ctx.md files",
     },
     messages: {
-      missingCtxFile:
-        'Context file not found for #{{id}}. Expected: {{expectedPath}}.',
+      missingCtxFile: "Context file not found for #{{id}}. Expected: {{expectedPath}}.",
     },
     schema: [
       {
@@ -36,11 +37,13 @@ const rule: Rule.RuleModule = {
         const tags = extractContextTags(context);
 
         // Resolve the context directory relative to the current working directory
-        const cwd = context.cwd ?? process.cwd();
+        const cwd = context.cwd;
         const resolvedContextDir = path.resolve(cwd, contextDir);
 
         for (const tag of tags) {
-          if (!tag.id) continue;
+          if (!tag.id) {
+            continue;
+          }
 
           const expectedFile = path.join(resolvedContextDir, `${tag.id}.ctx.md`);
           if (!fs.existsSync(expectedFile)) {

@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+
 import { extractContextTags } from "../utils/comment-extractor.js";
 
 /**
@@ -41,14 +42,20 @@ const rule: Rule.RuleModule = {
         const now = Date.now();
 
         for (const tag of tags) {
-          if (tag.type !== "history") continue;
+          if (tag.type !== "history") {
+            continue;
+          }
 
-          const dateMatch = tag.summary.match(DATE_PATTERN) ?? tag.raw.match(DATE_PATTERN);
-          if (!dateMatch) continue;
+          const dateMatch = DATE_PATTERN.exec(tag.summary) ?? DATE_PATTERN.exec(tag.raw);
+          if (!dateMatch) {
+            continue;
+          }
 
-          const dateStr = dateMatch[1];
+          const dateStr = dateMatch[1] ?? "";
           const tagDate = new Date(dateStr);
-          if (isNaN(tagDate.getTime())) continue;
+          if (isNaN(tagDate.getTime())) {
+            continue;
+          }
 
           const ageDays = Math.floor((now - tagDate.getTime()) / (1000 * 60 * 60 * 24));
           if (ageDays > maxAgeDays) {
