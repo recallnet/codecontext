@@ -25,6 +25,8 @@ if (message.timestamp > cutoff) {
 
 Now the constraint is visible before anyone edits the code, human or agent. If someone changes the code without re-verifying the attached context, the freshness gate fails.
 
+A test would help, and you should still want one. But tests and context do different jobs. A test proves that `>=` breaks behavior only if someone already wrote the exact boundary-case test. `@context` explains why the odd-looking `>` is intentional before an editor, reviewer, or agent "cleans it up." Tests protect behavior. `@context` protects intent.
+
 ## Why Everything Else Falls Short
 
 You already have places to store decisions. They mostly fail at one job: **showing up at the exact moment someone is about to break the code.**
