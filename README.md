@@ -1,18 +1,18 @@
 # codecontext
 
-Structured decision context, embedded where you read code.
+Decision context, attached to code where it matters.
 
 ---
 
 ## The One-Character Bug That Cost $12,000
 
-Someone changed `>` to `>=`. The tests passed. The code review looked fine. The deploy went smoothly.
+Someone changed `>` to `>=`. Tests were green. Review was green. Deploy was green.
 
-Three days later, 0.3% of transactions were processing twice. The payment gateway sends messages with timestamps that land exactly on the cutoff boundary during clock-skew windows. The original author knew this. They chose `>` deliberately. But that knowledge lived in a commit message from 8 months ago, buried under 47 subsequent commits.
+Three days later, 0.3% of transactions started processing twice. The payment gateway sometimes emits timestamps exactly on the cutoff boundary during clock-skew windows. The original author knew that. `>` was not an accident. But the reason was trapped in an 8-month-old commit message buried under 47 more commits.
 
-**The fix took 5 minutes. Finding the reason took 3 days.**
+**The code fix took 5 minutes. Recovering the reason took 3 days.**
 
-This is the problem codecontext solves.
+That is the problem codecontext solves.
 
 ```typescript
 // @context decision #docs/context/gate-42.md !critical [verified:2026-03-24] — strict > (not >=): upstream sends
@@ -23,33 +23,33 @@ if (message.timestamp > cutoff) {
 }
 ```
 
-Now anyone — human or AI agent — sees the constraint _before_ they touch the code. And if they change the code without re-verifying the context, the freshness gate fails.
+Now the constraint is visible before anyone edits the code, human or agent. If someone changes the code without re-verifying the attached context, the freshness gate fails.
 
 ## Why Everything Else Falls Short
 
-You already have places to put decisions. They all fail at one thing: **being in front of you at the moment you're about to break something.**
+You already have places to store decisions. They mostly fail at one job: **showing up at the exact moment someone is about to break the code.**
 
 ### Commit Logs
 
-Commit logs record _what changed_, not _why the current code looks this way_. After 50 commits touch a function, the original rationale is archaeology. You'd need to `git blame` every line, then `git log` each blame result, then hope the commit message explains the _decision_ and not just "fix threshold comparison."
+Commit logs are good at _what changed_. They are weak at _why this code looks the way it does right now_. After 50 commits touch a function, the original rationale becomes archaeology. You end up doing `git blame`, then `git log`, then hoping the relevant commit message contains a design constraint instead of "fix threshold comparison."
 
-`@context` lives with the code. When the code moves, it moves. When the code changes, it gets flagged.
+`@context` lives next to the code. When the code moves, it moves. When the code changes, tooling can flag it.
 
 ### External Wikis and Design Docs
 
-External docs are a write-once-read-never graveyard. They live in Confluence or Notion, behind a context switch, maintained by no one. They describe the system as it was designed, not as it exists. Nobody opens a wiki page before changing an `if` statement.
+External docs tend to drift toward write-once-read-never. They live behind a context switch, are maintained inconsistently, and usually describe the system as designed rather than the system as it exists. Almost nobody opens a wiki page before changing an `if` statement.
 
-`@context` is in the file you already have open. It shows up in `git diff`. It gets reviewed in PRs. It can't drift because the linter catches it.
+`@context` is already in the file you are editing. It shows up in `git diff`. It gets reviewed in PRs. Tooling can validate it.
 
 ### AI Memory and .claude Files
 
-AI memory is the newest entrant and the most dangerous. It's a shadow knowledge base — not version-controlled, not reviewable in PRs, invisible to teammates, impossible to audit. If an AI agent "remembers" why code was written a certain way, that knowledge dies when the context window clears, the memory gets pruned, or a different agent picks up the task.
+AI memory is the newest option and probably the most brittle. It is a shadow knowledge base: not version-controlled, not reviewable in PRs, invisible to teammates, and hard to audit. If an agent "remembers" why code was written a certain way, that memory disappears when the context window resets, the memory is pruned, or a different agent takes over.
 
-`@context` is plain text in your repo. Every agent reads it. Every human reviews it. `git log` tracks who wrote it and when.
+`@context` is just text in the repo. Humans can read it. Agents can read it. Review sees it. `git log` records who changed it and when.
 
 ### The Complement, Not the Replacement
 
-codecontext doesn't replace any of these. It fills the gap between them:
+codecontext does not replace these tools. It fills the gap between them:
 
 | Tool            | What it's for                                   |
 | --------------- | ----------------------------------------------- |
@@ -130,15 +130,15 @@ import codecontext from "@recallnet/codecontext-eslint-plugin";
 export default [codecontext.configs.recommended];
 ```
 
-The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not bumped.
+The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not advanced.
 
 Examples live in [`examples/`](examples/) and include both TypeScript and Go source with different context variations.
 
 ## The Agent Integration (The Killer Feature)
 
-AI coding agents are powerful but context-blind. They read code, not intent. They see `>` and have no way to know it's load-bearing.
+Coding agents are powerful but context-poor. They read code, but not the decision chain that made the code look this way. They see `>` and have no native way to know it is load-bearing.
 
-codecontext gives agents a structured briefing system:
+codecontext gives them a simple briefing loop:
 
 ```
 Agent workflow:
@@ -148,7 +148,7 @@ Agent workflow:
 4. npx codecontext --diff HEAD <file>  ← "did I break any decisions?"
 ```
 
-The `--json` flag outputs structured data agents consume directly:
+The `--json` flag produces structured output that agents and tools can consume directly:
 
 ```bash
 $ npx codecontext --scope src/payments/gateway.ts --json
@@ -175,7 +175,7 @@ $ npx codecontext --scope src/payments/gateway.ts --json
 }
 ```
 
-A Claude skill is included in `skills/codecontext/` that automates this entire workflow — reading context before edits, checking for invalidation after, and maintaining annotations as code evolves.
+A Claude skill is included in `skills/codecontext/` to automate this workflow: read context before edits, check invalidation after edits, and maintain annotations as code evolves.
 
 ### Pre-Commit Hook
 
@@ -184,7 +184,7 @@ A Claude skill is included in `skills/codecontext/` that automates this entire w
 npx codecontext --staged
 ```
 
-Exits non-zero if annotated code changed without advancing its verification date, or if a verification date exceeded the max-age threshold.
+This exits non-zero if annotated code changed without advancing its verification date, or if a verification date exceeded the max-age threshold.
 
 ## The Decision Registry
 
@@ -208,7 +208,7 @@ $ npx codecontext --report
 ...
 ```
 
-A centralized view of every decision, risk, and assumption in the codebase. Generated from code, always current.
+This gives you a centralized view of decisions, risks, and assumptions across the codebase. It is generated from code, so it stays aligned with the repository instead of drifting into a separate registry.
 
 ## Comment Syntax
 
@@ -245,12 +245,12 @@ A centralized view of every decision, risk, and assumption in the codebase. Gene
 | _(omitted)_ | Standard relevance                                         |
 | `!low`      | Background context, informational                          |
 
-The canonical form is `@context <type>...`, which is valid TSDoc. The legacy `@context:<type>...` form is still parsed for backwards compatibility, but should not be used for new annotations.
+The canonical form is `@context <type>...`, which is valid TSDoc. The legacy `@context:<type>...` form is still parsed for backwards compatibility, but new annotations should use the canonical form.
 
 Freshness has two modes:
 
 1. `max age`: a tag or `.ctx.md` `verified` date older than the configured threshold requires review.
-2. `not older than code`: if the anchored code changes and the verification date did not advance, the staged check fails and tells the developer to bump the date or delete the stale context.
+2. `not older than code`: if the anchored code changes and the verification date did not advance, the staged check fails and tells the developer to either bump the date or delete the stale context.
 
 ## Extended Docs
 
@@ -261,11 +261,11 @@ Freshness has two modes:
 // @context related #src/payments/gateway.ts — Matching implementation lives here
 ```
 
-If you want a structured long-form document, `.ctx.md` remains supported, but it is optional rather than required.
+If you want a structured long-form document, `.ctx.md` is still supported, but optional rather than required.
 
 ## Structured Context Files (.ctx.md)
 
-When the decision needs more than a one-liner and you want frontmatter plus predictable sections, create a `.ctx.md` file:
+When a decision needs more than a one-liner and you want frontmatter plus predictable sections, use a `.ctx.md` file:
 
 ```markdown
 ---
@@ -319,7 +319,7 @@ npm install -D @recallnet/codecontext-eslint-plugin
 
 ## Language Support
 
-codecontext is a **language-agnostic specification**. The `@context` tag works inside whatever comment syntax your language supports. The parser already handles all of these:
+codecontext is a **language-agnostic specification**. The `@context` tag works inside whatever comment syntax your language supports. The parser already handles all of the following:
 
 | Comment Style | Languages                                                         |
 | ------------- | ----------------------------------------------------------------- |
@@ -330,7 +330,7 @@ codecontext is a **language-agnostic specification**. The `@context` tag works i
 | `<!-- -->`    | HTML, XML, SVG                                                    |
 | `{/* */}`     | JSX, TSX                                                          |
 
-The TypeScript implementation is the first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where needed. Go support is available via the `go/analysis` package in `packages/golangci-lint`.
+The TypeScript implementation landed first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where that matters. Go support is available through the `go/analysis` package in `packages/golangci-lint`.
 
 See the full [specification](packages/spec/SPEC.md) for adaptation rules and conformance levels.
 
@@ -356,7 +356,7 @@ Packages are published to GitHub Packages under the `@recallnet` scope. Add this
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-You'll need a GitHub personal access token with `read:packages` scope. Set it as the `GITHUB_TOKEN` environment variable, or use `npm login --registry=https://npm.pkg.github.com`.
+You will need a GitHub personal access token with `read:packages` scope. Set it as `GITHUB_TOKEN`, or use `npm login --registry=https://npm.pkg.github.com`.
 
 ### 2. Install
 
