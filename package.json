@@ -12,6 +12,7 @@
     "go:test": "cd packages/golangci-lint && go test ./...",
     "go:fmt:check": "sh -c 'test -z \"$(cd packages/golangci-lint && gofmt -l analyzer plugin)\"'",
     "go:qa": "pnpm go:fmt:check && pnpm go:test",
+    "demo:render": "./docs/demos/scripts/render.sh",
     "prepare": "husky"
   },
   "devDependencies": {

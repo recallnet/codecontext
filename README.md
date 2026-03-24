@@ -134,6 +134,22 @@ The linter and staged-file gate catch unresolved references, invalid types, expi
 
 Examples live in [`examples/`](examples/) and include both TypeScript and Go source with different context variations.
 
+## Terminal Demos
+
+These demos are generated from source-controlled VHS tapes in [`docs/demos/tapes/`](docs/demos/tapes/) and can be re-rendered with `pnpm demo:render`.
+
+### Scope briefing
+
+![Scope briefing demo](docs/demos/gifs/scope.gif)
+
+### Decision registry
+
+![Decision registry demo](docs/demos/gifs/report.gif)
+
+### Freshness gate after a code change
+
+![Freshness gate demo](docs/demos/gifs/stale-check.gif)
+
 ## The Agent Integration (The Killer Feature)
 
 Coding agents are powerful but context-poor. They read code, but not the decision chain that made the code look this way. They see `>` and have no native way to know it is load-bearing.
