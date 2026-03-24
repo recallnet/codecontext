@@ -1,9 +1,15 @@
 {
   "id": "legacy-syntax",
   "description": "Legacy colon syntax remains accepted",
-  "implementations": ["ts", "go"],
+  "implementations": ["ts", "go", "py"],
   "filePath": "src/example.go",
   "source": "// @context:decision:tradeoff !high -- Legacy syntax still parses\npackage fixture\n",
+  "filePathByImplementation": {
+    "py": "src/example.py"
+  },
+  "sourceByImplementation": {
+    "py": "# @context:decision:tradeoff !high -- Legacy syntax still parses\nvalue = 1\n"
+  },
   "expected": {
     "tags": [
       {

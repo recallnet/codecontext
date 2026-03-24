@@ -69,6 +69,9 @@ export function loadCtxFileById(id: string, contextDir: string): CtxFile | null 
 /**
  * Load a structured .ctx.md file by direct project-relative path reference.
  */
+// @context decision:tradeoff #packages/spec/ctx-files.md !high [verified:2026-03-24] -- #ref is project-relative and
+//   may point at any file type; only direct .ctx.md refs get parsed as structured context docs.
+//   Do not force docs/context/<id>.ctx.md for normal references.
 export function loadCtxFileByRef(ref: string, projectRoot: string): CtxFile | null {
   if (!ref.endsWith(".ctx.md")) {
     return null;
@@ -110,6 +113,9 @@ export function loadAllCtxFiles(contextDir: string): CtxFile[] {
 /**
  * Resolve all #id references in tags to their .ctx.md files.
  */
+// @context decision:constraint #packages/spec/ctx-files.md !high [verified:2026-03-24] -- Structured .ctx.md loading is
+//   optional enrichment on top of plain file refs. Resolution should first accept direct project-relative .ctx.md paths,
+//   then fall back to legacy bare-ID lookup in docs/context for older annotations.
 export function resolveCtxFiles(
   tags: ContextTag[],
   contextDir: string | null,

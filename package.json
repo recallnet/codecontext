@@ -12,6 +12,8 @@
     "go:test": "cd packages/golangci-lint && go test ./...",
     "go:fmt:check": "sh -c 'test -z \"$(cd packages/golangci-lint && gofmt -l analyzer plugin)\"'",
     "go:qa": "pnpm go:fmt:check && pnpm go:test",
+    "python:test": "python3 -m unittest discover -s packages/python/tests -t packages/python",
+    "python:qa": "pnpm python:test && python3 -m compileall -q packages/python/codecontext_python",
     "demo:render": "./docs/demos/scripts/render.sh",
     "prepare": "husky"
   },

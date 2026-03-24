@@ -1,9 +1,15 @@
 {
   "id": "malformed",
   "description": "Malformed tags are reported",
-  "implementations": ["ts", "go"],
+  "implementations": ["ts", "go", "py"],
   "filePath": "src/example.go",
   "source": "// @context decision missing separator\npackage fixture\n",
+  "filePathByImplementation": {
+    "py": "src/example.py"
+  },
+  "sourceByImplementation": {
+    "py": "# @context decision missing separator\nvalue = 1\n"
+  },
   "expected": {
     "tags": [],
     "errors": ["Malformed @context tag: \"@context decision missing separator\""],

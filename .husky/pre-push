@@ -27,7 +27,11 @@ echo "[5/6] Running all tests..."
 npx turbo test
 
 # ── Check 6: Go QA gates ────────────────────────────────────────────
-echo "[6/6] Running Go QA gates..."
+echo "[6/7] Running Go QA gates..."
 pnpm go:qa
+
+# ── Check 7: Python QA gates ────────────────────────────────────────
+echo "[7/7] Running Python QA gates..."
+pnpm python:qa
 
 echo "✅ All pre-push checks passed"

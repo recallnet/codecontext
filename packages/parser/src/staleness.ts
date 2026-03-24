@@ -159,6 +159,9 @@ export function extractBlock(lines: string[], tagLineIndex: number): string {
 /**
  * Compute staleness for all context tags in a file.
  */
+// @context decision #packages/spec/staleness.md !critical [verified:2026-03-24] -- Freshness has two gates working
+//   together: max-age expiration and "code changed without advancing verified date".
+//   If the anchored block hash changes and the date does not move forward, the context must go stale.
 export function computeStaleness(
   tags: ContextTag[],
   sourceLines: string[],
@@ -230,6 +233,8 @@ export function computeStaleness(
  * Update the cache with current verification data.
  * Call this after a user confirms context is still accurate.
  */
+// @context decision:assumption #packages/spec/staleness.md !high [verified:2026-03-24] -- Cache entries only persist
+//   verified contexts. Stale or review-required entries must not overwrite the last known verified block/date.
 export function updateCache(cache: StalenessCache, anchored: AnchoredContext[]): StalenessCache {
   const updated = { ...cache, entries: { ...cache.entries } };
   const now = new Date().toISOString();

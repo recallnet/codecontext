@@ -9,6 +9,9 @@ import type { ContextSubtype, ContextTag, Priority, SourceLocation } from "./typ
  * `@context:<type>` form, plus both em-dash (—) and double-dash (--)
  * separators.
  */
+// @context decision:constraint #packages/spec/syntax.md !critical [verified:2026-03-24] -- Canonical syntax stays
+//   TSDoc-safe by treating decision:tradeoff as payload after @context, not as part of the tag name.
+//   Legacy @context:<type> remains parseable for compatibility, but new syntax must preserve the canonical form.
 const CONTEXT_PATTERN =
   // eslint-disable-next-line security/detect-unsafe-regex
   /^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$/;

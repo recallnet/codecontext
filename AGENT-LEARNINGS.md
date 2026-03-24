@@ -13,6 +13,29 @@ Entries tagged `meta` are cross-cutting (not repo-specific) and surfaced team-wi
 
 <!-- Entries below, newest first -->
 
+### 2026-03-24 — Shared conformance fixtures must allow language-specific source shapes (confirmed)
+
+Author: Hatch
+Insight: A cross-language spec harness only stays useful if fixtures can
+override source text and file paths per implementation; otherwise every new
+language gets forced through the syntax assumptions of the first one.
+
+Detail: The shared conformance suite originally assumed Go or TypeScript-style
+fixture source. When adding Python support, the parser logic itself was fine,
+but the harness made Python second-class because the canonical fixtures all
+used `//` comments and non-Python file shapes. The right fix was not to fork
+the fixture set, but to extend fixture metadata with per-implementation
+`source` and `filePath` overrides while keeping one normalized expected output
+for tags, errors, and resolved `.ctx.md` files.
+
+Directive: Generalize shared fixtures before adding a new language binding.
+Do not copy the fixture suite per language just to work around syntax.
+Action: Keep `filePathByImplementation` and `sourceByImplementation` in the
+fixture contract, and require future language packages to run the shared
+conformance cases rather than bespoke parser-only tests.
+Context: main branch, adding Python-native support, shared conformance
+coverage, and Python examples
+
 ### 2026-03-24 — Freshness gates need first-class verified dates (confirmed)
 
 Author: Hatch

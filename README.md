@@ -198,7 +198,7 @@ export default [codecontext.configs.recommended];
 
 The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not advanced.
 
-Examples live in [`examples/`](examples/) and include both TypeScript and Go source with different context variations.
+Examples live in [`examples/`](examples/) and include TypeScript, Go, and Python source with different context variations.
 
 ## Terminal Demos
 
@@ -373,7 +373,7 @@ codecontext is a **language-agnostic specification**. The `@context` tag works i
 | `<!-- -->`    | HTML, XML, SVG                                                    |
 | `{/* */}`     | JSX, TSX                                                          |
 
-The TypeScript implementation landed first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where that matters. Go support is available through the `go/analysis` package in `packages/golangci-lint`.
+The TypeScript implementation landed first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where that matters. Go support is available through the `go/analysis` package in `packages/golangci-lint`, and Python support is available through the native checker in `packages/python`.
 
 See the full [specification](packages/spec/SPEC.md) for adaptation rules and conformance levels.
 
@@ -385,6 +385,7 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 | [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and structured docs |
 | [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity             |
 | [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint   |
+| [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations  |
 | [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                     |
 | [`@recallnet/codecontext-tsdoc`](packages/tsdoc)                 | TSDoc extension for the `@context` block tag        |
 

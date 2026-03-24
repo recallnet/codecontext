@@ -26,6 +26,8 @@ type fixture struct {
 	Implementations []string          `json:"implementations"`
 	FilePath        string            `json:"filePath"`
 	Source          string            `json:"source"`
+	FilePathByImpl  map[string]string `json:"filePathByImplementation"`
+	SourceByImpl    map[string]string `json:"sourceByImplementation"`
 	SupportFiles    map[string]string `json:"supportFiles"`
 	Expected        struct {
 		Tags             []fixtureTag `json:"tags"`
@@ -74,15 +76,24 @@ func TestSharedConformanceFixtures(t *testing.T) {
 				}
 			}
 
-			sourcePath := filepath.Join(root, filepath.FromSlash(fx.FilePath))
+			filePath := fx.FilePath
+			if override, ok := fx.FilePathByImpl["go"]; ok {
+				filePath = override
+			}
+			source := fx.Source
+			if override, ok := fx.SourceByImpl["go"]; ok {
+				source = override
+			}
+
+			sourcePath := filepath.Join(root, filepath.FromSlash(filePath))
 			if err := os.MkdirAll(filepath.Dir(sourcePath), 0o755); err != nil {
 				t.Fatalf("mkdir source dir: %v", err)
 			}
-			if err := os.WriteFile(sourcePath, []byte(fx.Source), 0o644); err != nil {
+			if err := os.WriteFile(sourcePath, []byte(source), 0o644); err != nil {
 				t.Fatalf("write source file: %v", err)
 			}
 
-			result := analyzer.ParseSource(fx.Source, root, filepath.Join("docs", "context"))
+			result := analyzer.ParseSource(source, root, filepath.Join("docs", "context"))
 
 			gotTags := make([]fixtureTag, 0, len(result.Tags))
 			for _, tag := range result.Tags {

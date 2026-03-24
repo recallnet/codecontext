@@ -1,9 +1,15 @@
 {
   "id": "invalid-subtype",
   "description": "Invalid subtypes are rejected",
-  "implementations": ["ts", "go"],
+  "implementations": ["ts", "go", "py"],
   "filePath": "src/example.go",
   "source": "// @context decision:nope -- Bad subtype\npackage fixture\n",
+  "filePathByImplementation": {
+    "py": "src/example.py"
+  },
+  "sourceByImplementation": {
+    "py": "# @context decision:nope -- Bad subtype\nvalue = 1\n"
+  },
   "expected": {
     "tags": [],
     "errors": ["Invalid subtype \"nope\" for type \"decision\""],

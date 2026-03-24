@@ -1,9 +1,15 @@
 {
   "id": "unresolved-ref",
   "description": "Missing references are reported",
-  "implementations": ["ts", "go"],
+  "implementations": ["ts", "go", "py"],
   "filePath": "src/example.go",
   "source": "// @context decision #docs/context/missing.md -- Missing ref\npackage fixture\n",
+  "filePathByImplementation": {
+    "py": "src/example.py"
+  },
+  "sourceByImplementation": {
+    "py": "# @context decision #docs/context/missing.md -- Missing ref\nvalue = 1\n"
+  },
   "expected": {
     "tags": [
       {

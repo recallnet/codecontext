@@ -1,0 +1,18 @@
+[project]
+name = "codecontext-python"
+version = "0.1.0"
+description = "Python-native checker for @context annotations"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Recall Labs" }]
+
+[project.scripts]
+codecontext-python = "codecontext_python.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["codecontext_python"]

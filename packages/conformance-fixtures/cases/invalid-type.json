@@ -1,9 +1,15 @@
 {
   "id": "invalid-type",
   "description": "Unknown types are rejected",
-  "implementations": ["ts", "go"],
+  "implementations": ["ts", "go", "py"],
   "filePath": "src/example.go",
   "source": "// @context banana -- Not allowed\npackage fixture\n",
+  "filePathByImplementation": {
+    "py": "src/example.py"
+  },
+  "sourceByImplementation": {
+    "py": "# @context banana -- Not allowed\nvalue = 1\n"
+  },
   "expected": {
     "tags": [],
     "errors": ["Unknown context type: \"banana\""],

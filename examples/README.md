@@ -1,6 +1,6 @@
 # Examples
 
-This folder contains small TypeScript and Go examples showing different
+This folder contains small TypeScript, Go, and Python examples showing different
 `@context` variations:
 
 - canonical `@context <type>` syntax
@@ -15,6 +15,7 @@ Files:
 
 - `ts/payments/gateway.ts`
 - `go/payments/gateway.go`
+- `python/payments/gateway.py`
 - `docs/context/gate-42.md`
 - `docs/context/cache-strategy.ctx.md`
 - `docs/requirements/billing-rounding.md`

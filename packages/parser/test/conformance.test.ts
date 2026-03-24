@@ -31,6 +31,8 @@ interface Fixture {
   implementations: string[];
   filePath: string;
   source: string;
+  filePathByImplementation?: Record<string, string>;
+  sourceByImplementation?: Record<string, string>;
   supportFiles?: Record<string, string>;
   expected: {
     tags: FixtureTag[];
@@ -46,6 +48,9 @@ function loadFixtures(): Fixture[] {
     .filter((fixture) => fixture.implementations.includes("ts"));
 }
 
+// @context decision #packages/conformance-fixtures/README.md !high [verified:2026-03-24] -- Shared fixtures are the
+//   cross-language spec contract. Per-implementation source overrides keep one expected normalized output while allowing
+//   Go, TS, and Python to express the same case in native comment syntax.
 function writeFixtureProject(fixture: Fixture): string {
   const root = mkdtempSync(join(tmpdir(), `codecontext-${fixture.id}-`));
 
@@ -63,9 +68,9 @@ function writeFixtureProject(fixture: Fixture): string {
     }
   }
 
-  const sourcePath = join(root, fixture.filePath);
+  const sourcePath = join(root, fixture.filePathByImplementation?.ts ?? fixture.filePath);
   mkdirSync(dirname(sourcePath), { recursive: true });
-  writeFileSync(sourcePath, fixture.source, "utf-8");
+  writeFileSync(sourcePath, fixture.sourceByImplementation?.ts ?? fixture.source, "utf-8");
 
   return sourcePath;
 }

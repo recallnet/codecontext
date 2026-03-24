@@ -4,6 +4,7 @@ set -eu
 echo "=== Pre-commit checks ==="
 
 GO_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^packages/golangci-lint/.*\.(go|mod|sum)$' || true)
+PYTHON_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(packages/python/.*\.(py|toml)|examples/python/.*\.py)$' || true)
 
 is_js_secret_scan_target() {
   case "$1" in
@@ -56,8 +57,16 @@ else
   echo "[6/10] Skipping Go QA gates (no Go changes)"
 fi
 
-# ── Stage 7: Hardcoded secrets check ────────────────────────────────
-echo "[7/10] Checking for hardcoded secrets..."
+# ── Stage 7: Python QA gates ────────────────────────────────────────
+if [ -n "$PYTHON_CHANGED" ]; then
+  echo "[7/11] Running Python QA gates..."
+  pnpm python:qa
+else
+  echo "[7/11] Skipping Python QA gates (no Python changes)"
+fi
+
+# ── Stage 8: Hardcoded secrets check ────────────────────────────────
+echo "[8/11] Checking for hardcoded secrets..."
 SECRETS_REPORT=$(
   git diff --cached --name-only --diff-filter=d | while IFS= read -r file; do
     if is_js_secret_scan_target "$file"; then
@@ -73,8 +82,8 @@ if [ -n "$SECRETS_REPORT" ]; then
   exit 1
 fi
 
-# ── Stage 8: Console.log warnings ───────────────────────────────────
-echo "[8/10] Checking for console.log statements..."
+# ── Stage 9: Console.log warnings ───────────────────────────────────
+echo "[9/11] Checking for console.log statements..."
 CONSOLE_REPORT=$(
   git diff --cached --name-only --diff-filter=d | while IFS= read -r file; do
     if is_ts_console_scan_target "$file"; then
@@ -89,7 +98,7 @@ if [ -n "$CONSOLE_REPORT" ]; then
   echo "⚠️  Warning: console.log statements found (non-blocking)"
 fi
 
-# ── Stage 9: Changeset requirement ──────────────────────────────────
+# ── Stage 10: Changeset requirement ─────────────────────────────────
 # Check if any publishable package files changed without a changeset
 CHANGED_PACKAGES=$(git diff --cached --name-only | grep -E '^packages/(parser|cli|eslint-plugin)/src/' || true)
 if [ -n "$CHANGED_PACKAGES" ]; then
@@ -100,16 +109,16 @@ if [ -n "$CHANGED_PACKAGES" ]; then
   fi
 fi
 
-# ── Stage 10: Go module hygiene ─────────────────────────────────────
+# ── Stage 11: Go module hygiene ─────────────────────────────────────
 if [ -n "$GO_CHANGED" ]; then
-  echo "[10/10] Verifying Go module metadata..."
+  echo "[11/11] Verifying Go module metadata..."
   (cd packages/golangci-lint && go mod tidy)
   if ! git diff --quiet -- packages/golangci-lint/go.mod packages/golangci-lint/go.sum; then
     echo "❌ Go module files were out of date. Stage packages/golangci-lint/go.mod and go.sum."
     exit 1
   fi
 else
-  echo "[10/10] Skipping Go module hygiene (no Go changes)"
+  echo "[11/11] Skipping Go module hygiene (no Go changes)"
 fi
 
 echo "✅ All pre-commit checks passed"
