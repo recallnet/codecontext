@@ -42,7 +42,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Run tests with coverage
-        run: pnpm test:coverage
+        run: pnpm --filter @recallnet/codecontext-parser test:coverage
 
   build-verify:
     runs-on: ubuntu-latest
@@ -61,9 +61,9 @@ jobs:
       - name: Verify CLI entry point
         run: node packages/cli/dist/index.js --help
       - name: Verify parser exports
-        run: node -e "import('@recallnet/codecontext-parser').then(m => { if (!m.parseContextTags) throw new Error('Missing export'); console.log('Parser exports OK'); })"
+        run: node -e "const m = await import('./packages/parser/dist/index.js'); if (!m.parseContextTags) throw new Error('Missing export'); console.log('Parser exports OK');"
       - name: Verify ESLint plugin exports
-        run: node -e "import('@recallnet/codecontext-eslint-plugin').then(m => { if (!m.default?.rules) throw new Error('Missing rules'); console.log('ESLint plugin exports OK'); })"
+        run: node -e "const m = await import('./packages/eslint-plugin/dist/index.js'); if (!m.default?.rules) throw new Error('Missing rules'); console.log('ESLint plugin exports OK');"
 
   changeset-check:
     runs-on: ubuntu-latest

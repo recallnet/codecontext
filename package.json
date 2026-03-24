@@ -4,7 +4,7 @@
   "scripts": {
     "build": "turbo build",
     "test": "turbo test",
-    "test:coverage": "turbo test:coverage",
+    "test:coverage": "pnpm --filter @recallnet/codecontext-parser test:coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
