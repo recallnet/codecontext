@@ -7,7 +7,7 @@ It validates:
 
 - `@context` tag syntax
 - known type/subtype combinations
-- local `#ref` resolution
+- local `{@link file:...}` resolution
 - explicit `[verified:YYYY-MM-DD]` dates
 
 ## Package Layout
@@ -18,7 +18,7 @@ It validates:
 ## Example
 
 ```python
-# @context decision:constraint #docs/context/api-limits.md !high [verified:2026-03-24] -- Stripe caps batch size at 100.
+# @context decision:constraint {@link file:docs/context/api-limits.md} !high [verified:2026-03-24] -- Stripe caps batch size at 100.
 def clamp_batch_size(size: int) -> int:
     return min(size, 100)
 ```

@@ -42,7 +42,7 @@ function loadFixtures(): Fixture[] {
     .filter((fixture) => fixture.implementations.includes("ts"));
 }
 
-// @context decision #packages/conformance-fixtures/README.md !high [verified:2026-03-24] -- Shared fixtures are the
+// @context decision {@link file:packages/conformance-fixtures/README.md} !high [verified:2026-03-24] -- Shared fixtures are the
 //   cross-language spec contract. Per-implementation source overrides keep one expected normalized output while allowing
 //   Go, TS, and Python to express the same case in native comment syntax.
 function writeFixtureProject(fixture: Fixture): string {
@@ -77,10 +77,15 @@ function normalizeFixtureTags(tags: FixtureTag[]): FixtureTag[] {
 }
 
 function referenceExists(projectRoot: string, contextDir: string, ref: string): boolean {
+  if (ref.startsWith("http://") || ref.startsWith("https://")) {
+    return true;
+  }
+
+  const normalized = ref.startsWith("file:") ? ref.slice("file:".length) : ref;
   const candidates =
-    ref.includes("/") || ref.includes(".")
-      ? [resolve(projectRoot, ref)]
-      : [resolve(projectRoot, ref), resolve(projectRoot, contextDir, ref)];
+    normalized.includes("/") || normalized.includes(".")
+      ? [resolve(projectRoot, normalized)]
+      : [resolve(projectRoot, normalized), resolve(projectRoot, contextDir, normalized)];
 
   return candidates.some((candidate) => {
     try {

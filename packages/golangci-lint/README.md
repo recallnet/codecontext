@@ -6,7 +6,7 @@ It validates:
 
 - `@context` tag syntax
 - known type/subtype combinations
-- local `#ref` resolution
+- local `{@link file:...}` resolution
 
 ## Package Layout
 
@@ -16,7 +16,7 @@ It validates:
 ## Example
 
 ```go
-// @context decision:constraint #docs/context/api-limits.md !high -- Stripe caps batch size at 100
+// @context decision:constraint {@link file:docs/context/api-limits.md} !high -- Stripe caps batch size at 100
 func sendBatch() {}
 ```
 

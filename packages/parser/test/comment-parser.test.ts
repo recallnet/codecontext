@@ -28,7 +28,7 @@ describe("parseContextTags", () => {
 
   it("parses a tag with all fields: type, subtype, id, priority, summary", () => {
     const source =
-      `// @context decision:tradeoff #docs/decisions/auth-choice.md !critical — ` +
+      `// @context decision:tradeoff {@link file:docs/decisions/auth-choice.md} !critical — ` +
       "Chose JWT over sessions for stateless scaling";
     const { tags, errors } = parseContextTags(source, file);
 
@@ -38,20 +38,29 @@ describe("parseContextTags", () => {
     const tag = tags[0];
     expect(tag.type).toBe("decision");
     expect(tag.subtype).toBe("tradeoff");
-    expect(tag.id).toBe("docs/decisions/auth-choice.md");
+    expect(tag.id).toBe("file:docs/decisions/auth-choice.md");
     expect(tag.priority).toBe("critical");
     expect(tag.summary).toBe("Chose JWT over sessions for stateless scaling");
   });
 
   it("parses a tag with an explicit verification date", () => {
     const source =
-      `// @context decision:tradeoff #docs/decisions/auth-choice.md !critical ` +
+      `// @context decision:tradeoff {@link file:docs/decisions/auth-choice.md} !critical ` +
       `[verified:2026-03-24] — Chose JWT over sessions for stateless scaling`;
     const { tags, errors } = parseContextTags(source, file);
 
     expect(errors).toHaveLength(0);
     expect(tags).toHaveLength(1);
     expect(tags[0].verified).toBe("2026-03-24");
+  });
+
+  it("parses a tag with an http link target", () => {
+    const source = `// @context related {@link https://example.com/runbook} — External runbook`;
+    const { tags, errors } = parseContextTags(source, file);
+
+    expect(errors).toHaveLength(0);
+    expect(tags).toHaveLength(1);
+    expect(tags[0].id).toBe("https://example.com/runbook");
   });
 
   it("parses multiple tags from one file", () => {

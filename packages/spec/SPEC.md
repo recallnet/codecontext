@@ -23,18 +23,18 @@ codecontext is a specification for embedding structured decision context directl
 A context tag is a single annotation with the following structure:
 
 ```
-@context <type>[:<subtype>] [#ref] [!priority] — <summary>
+@context <type>[:<subtype>] [{@link file:ref}] [!priority] — <summary>
 ```
 
 ### Fields
 
-| Field       | Required | Format                           | Description                                                                      |
-| ----------- | -------- | -------------------------------- | -------------------------------------------------------------------------------- |
-| `type`      | Yes      | Lowercase alphanumeric           | The primary classification of the context. See Type Taxonomy.                    |
-| `subtype`   | No       | Lowercase alphanumeric           | A secondary classification within the type.                                      |
-| `#ref`      | No       | `#` followed by a non-space path | A project-relative reference to supporting docs or code.                         |
-| `!priority` | No       | `!critical`, `!high`, or `!low`  | The importance level of the annotation.                                          |
-| `summary`   | Yes      | Free-form text                   | A human-readable description of the context. Follows an em-dash (`—`) separator. |
+| Field       | Required | Format                          | Description                                                                      |
+| ----------- | -------- | ------------------------------- | -------------------------------------------------------------------------------- |
+| `type`      | Yes      | Lowercase alphanumeric          | The primary classification of the context. See Type Taxonomy.                    |
+| `subtype`   | No       | Lowercase alphanumeric          | A secondary classification within the type.                                      |
+| `{@link}`   | No       | `{@link <target>}`              | A supporting reference target such as `file:docs/context/cache-strategy.md`.     |
+| `!priority` | No       | `!critical`, `!high`, or `!low` | The importance level of the annotation.                                          |
+| `summary`   | Yes      | Free-form text                  | A human-readable description of the context. Follows an em-dash (`—`) separator. |
 
 ### Universal Comment Embedding
 
@@ -43,7 +43,7 @@ The `@context` sigil can appear inside any comment form that a programming langu
 Examples across languages:
 
 ```javascript
-// @context decision:tradeoff #docs/context/cache-strategy.md !critical — LRU chosen over LFU for O(1) eviction
+// @context decision:tradeoff {@link file:docs/context/cache-strategy.md} !critical — LRU chosen over LFU for O(1) eviction
 ```
 
 ```python
@@ -59,7 +59,7 @@ Examples across languages:
 ```
 
 ```html
-<!-- @context related #docs/auth-flow.md — See authentication context for session handling -->
+<!-- @context related {@link file:docs/auth-flow.md} — See authentication context for session handling -->
 ```
 
 ```lisp
@@ -114,17 +114,17 @@ A conforming tool SHOULD surface `!critical` tags prominently when a developer i
 
 ## References
 
-A reference takes the form `#<ref>` where `<ref>` is a non-space project-relative path such as `docs/context/cache-strategy.md` or `src/cache/lru.ts`.
+A reference takes the form `{@link <target>}` where `<target>` is a non-space target such as `file:docs/context/cache-strategy.md`, `file:src/cache/lru.ts`, or `https://example.com/runbook`.
 
 ### Resolution
 
-When a tool encounters `#<ref>`, it SHOULD resolve the reference relative to the project root.
+When a tool encounters `{@link file:<path>}`, it SHOULD resolve the path relative to the project root. Remote URLs such as `{@link https://...}` SHOULD be preserved as references but do not require local file checks.
 
 Resolution order:
 
-1. If `<ref>` names an existing project-relative path, resolve it directly.
-2. If a tool supports legacy bare IDs, it MAY also search configured context directories such as `docs/context/`.
-3. If not found, report an unresolved reference (tools SHOULD warn, not error).
+1. If `<target>` uses the `file:` scheme, resolve the path directly from the project root.
+2. If a tool supports bare file names, it MAY also search configured context directories such as `docs/context/`.
+3. If a local file target is not found, report an unresolved reference (tools SHOULD warn, not error).
 
 Implementations MAY offer richer previews or parsing for specific file types, but that behavior is implementation-specific and not required by the core specification.
 
@@ -174,7 +174,7 @@ A **Minimal** conforming implementation MUST:
 
 A **Standard** conforming implementation MUST satisfy all Minimal requirements and additionally:
 
-- Resolve `#ref` references to project files.
+- Resolve local `{@link file:...}` references to project files.
 - Report unresolved references as warnings.
 
 ### Level 3: Full

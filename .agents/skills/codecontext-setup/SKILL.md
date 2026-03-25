@@ -105,7 +105,7 @@ Use something close to this:
     `@context requirement`, `@context history`
   - Keep notes short and specific: what is true, why it matters, and what
     would break if changed
-  - Use `#ref` for supporting material when helpful, but refs are just pointers
+  - Use `{@link ...}` for supporting material when helpful, but refs are just pointers
     to repo files or docs. Do not require any special doc schema.
   - Before editing critical files, run:
     `npx @recallnet/codecontext-cli --scope <file>`

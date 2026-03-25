@@ -17,7 +17,7 @@ Three days later, 0.3% of transactions started processing twice. The payment gat
 That is the problem codecontext solves.
 
 ```typescript
-// @context decision #.claude/skills/payments-gateway/SKILL.md !critical [verified:2026-03-24] — before editing
+// @context decision {@link file:.claude/skills/payments-gateway/SKILL.md} !critical [verified:2026-03-24] — before editing
 //   this cutoff logic, load .claude/skills/payments-gateway/SKILL.md. strict > (not >=): upstream
 //   sends at-threshold values during clock skew. >= causes double-processing.
 if (message.timestamp > cutoff) {
@@ -27,7 +27,7 @@ if (message.timestamp > cutoff) {
 
 Now the constraint is visible before anyone edits the code, human or agent. And if an agent changes the guarded code without re-verifying the inline context it just ignored, the freshness gate fails deterministically before the change lands.
 
-And the linked reference can be any supporting artifact. Here the `#ref` points directly at a repo-local skill the agent is expected to load before touching the code:
+And the linked reference can be any supporting artifact. Here the `{@link ...}` target points directly at a repo-local skill the agent is expected to load before touching the code:
 
 ```md
 <!-- .claude/skills/payments-gateway/SKILL.md -->
@@ -142,7 +142,7 @@ You attach rationale to code, then the CLI and linter force re-verification when
 ### 1. Annotate decisions in code
 
 ```typescript
-// @context decision:tradeoff #docs/context/cache-strategy.md !critical [verified:2026-03-24] — LRU over LFU
+// @context decision:tradeoff {@link file:docs/context/cache-strategy.md} !critical [verified:2026-03-24] — LRU over LFU
 //   for O(1) eviction. LFU was 3x slower in benchmarks at our p99 load.
 const cache = new LRUCache({ maxSize: 10_000 });
 ```
@@ -289,17 +289,17 @@ This gives you a centralized view of decisions, risks, and assumptions across th
 ## Comment Syntax
 
 ```
-@context <type>[:<subtype>] [#ref] [!priority] [verified:YYYY-MM-DD] — <summary>
+@context <type>[:<subtype>] [{@link file:ref}] [!priority] [verified:YYYY-MM-DD] — <summary>
 ```
 
-| Field       | Required | Description                                                    |
-| ----------- | -------- | -------------------------------------------------------------- |
-| `type`      | Yes      | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
-| `subtype`   | No       | Narrows the type (e.g., `decision:tradeoff`, `risk:security`)  |
-| `#ref`      | No       | Project-relative reference to supporting docs or code          |
-| `!priority` | No       | `!critical`, `!high`, or `!low`                                |
-| `verified`  | No       | Explicit verification date used by freshness checks            |
-| `summary`   | Yes      | Human-readable description after the em-dash                   |
+| Field       | Required | Description                                                     |
+| ----------- | -------- | --------------------------------------------------------------- |
+| `type`      | Yes      | `decision`, `requirement`, `risk`, `related`, `history`, `doc`  |
+| `subtype`   | No       | Narrows the type (e.g., `decision:tradeoff`, `risk:security`)   |
+| `{@link}`   | No       | Supporting reference target such as `file:...` or `https://...` |
+| `!priority` | No       | `!critical`, `!high`, or `!low`                                 |
+| `verified`  | No       | Explicit verification date used by freshness checks             |
+| `summary`   | Yes      | Human-readable description after the em-dash                    |
 
 ### Type Taxonomy
 
@@ -330,11 +330,11 @@ Freshness has two modes:
 
 ## Extended Docs
 
-`#ref` can point to any project-relative file that helps explain the decision:
+`{@link ...}` can point to any supporting artifact that helps explain the decision:
 
 ```typescript
-// @context decision #docs/context/gate-42.md !critical — Boundary timestamps must be excluded
-// @context related #src/payments/gateway.ts — Matching implementation lives here
+// @context decision {@link file:docs/context/gate-42.md} !critical — Boundary timestamps must be excluded
+// @context related {@link file:src/payments/gateway.ts} — Matching implementation lives here
 ```
 
 The linked file format is intentionally unconstrained. Use Markdown, HTML,
@@ -351,7 +351,7 @@ npm install -D @recallnet/codecontext-eslint-plugin
 | Rule                                      | Default | Description                                                                  |
 | ----------------------------------------- | ------- | ---------------------------------------------------------------------------- |
 | `codecontext/context-hierarchy`           | error   | Type/subtype combinations must be valid                                      |
-| `codecontext/valid-context-refs`          | error   | `#ref` must resolve to an existing local file                                |
+| `codecontext/valid-context-refs`          | error   | Local `{@link file:...}` targets must resolve to an existing file            |
 | `codecontext/require-context-for-complex` | warn    | Complex functions (cyclomatic complexity > 5) should have `@context`         |
 | `codecontext/no-stale-context`            | error   | Explicit verification dates are too old, or code changed without a date bump |
 

@@ -7,7 +7,7 @@ import re
 
 CONTEXT_PATTERN = re.compile(
     r"^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*"
-    r"(?:#([A-Za-z0-9_./-]+))?\s*"
+    r"(?:\{@link\s+([^}\s]+)\})?\s*"
     r"(?:!(critical|high|low))?\s*"
     r"(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*"
     r"(?:—|--)\s*(.+)$"
@@ -126,14 +126,18 @@ def _is_valid_verified_date(value: str) -> bool:
 
 
 def _reference_exists(project_root: Path, context_dir: str, ref: str) -> bool:
+    if ref.startswith("http://") or ref.startswith("https://"):
+        return True
+
+    normalized_ref = ref.removeprefix("file:")
     candidates: list[Path] = []
-    if "/" in ref or "." in ref:
-        candidates.append(project_root / Path(ref))
+    if "/" in normalized_ref or "." in normalized_ref:
+        candidates.append(project_root / Path(normalized_ref))
     else:
         candidates.extend(
             [
-                project_root / ref,
-                project_root / context_dir / ref,
+                project_root / normalized_ref,
+                project_root / context_dir / normalized_ref,
             ]
         )
 

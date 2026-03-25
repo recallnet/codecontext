@@ -55,13 +55,13 @@ For block comments spanning multiple lines, the parser MUST process each line in
 ### decision
 
 ```javascript
-// @context decision #docs/api/versioning.md [verified:2026-03-24] — REST versioning uses URL path prefix over Accept headers
+// @context decision {@link file:docs/api/versioning.md} [verified:2026-03-24] — REST versioning uses URL path prefix over Accept headers
 ```
 
 #### decision:tradeoff
 
 ```go
-// @context decision:tradeoff #docs/benchmarks/mem-vs-cpu.md !high [verified:2026-03-24] — Pre-compute lookup table; trades 64MB RAM for 10x query speedup
+// @context decision:tradeoff {@link file:docs/benchmarks/mem-vs-cpu.md} !high [verified:2026-03-24] — Pre-compute lookup table; trades 64MB RAM for 10x query speedup
 ```
 
 #### decision:constraint
@@ -73,13 +73,13 @@ For block comments spanning multiple lines, the parser MUST process each line in
 #### decision:assumption
 
 ```rust
-// @context decision:assumption #docs/tenancy.md [verified:2026-03-24] — Assumes single-tenant deployment; multi-tenant requires rework
+// @context decision:assumption {@link file:docs/tenancy.md} [verified:2026-03-24] — Assumes single-tenant deployment; multi-tenant requires rework
 ```
 
 ### requirement
 
 ```typescript
-// @context requirement #docs/finance/billing-calc.md !critical [verified:2026-03-24] — Implements rounding rules from finance spec section 4.2
+// @context requirement {@link file:docs/finance/billing-calc.md} !critical [verified:2026-03-24] — Implements rounding rules from finance spec section 4.2
 ```
 
 ### risk
@@ -109,7 +109,7 @@ For block comments spanning multiple lines, the parser MUST process each line in
 ### related
 
 ```html
-<!-- @context related #auth/session.ts [verified:2026-03-24] — Session token validation logic is in auth/session.ts -->
+<!-- @context related {@link file:auth/session.ts} [verified:2026-03-24] — Session token validation logic is in auth/session.ts -->
 ```
 
 ### history
@@ -133,7 +133,7 @@ When a single line is insufficient, consecutive `@context` comments form a **con
 The first line contains the full context tag. Subsequent lines use `@context+` to indicate continuation:
 
 ```typescript
-// @context decision:tradeoff #docs/persistence/orm-choice.md !high — Chose raw SQL over ORM for this module
+// @context decision:tradeoff {@link file:docs/persistence/orm-choice.md} !high — Chose raw SQL over ORM for this module
 // @context+ — ORM added 200ms p99 latency due to hydration overhead
 // @context+ — Raw SQL is acceptable here because the schema is stable and well-tested
 ```
@@ -191,7 +191,7 @@ A context tag with an empty summary (separator followed by only whitespace) is a
 
 ### Duplicate References
 
-Multiple `@context` tags in the same file MAY reference the same `#ref`. This indicates that multiple code locations share the same supporting material. This is valid and expected.
+Multiple `@context` tags in the same file MAY reference the same `{@link file:ref}`. This indicates that multiple code locations share the same supporting material. This is valid and expected.
 
 ### Nested Block Comments
 

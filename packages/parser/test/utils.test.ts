@@ -26,14 +26,14 @@ describe("buildFileContext", () => {
     const sourceFile = join(sourceDir, "example.ts");
     writeFileSync(
       sourceFile,
-      "// @context decision:tradeoff #docs/context/cache-strategy.md -- LRU keeps eviction O(1).\n" +
+      "// @context decision:tradeoff {@link file:docs/context/cache-strategy.md} -- LRU keeps eviction O(1).\n" +
         "export const strategy = 'lru';\n",
       "utf-8"
     );
 
     const ctx = buildFileContext(sourceFile);
 
-    expect(ctx.tags[0]?.id).toBe("docs/context/cache-strategy.md");
+    expect(ctx.tags[0]?.id).toBe("file:docs/context/cache-strategy.md");
     expect(ctx.tags[0]?.verified).toBeUndefined();
     expect(ctx.anchored[0]?.verifiedDate).toBeUndefined();
   });

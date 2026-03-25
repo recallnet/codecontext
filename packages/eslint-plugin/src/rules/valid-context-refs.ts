@@ -9,10 +9,12 @@ const rule: Rule.RuleModule = {
   meta: {
     type: "problem",
     docs: {
-      description: "Check that #references in @context comments resolve to existing local files",
+      description:
+        "Check that local {@link ...} references in @context comments resolve to existing files",
     },
     messages: {
-      missingReference: "Context reference not found for #{{id}}. Looked for: {{expectedPath}}.",
+      missingReference:
+        "Context reference not found for {@link {{id}}}. Looked for: {{expectedPath}}.",
     },
     schema: [
       {
@@ -31,15 +33,21 @@ const rule: Rule.RuleModule = {
   create(context) {
     const options = (context.options[0] as { contextDir?: string } | undefined) ?? {};
     const contextDir = options.contextDir ?? "docs/context";
+    const isRemoteReference = (value: string): boolean =>
+      value.startsWith("http://") || value.startsWith("https://");
+    const normalizeLocalReference = (value: string): string =>
+      value.startsWith("file:") ? value.slice("file:".length) : value;
     const looksLikePathReference = (value: string): boolean =>
       value.includes("/") || value.includes(".");
 
     const resolveCandidates = (value: string, cwd: string): string[] => {
-      if (looksLikePathReference(value)) {
-        return [path.resolve(cwd, value)];
+      const normalized = normalizeLocalReference(value);
+
+      if (looksLikePathReference(normalized)) {
+        return [path.resolve(cwd, normalized)];
       }
 
-      return [path.resolve(cwd, value), path.resolve(cwd, contextDir, value)];
+      return [path.resolve(cwd, normalized), path.resolve(cwd, contextDir, normalized)];
     };
 
     return {
@@ -49,7 +57,7 @@ const rule: Rule.RuleModule = {
         const cwd = context.cwd;
 
         for (const tag of tags) {
-          if (!tag.id) {
+          if (!tag.id || isRemoteReference(tag.id)) {
             continue;
           }
 

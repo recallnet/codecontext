@@ -29,7 +29,7 @@ export interface ContextTag {
   type: ContextType;
   /** Optional subtype (e.g., decision:tradeoff) */
   subtype?: ContextSubtype;
-  /** Optional reference to supporting docs or code */
+  /** Optional reference target from an inline link token */
   id?: string;
   /** Priority level */
   priority?: Priority;

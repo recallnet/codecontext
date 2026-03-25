@@ -3,24 +3,24 @@
   "description": "Missing references are reported",
   "implementations": ["ts", "go", "py"],
   "filePath": "src/example.go",
-  "source": "// @context decision #docs/context/missing.md -- Missing ref\npackage fixture\n",
+  "source": "// @context decision {@link file:docs/context/missing.md} -- Missing ref\npackage fixture\n",
   "filePathByImplementation": {
     "py": "src/example.py"
   },
   "sourceByImplementation": {
-    "py": "# @context decision #docs/context/missing.md -- Missing ref\nvalue = 1\n"
+    "py": "# @context decision {@link file:docs/context/missing.md} -- Missing ref\nvalue = 1\n"
   },
   "expected": {
     "tags": [
       {
         "type": "decision",
         "subtype": null,
-        "id": "docs/context/missing.md",
+        "id": "file:docs/context/missing.md",
         "priority": null,
         "summary": "Missing ref",
         "line": 1
       }
     ],
-    "errors": ["Unresolved context reference: \"docs/context/missing.md\""]
+    "errors": ["Unresolved context reference: \"file:docs/context/missing.md\""]
   }
 }

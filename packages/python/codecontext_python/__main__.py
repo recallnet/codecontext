@@ -15,12 +15,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--context-dir",
         default="docs/context",
-        help="Legacy context directory for bare #refs",
+        help="Fallback context directory for bare file names",
     )
     parser.add_argument(
         "--no-check-refs",
         action="store_true",
-        help="Skip local #ref existence checks",
+        help="Skip local {@link file:...} existence checks",
     )
     return parser
 

@@ -3,18 +3,18 @@ import type { ContextSubtype, ContextTag, Priority, SourceLocation } from "./typ
 
 /**
  * Regex for the `@context` tag format:
- *   `@context <type>[:<subtype>] [#id] [!priority] [verified:YYYY-MM-DD] — <summary>`
+ *   `@context <type>[:<subtype>] [{@link <target>}] [!priority] [verified:YYYY-MM-DD] — <summary>`
  *
  * Supports both the canonical `@context <type>` form and the legacy
  * `@context:<type>` form, plus both em-dash (—) and double-dash (--)
  * separators.
  */
-// @context decision:constraint #packages/spec/syntax.md !critical [verified:2026-03-24] -- Canonical syntax stays
+// @context decision:constraint {@link file:packages/spec/syntax.md} !critical [verified:2026-03-24] -- Canonical syntax stays
 //   TSDoc-safe by treating decision:tradeoff as payload after @context, not as part of the tag name.
 //   Legacy @context:<type> remains parseable for compatibility, but new syntax must preserve the canonical form.
 const CONTEXT_PATTERN =
   // eslint-disable-next-line security/detect-unsafe-regex
-  /^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$/;
+  /^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:\{@link\s+([^}\s]+)\})?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$/;
 
 const CONTEXT_PREFIX_PATTERN = /^@context(?:\s+|:)/;
 

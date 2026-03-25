@@ -75,7 +75,7 @@ The hash algorithm and length MAY be overridden in `codecontext.json` via the `h
 Given this code:
 
 ```typescript
-// @context decision:tradeoff #docs/context/cache-strategy.md !high — LRU over LFU for O(1) eviction
+// @context decision:tradeoff {@link file:docs/context/cache-strategy.md} !high — LRU over LFU for O(1) eviction
 function evict(cache: Map<string, Entry>): void {
   const oldest = cache.keys().next().value;
   cache.delete(oldest);
@@ -166,7 +166,7 @@ The staleness cache is stored in `.codecontext-cache.json` at the project root. 
     "src/cache/lru.ts": [
       {
         "line": 14,
-        "tag": "@context decision:tradeoff #docs/context/cache-strategy.md !high",
+        "tag": "@context decision:tradeoff {@link file:docs/context/cache-strategy.md} !high",
         "hash": "Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu",
         "verifiedAt": "2025-11-15T10:30:00Z",
         "verifiedBy": "cli",

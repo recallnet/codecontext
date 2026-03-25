@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	contextPattern = regexp.MustCompile(`^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:#([A-Za-z0-9_./-]+))?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$`)
+	contextPattern = regexp.MustCompile(`^@context(?:\s+|:)([a-z][a-z0-9]*)(?::([a-z][a-z0-9]*))?\s*(?:\{@link\s+([^}\s]+)\})?\s*(?:!(critical|high|low))?\s*(?:\[verified:(\d{4}-\d{2}-\d{2})\])?\s*(?:—|--)\s*(.+)$`)
 	contextPrefix  = regexp.MustCompile(`^@context(?:\s+|:)`)
 )
 
@@ -60,8 +60,8 @@ func run(pass *analysis.Pass) (any, error) {
 }
 
 func init() {
-	Analyzer.Flags.String("context-dir", "docs/context", "legacy context directory for bare #refs")
-	Analyzer.Flags.Bool("check-refs", true, "check that #refs resolve to local files")
+	Analyzer.Flags.String("context-dir", "docs/context", "fallback context directory for bare file names")
+	Analyzer.Flags.Bool("check-refs", true, "check that local {@link ...} references resolve to files")
 }
 
 func checkCommentGroup(
@@ -149,13 +149,18 @@ func findProjectRoot(startDir string) string {
 }
 
 func referenceExists(projectRoot string, contextDir string, ref string) bool {
+	if strings.HasPrefix(ref, "http://") || strings.HasPrefix(ref, "https://") {
+		return true
+	}
+
+	normalizedRef := strings.TrimPrefix(ref, "file:")
 	candidates := []string{}
-	if strings.Contains(ref, "/") || strings.Contains(ref, ".") {
-		candidates = append(candidates, filepath.Join(projectRoot, filepath.FromSlash(ref)))
+	if strings.Contains(normalizedRef, "/") || strings.Contains(normalizedRef, ".") {
+		candidates = append(candidates, filepath.Join(projectRoot, filepath.FromSlash(normalizedRef)))
 	} else {
 		candidates = append(candidates,
-			filepath.Join(projectRoot, ref),
-			filepath.Join(projectRoot, contextDir, ref),
+			filepath.Join(projectRoot, normalizedRef),
+			filepath.Join(projectRoot, contextDir, normalizedRef),
 		)
 	}
 

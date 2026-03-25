@@ -3,12 +3,12 @@
   "description": "parses an explicit verification date in canonical syntax",
   "implementations": ["ts", "go", "py"],
   "filePath": "src/example.ts",
-  "source": "// @context decision:tradeoff #docs/context/cache-strategy.md !high [verified:2026-03-24] -- LRU keeps eviction O(1).\nconst strategy = 'lru';\n",
+  "source": "// @context decision:tradeoff {@link file:docs/context/cache-strategy.md} !high [verified:2026-03-24] -- LRU keeps eviction O(1).\nconst strategy = 'lru';\n",
   "filePathByImplementation": {
     "py": "src/example.py"
   },
   "sourceByImplementation": {
-    "py": "# @context decision:tradeoff #docs/context/cache-strategy.md !high [verified:2026-03-24] -- LRU keeps eviction O(1).\nstrategy = 'lru'\n"
+    "py": "# @context decision:tradeoff {@link file:docs/context/cache-strategy.md} !high [verified:2026-03-24] -- LRU keeps eviction O(1).\nstrategy = 'lru'\n"
   },
   "supportFiles": {
     "docs/context/cache-strategy.md": "# Cache strategy\n\nUse an in-process LRU cache.\n"
@@ -18,7 +18,7 @@
       {
         "type": "decision",
         "subtype": "tradeoff",
-        "id": "docs/context/cache-strategy.md",
+        "id": "file:docs/context/cache-strategy.md",
         "priority": "high",
         "verified": "2026-03-24",
         "summary": "LRU keeps eviction O(1).",
