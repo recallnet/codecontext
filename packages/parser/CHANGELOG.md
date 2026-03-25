@@ -1,5 +1,13 @@
 # @recallnet/codecontext-parser
 
+## 0.4.0
+
+### Minor Changes
+
+- 8abd83f: Adopt `{@link ...}` as the canonical supporting-reference syntax for `@context` annotations.
+
+  Local references should now use `{@link file:...}` and remote references may use `{@link https://...}`. Parser, lint, spec, and README examples were updated to match.
+
 ## 0.3.0
 
 ### Minor Changes
