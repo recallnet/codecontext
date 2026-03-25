@@ -253,8 +253,6 @@ These demos are generated from source-controlled VHS tapes in [`docs/demos/tapes
 
 ![Decision registry demo](docs/demos/gifs/report.gif)
 
-A Claude skill is included in `skills/codecontext/` to automate this workflow: read context before edits, check invalidation after edits, and maintain annotations as code evolves.
-
 ### Pre-Commit Hook
 
 ```bash
