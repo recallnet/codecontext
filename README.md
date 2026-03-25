@@ -25,7 +25,7 @@ if (message.timestamp > cutoff) {
 }
 ```
 
-Now the constraint is visible before anyone edits the code, human or agent. If someone changes the code without re-verifying the attached context, the freshness gate fails.
+Now the constraint is visible before anyone edits the code, human or agent. And if an agent changes the guarded code without re-verifying the inline context it just ignored, the freshness gate fails deterministically before the change lands.
 
 And the linked reference can be any supporting artifact. In this case it might be a plain Markdown note committed in the repo:
 
@@ -209,7 +209,7 @@ import codecontext from "@recallnet/codecontext-eslint-plugin";
 export default [codecontext.configs.recommended];
 ```
 
-The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not advanced.
+The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not advanced. In practice, that means an agent cannot silently ignore critical inline context and still pass the gate.
 
 If an agent edits the guarded code without renewing the inline verification date, the failure should be obvious:
 
