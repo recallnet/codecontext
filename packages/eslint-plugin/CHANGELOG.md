@@ -1,5 +1,16 @@
 # @recallnet/codecontext-eslint-plugin
 
+## 0.3.0
+
+### Minor Changes
+
+- 29dfb88: Remove `.ctx.md` support and treat `#ref` values as plain references to arbitrary supporting artifacts. JSON/report output no longer exposes `ctxFile` metadata, verification dates must live on inline `@context` tags, and reference resolution no longer falls back to `.ctx.md` conventions.
+
+### Patch Changes
+
+- Updated dependencies [29dfb88]
+  - @recallnet/codecontext-parser@0.3.0
+
 ## 0.2.2
 
 ### Patch Changes
