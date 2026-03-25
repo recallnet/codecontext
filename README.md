@@ -90,7 +90,7 @@ $ npx codecontext --scope src/payments/gateway.ts --json
     {
       "line": 42,
       "type": "decision",
-      "id": "docs/context/gate-42.md",
+      "id": "file:docs/context/gate-42.md",
       "priority": "critical",
       "status": "verified",
       "verified": "2026-03-24",
@@ -173,7 +173,7 @@ $ npx codecontext --scope src/payments/gateway.ts
 
   src/payments/gateway.ts — 4 context entries
 
-    CRITICAL  decision #docs/context/gate-42.md  (verified 2025-11-15)
+    CRITICAL  decision {@link file:docs/context/gate-42.md}  (verified 2025-11-15)
     strict > (not >=): upstream sends at-threshold values during clock skew
     doc: docs/context/gate-42.md
 
@@ -193,7 +193,7 @@ $ npx codecontext --scope src/payments/gateway.ts
 $ npx codecontext --diff HEAD src/payments/gateway.ts
 
   Lines 42-44 (modified):
-    CRITICAL  decision #docs/context/gate-42.md  — strict > (not >=)
+    CRITICAL  decision {@link file:docs/context/gate-42.md}  — strict > (not >=)
     STATUS: ANCHORED CODE CHANGED — review required
     Previous anchor hash: Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu
     Current anchor hash:  Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu
@@ -226,7 +226,7 @@ The same rule also trips through the staged-file workflow:
 $ npx codecontext --staged
 
 src/payments/gateway.ts:42
-  decision #docs/context/gate-42.md
+  decision {@link file:docs/context/gate-42.md}
   status: review-required
   reason: code changed without verification-date bump
 

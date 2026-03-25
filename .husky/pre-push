@@ -16,7 +16,7 @@ npx turbo build
 
 # ── Check 3: Full lint ──────────────────────────────────────────────
 echo "[3/6] Linting..."
-npx turbo lint
+pnpm lint
 
 # ── Check 4: Full type-check ────────────────────────────────────────
 echo "[4/6] Type-checking..."

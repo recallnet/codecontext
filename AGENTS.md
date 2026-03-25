@@ -1,5 +1,33 @@
 # AGENTS
 
+## codecontext
+
+- Use inline `@context` annotations for non-obvious, high-value reasoning that
+  future edits could easily erase.
+- Required for:
+  critical decision logic and invariants
+  security-sensitive behavior and hard-won lessons
+  external integration quirks and contract mismatches
+  regression guards explaining why a simpler change would be wrong
+- Preferred forms:
+  `@context decision`
+  `@context risk`
+  `@context requirement`
+  `@context history`
+- Keep notes short and specific: what is true, why it matters, and what would
+  break if changed.
+- Use `{@link ...}` for supporting material when helpful. Refs are just
+  pointers to repo files, URLs, skills, or docs. Do not require any special doc
+  schema.
+- Before editing critical files, run:
+  `npx @recallnet/codecontext-cli --scope <file>`
+- After editing, run:
+  `npx @recallnet/codecontext-cli --diff HEAD <file>`
+- For broader repo orientation, run:
+  `npx @recallnet/codecontext-cli --report`
+- Do not use `@context` for obvious narration, duplicated ADR prose, or
+  generic comments.
+
 ## Package Publishing
 
 - This repo publishes packages through Changesets, not from every successful
