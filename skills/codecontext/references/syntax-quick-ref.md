@@ -71,50 +71,16 @@ Link to supporting context in any project file:
 
 The `#docs/context/gate-42.md` reference resolves directly to that file.
 
-## .ctx.md File Template
+## Reference Targets
 
-```markdown
----
-id: my-decision-id
-type: decision
-status: active
-verified: 2025-11-15
-owners:
-  - "@alice"
-  - "@bob"
-traces:
-  - "JIRA-1234"
-  - "INCIDENT-5678"
----
+`#ref` can point at any useful supporting artifact:
 
-## Decision
+- project Markdown or HTML docs
+- source files
+- issue or ADR exports committed into the repo
+- generated analysis artifacts
 
-State what was decided.
-
-## Why
-
-Explain the rationale. Include data, incident references, or benchmarks.
-
-## Alternatives Considered
-
-- **Option B** -- Why it was rejected.
-- **Option C** -- Why it was rejected.
-
-## Constraints
-
-External factors that shaped or limit this decision.
-```
-
-### Frontmatter Fields
-
-| Field      | Required | Values                                                         |
-| ---------- | -------- | -------------------------------------------------------------- |
-| `id`       | Yes      | Lowercase alphanumeric with hyphens (`[a-z0-9-]+`)             |
-| `type`     | Yes      | `decision`, `requirement`, `risk`, `related`, `history`, `doc` |
-| `status`   | No       | `active` (default), `superseded`, `deprecated`                 |
-| `verified` | No       | ISO date (YYYY-MM-DD)                                          |
-| `owners`   | No       | List of owner handles                                          |
-| `traces`   | No       | List of external references                                    |
+Keep verification dates on the inline `@context` tag itself.
 
 ## CLI Commands
 

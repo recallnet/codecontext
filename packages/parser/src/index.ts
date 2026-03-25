@@ -9,9 +9,6 @@ export type {
   StalenessReason,
   SourceLocation,
   ContextTag,
-  CtxFileFrontmatter,
-  CtxFileSection,
-  CtxFile,
   AnchoredContext,
   FileContext,
   ScopeBriefing,
@@ -25,9 +22,6 @@ export {
   type ParseResult,
   type ParseError,
 } from "./comment-parser.js";
-
-// .ctx.md file parser
-export { parseCtxFile, CtxFileError } from "./ctx-file-parser.js";
 
 // Taxonomy
 export { TAXONOMY, isValidType, isValidSubtype, getValidSubtypes } from "./taxonomy.js";
@@ -47,10 +41,6 @@ export {
 export {
   findContextDir,
   findProjectRoot,
-  loadCtxFileById,
-  loadCtxFileByRef,
-  loadAllCtxFiles,
-  resolveCtxFiles,
   loadCache,
   saveCache,
   buildFileContext,

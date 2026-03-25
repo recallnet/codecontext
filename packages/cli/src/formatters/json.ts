@@ -1,46 +1,13 @@
-import type { CtxFile, FileContext } from "@recallnet/codecontext-parser";
-
-interface SerializedCtxFile {
-  id: string;
-  type: string;
-  status: string;
-  verified: string;
-  owners: string[];
-  traces: string[];
-  body: string;
-  filePath: string;
-}
+import type { FileContext } from "@recallnet/codecontext-parser";
 
 type FileContextTag = FileContext["tags"][number] & { verified?: string };
-type FileAnchored = FileContext["anchored"][number] & {
-  verifiedDate?: string;
-  reason?: string;
-};
-
-function serializeCtxFile(ctxFile: CtxFile): SerializedCtxFile {
-  return {
-    id: ctxFile.frontmatter.id,
-    type: ctxFile.frontmatter.type,
-    status: ctxFile.frontmatter.status,
-    verified: ctxFile.frontmatter.verified,
-    owners: ctxFile.frontmatter.owners,
-    traces: ctxFile.frontmatter.traces,
-    body: ctxFile.body,
-    filePath: ctxFile.filePath,
-  };
-}
+type FileAnchored = FileContext["anchored"][number] & { verifiedDate?: string; reason?: string };
 
 /**
- * Format a FileContext as JSON with .ctx.md content inlined.
+ * Format a FileContext as JSON for agent/tool consumption.
  * This is designed for consumption by AI agents and tooling.
  */
 export function formatFileContextJson(ctx: FileContext): string {
-  const resolvedCtxFiles: Record<string, SerializedCtxFile> = {};
-  for (const [id, ctxFile] of ctx.resolvedCtxFiles) {
-    // eslint-disable-next-line security/detect-object-injection
-    resolvedCtxFiles[id] = serializeCtxFile(ctxFile);
-  }
-
   const output = {
     file: ctx.file,
     tags: ctx.tags.map((tag) => {
@@ -74,7 +41,6 @@ export function formatFileContextJson(ctx: FileContext): string {
         reason: a.reason,
       };
     }),
-    resolvedCtxFiles,
   };
 
   return JSON.stringify(output, null, 2);

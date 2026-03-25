@@ -12,7 +12,6 @@
   },
   "expected": {
     "tags": [],
-    "errors": ["Unknown context type: \"banana\""],
-    "resolvedCtxFiles": []
+    "errors": ["Unknown context type: \"banana\""]
   }
 }

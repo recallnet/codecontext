@@ -3,7 +3,7 @@ export function shouldProcess(messageTimestamp: number, cutoff: number): boolean
   return messageTimestamp > cutoff;
 }
 
-// @context decision:tradeoff #examples/docs/context/cache-strategy.ctx.md !high -- LRU keeps eviction O(1).
+// @context decision:tradeoff #examples/docs/context/cache-strategy.md !high -- LRU keeps eviction O(1).
 export class LRUCache<K, V> {
   readonly #store = new Map<K, V>();
 

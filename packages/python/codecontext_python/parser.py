@@ -39,7 +39,6 @@ class NormalizedTag:
 class ParseSourceResult:
     tags: list[NormalizedTag] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
-    resolved_ctx_files: list[str] = field(default_factory=list)
 
 
 def parse_source(
@@ -95,10 +94,6 @@ def parse_source(
         if not ref or not check_refs:
             continue
 
-        if ref.endswith(".ctx.md") and _reference_exists(root, context_dir, ref):
-            result.resolved_ctx_files.append(ref)
-            continue
-
         if not _reference_exists(root, context_dir, ref):
             result.errors.append(f'Unresolved context reference: "{ref}"')
 
@@ -139,7 +134,6 @@ def _reference_exists(project_root: Path, context_dir: str, ref: str) -> bool:
             [
                 project_root / ref,
                 project_root / context_dir / ref,
-                project_root / context_dir / f"{ref}.ctx.md",
             ]
         )
 

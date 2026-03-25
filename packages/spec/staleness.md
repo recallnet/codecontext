@@ -16,7 +16,7 @@ It works in four steps:
 
 1. **Identify** the logical block of code associated with each `@context` tag.
 2. **Hash** the logical block's content to produce a fingerprint.
-3. **Read** the explicit verification date from `[verified:YYYY-MM-DD]` or a resolved `.ctx.md` file's `verified:` frontmatter.
+3. **Read** the explicit verification date from `[verified:YYYY-MM-DD]` on the tag itself.
 4. **Compare** the current fingerprint and verification date with the stored state to determine status.
 
 ## Logical Block Identification

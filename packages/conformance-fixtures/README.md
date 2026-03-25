@@ -12,4 +12,3 @@ Each fixture declares:
 - `supportFiles`: optional additional files to materialize in the temp project
 - `expected.tags`: normalized parsed tags
 - `expected.errors`: normalized parse/validation errors
-- `expected.resolvedCtxFiles`: refs that should resolve as structured `.ctx.md` files

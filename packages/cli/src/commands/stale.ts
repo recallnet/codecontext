@@ -23,22 +23,9 @@ export function runStale(filePath: string): void {
   const staleLines = new Set(staleAnchored.map((a) => a.tag.location.line));
   const staleTags = ctx.tags.filter((t) => staleLines.has(t.location.line));
 
-  // Collect only referenced ctx files
-  const filteredCtxFiles = new Map<
-    string,
-    typeof ctx.resolvedCtxFiles extends Map<string, infer V> ? V : never
-  >();
-  for (const tag of staleTags) {
-    const ctxFile = tag.id ? ctx.resolvedCtxFiles.get(tag.id) : undefined;
-    if (tag.id && ctxFile) {
-      filteredCtxFiles.set(tag.id, ctxFile);
-    }
-  }
-
   const filtered: FileContext = {
     file: ctx.file,
     tags: staleTags,
-    resolvedCtxFiles: filteredCtxFiles,
     anchored: staleAnchored,
   };
 

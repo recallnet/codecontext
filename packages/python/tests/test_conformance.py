@@ -65,10 +65,6 @@ class ConformanceTest(unittest.TestCase):
 
                     self.assertEqual(want_tags, got_tags)
                     self.assertEqual(fixture["expected"]["errors"], result.errors)
-                    self.assertEqual(
-                        sorted(fixture["expected"]["resolvedCtxFiles"]),
-                        sorted(result.resolved_ctx_files),
-                    )
 
 
 if __name__ == "__main__":

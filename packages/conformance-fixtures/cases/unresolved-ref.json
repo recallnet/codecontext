@@ -21,7 +21,6 @@
         "line": 1
       }
     ],
-    "errors": ["Unresolved context reference: \"docs/context/missing.md\""],
-    "resolvedCtxFiles": []
+    "errors": ["Unresolved context reference: \"docs/context/missing.md\""]
   }
 }

@@ -30,9 +30,8 @@ type fixture struct {
 	SourceByImpl    map[string]string `json:"sourceByImplementation"`
 	SupportFiles    map[string]string `json:"supportFiles"`
 	Expected        struct {
-		Tags             []fixtureTag `json:"tags"`
-		Errors           []string     `json:"errors"`
-		ResolvedCtxFiles []string     `json:"resolvedCtxFiles"`
+		Tags   []fixtureTag `json:"tags"`
+		Errors []string     `json:"errors"`
 	} `json:"expected"`
 }
 
@@ -113,11 +112,6 @@ func TestSharedConformanceFixtures(t *testing.T) {
 			}
 			if !equalTags(gotTags, fx.Expected.Tags) {
 				t.Fatalf("tags mismatch\nwant: %#v\ngot:  %#v", fx.Expected.Tags, gotTags)
-			}
-			slices.Sort(result.ResolvedCtxFiles)
-			slices.Sort(fx.Expected.ResolvedCtxFiles)
-			if !slices.Equal(result.ResolvedCtxFiles, fx.Expected.ResolvedCtxFiles) {
-				t.Fatalf("resolved ctx files mismatch\nwant: %#v\ngot:  %#v", fx.Expected.ResolvedCtxFiles, result.ResolvedCtxFiles)
 			}
 		})
 	}

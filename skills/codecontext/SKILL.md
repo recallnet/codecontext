@@ -70,7 +70,7 @@ When you change code that has `@context` annotations:
 
 2. **Remove dead context.** If you deleted the code a tag annotates, delete the tag. If you refactored away the tradeoff a `decision:tradeoff` describes, remove it.
 
-3. **Check linked supporting files.** If the tag has a `#ref` reference, open the referenced file and check whether its content still applies. If it is a structured `.ctx.md` file and you've confirmed it is still accurate, update the `verified` date in frontmatter.
+3. **Check linked supporting files.** If the tag has a `#ref` reference, open the referenced file and check whether its content still applies. Keep verification dates on the inline tag itself.
 
 4. **Don't leave stale annotations.** A stale `@context` tag that contradicts the code is a trap. Either update it to match reality or remove it entirely.
 
@@ -116,50 +116,18 @@ Do not add `@context` for:
 - _(no priority)_ -- Standard relevance. The default.
 - `!low` -- Background information. Nice to know, not essential.
 
-### When to Create a Structured .ctx.md File
+### When to Add A Supporting Reference
 
-Create a `.ctx.md` file when:
+Add a `#ref` when:
 
 - The rationale needs more than one or two lines.
 - There are alternatives considered, constraints, or external references to document.
-- Multiple code locations reference the same decision.
+- Multiple code locations should point at the same deeper material.
 
-Reference it inline with `#ref`:
+The reference target can be any useful artifact:
 
 ```javascript
 // @context decision #docs/context/cache-strategy.md !high — LRU chosen over LFU; see benchmarks
-```
-
-### .ctx.md File Template
-
-```markdown
----
-id: <kebab-case-id>
-type: decision
-status: active
-verified: YYYY-MM-DD
-owners:
-  - "@yourname"
-traces:
-  - "JIRA-XXXX"
----
-
-## Decision
-
-What was decided.
-
-## Why
-
-Why this option was chosen over alternatives.
-
-## Alternatives Considered
-
-- **Option B** -- Why it was rejected.
-- **Option C** -- Why it was rejected.
-
-## Constraints
-
-External factors that shaped the decision.
 ```
 
 ## Syntax Quick Reference
@@ -182,8 +150,6 @@ Types and subtypes:
 | `doc`         | --                                     |
 
 Priority levels: `!critical`, `!high`, _(none)_, `!low`
-
-Status values (in .ctx.md frontmatter): `active`, `superseded`, `deprecated`
 
 CLI commands:
 
@@ -208,4 +174,4 @@ CLI commands:
 
 **Don't use !critical for everything.** If every tag is critical, none of them are. Reserve `!critical` for constraints learned from production incidents or invariants where violation causes data loss, security issues, or silent corruption.
 
-**Don't create .ctx.md files for one-liners.** If the rationale fits in a single comment line, keep it inline. Extended context files are for decisions that genuinely need multiple paragraphs of explanation.
+**Don't invent a special sidecar format.** References can point at Markdown, HTML, code, issues, commits, or any other supporting artifact. Keep the structure in `@context`, not in a new document spec.

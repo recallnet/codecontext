@@ -9,14 +9,14 @@ codecontext is a specification for embedding structured decision context directl
 
 ## Terminology
 
-| Term              | Definition                                                                                                                                                                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Context tag**   | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional reference, optional priority, and a human-readable summary.                       |
-| **Context file**  | An optional long-form supporting document referenced from a context tag. A project MAY use ordinary files such as `.md`, `.html`, `.txt`, diagrams, or source files. The core specification does not prescribe the file format.            |
-| **Logical block** | The contiguous region of code immediately following a context tag. The logical block is the scope to which the tag applies. Block boundaries are language-dependent (e.g., the next function, class, statement, or brace-delimited block). |
-| **Anchor**        | The association between a context tag and its logical block. The anchor is what makes staleness detection possible: when the logical block changes, the anchor's hash changes.                                                             |
-| **Staleness**     | The condition where the logical block associated with a context tag has been modified since the tag was last verified. Staleness indicates that the context may no longer accurately describe the code.                                    |
-| **Verification**  | The act of confirming that a context tag still accurately describes its logical block. Verification updates the content hash stored in the cache.                                                                                          |
+| Term                     | Definition                                                                                                                                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Context tag**          | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional reference, optional priority, and a human-readable summary.                                               |
+| **Supporting reference** | An optional external artifact referenced from a context tag. A project MAY use ordinary files such as `.md`, `.html`, `.txt`, diagrams, source files, issues exported into the repo, or other material. The core specification does not prescribe the file format. |
+| **Logical block**        | The contiguous region of code immediately following a context tag. The logical block is the scope to which the tag applies. Block boundaries are language-dependent (e.g., the next function, class, statement, or brace-delimited block).                         |
+| **Anchor**               | The association between a context tag and its logical block. The anchor is what makes staleness detection possible: when the logical block changes, the anchor's hash changes.                                                                                     |
+| **Staleness**            | The condition where the logical block associated with a context tag has been modified since the tag was last verified. Staleness indicates that the context may no longer accurately describe the code.                                                            |
+| **Verification**         | The act of confirming that a context tag still accurately describes its logical block. Verification updates the content hash stored in the cache.                                                                                                                  |
 
 ## Comment Syntax
 

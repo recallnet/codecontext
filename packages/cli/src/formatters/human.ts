@@ -118,18 +118,6 @@ export function formatFileContext(ctx: FileContext): string {
     lines.push("");
   }
 
-  // Show referenced .ctx.md files
-  if (ctx.resolvedCtxFiles.size > 0) {
-    lines.push(`${DIM}${"─".repeat(40)}${RESET}`);
-    lines.push(`${BOLD}Referenced .ctx.md files:${RESET}`);
-    for (const [id, ctxFile] of ctx.resolvedCtxFiles) {
-      lines.push(`  ${CYAN}#${id}${RESET} ${DIM}→ ${ctxFile.filePath}${RESET}`);
-      lines.push(
-        `    ${DIM}status: ${ctxFile.frontmatter.status} | owners: ${ctxFile.frontmatter.owners.join(", ")}${RESET}`
-      );
-    }
-  }
-
   return lines.join("\n");
 }
 
@@ -149,11 +137,6 @@ export function formatScopeBriefing(briefing: ScopeBriefing): string {
       `  ${colorType(entry.tag.type, entry.tag.subtype)}${colorPriority(entry.tag.priority)}  ${DIM}(${statusStr}${DIM})${RESET}`
     );
     lines.push(`    ${entry.tag.summary}`);
-    if (entry.ctxFile) {
-      lines.push(
-        `    ${DIM}→ #${entry.tag.id ?? "unknown"}: ${entry.ctxFile.frontmatter.status}${RESET}`
-      );
-    }
     lines.push("");
   }
 

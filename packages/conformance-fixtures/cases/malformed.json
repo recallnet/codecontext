@@ -12,7 +12,6 @@
   },
   "expected": {
     "tags": [],
-    "errors": ["Malformed @context tag: \"@context decision missing separator\""],
-    "resolvedCtxFiles": []
+    "errors": ["Malformed @context tag: \"@context decision missing separator\""]
   }
 }

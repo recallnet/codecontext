@@ -15,16 +15,14 @@ type NormalizedTag struct {
 }
 
 type ParseSourceResult struct {
-	Tags             []NormalizedTag
-	Errors           []string
-	ResolvedCtxFiles []string
+	Tags   []NormalizedTag
+	Errors []string
 }
 
 func ParseSource(source string, projectRoot string, contextDir string) ParseSourceResult {
 	result := ParseSourceResult{
-		Tags:             []NormalizedTag{},
-		Errors:           []string{},
-		ResolvedCtxFiles: []string{},
+		Tags:   []NormalizedTag{},
+		Errors: []string{},
 	}
 
 	lines := strings.Split(source, "\n")
@@ -74,10 +72,6 @@ func ParseSource(source string, projectRoot string, contextDir string) ParseSour
 		})
 
 		if ref == "" {
-			continue
-		}
-		if strings.HasSuffix(ref, ".ctx.md") && referenceExists(projectRoot, contextDir, ref) {
-			result.ResolvedCtxFiles = append(result.ResolvedCtxFiles, ref)
 			continue
 		}
 		if !referenceExists(projectRoot, contextDir, ref) {

@@ -26,7 +26,7 @@ but the harness made Python second-class because the canonical fixtures all
 used `//` comments and non-Python file shapes. The right fix was not to fork
 the fixture set, but to extend fixture metadata with per-implementation
 `source` and `filePath` overrides while keeping one normalized expected output
-for tags, errors, and resolved `.ctx.md` files.
+for tags and errors.
 
 Directive: Generalize shared fixtures before adding a new language binding.
 Do not copy the fixture suite per language just to work around syntax.
@@ -49,9 +49,8 @@ detection in the parser/CLI and a separate ESLint rule that scraped dates
 from `history` summaries. That split could not enforce the desired workflow
 of "you changed the code, so bump the verification date or delete the stale
 context." The fix was to add explicit `[verified:YYYY-MM-DD]` syntax on tags,
-flow that field through the shared parser/types, fall back to `.ctx.md`
-frontmatter `verified:` when present, and compare both hash and date in the
-same staleness engine.
+flow that field through the shared parser/types and compare both hash and date
+in the same staleness engine.
 
 Directive: Model verification dates as first-class parsed fields, not prose.
 Use one shared staleness engine for CLI, lint, and future language bindings.

@@ -1,16 +1,11 @@
 import { mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  buildFileContext,
-  loadCtxFileById,
-  loadCtxFileByRef,
-  parseContextTags,
-} from "../src/index.js";
+import { buildFileContext, parseContextTags } from "../src/index.js";
 
 const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
 const fixturesDir = join(repoRoot, "packages", "conformance-fixtures", "cases");
@@ -37,7 +32,6 @@ interface Fixture {
   expected: {
     tags: FixtureTag[];
     errors: string[];
-    resolvedCtxFiles: string[];
   };
 }
 
@@ -82,6 +76,22 @@ function normalizeFixtureTags(tags: FixtureTag[]): FixtureTag[] {
   }));
 }
 
+function referenceExists(projectRoot: string, contextDir: string, ref: string): boolean {
+  const candidates =
+    ref.includes("/") || ref.includes(".")
+      ? [resolve(projectRoot, ref)]
+      : [resolve(projectRoot, ref), resolve(projectRoot, contextDir, ref)];
+
+  return candidates.some((candidate) => {
+    try {
+      readFileSync(candidate, "utf-8");
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
 function collectErrors(fixture: Fixture, sourcePath: string): string[] {
   const source = readFileSync(sourcePath, "utf-8");
   const parseResult = parseContextTags(source, sourcePath);
@@ -95,9 +105,8 @@ function collectErrors(fixture: Fixture, sourcePath: string): string[] {
       continue;
     }
 
-    const resolved = loadCtxFileByRef(tag.id, projectRoot) ?? loadCtxFileById(tag.id, contextDir);
     if (
-      !resolved &&
+      !referenceExists(projectRoot, contextDir, tag.id) &&
       fixture.expected.errors.includes(`Unresolved context reference: "${tag.id}"`)
     ) {
       errors.push(`Unresolved context reference: "${tag.id}"`);
@@ -128,9 +137,7 @@ describe("shared conformance fixtures", () => {
       ).toEqual(normalizeFixtureTags(fixture.expected.tags));
 
       expect(collectErrors(fixture, sourcePath)).toEqual(fixture.expected.errors);
-      expect([...ctx.resolvedCtxFiles.keys()].sort()).toEqual(
-        [...fixture.expected.resolvedCtxFiles].sort()
-      );
+      expect(ctx.tags).toHaveLength(fixture.expected.tags.length);
     });
   }
 });

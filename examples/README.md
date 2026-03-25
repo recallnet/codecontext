@@ -9,7 +9,6 @@ This folder contains small TypeScript, Go, and Python examples showing different
 - subtype usage
 - explicit `[verified:YYYY-MM-DD]` dates on tags
 - direct `#ref` links to ordinary project files
-- optional structured `.ctx.md` documents with frontmatter `verified:` dates
 
 Files:
 
@@ -17,5 +16,5 @@ Files:
 - `go/payments/gateway.go`
 - `python/payments/gateway.py`
 - `docs/context/gate-42.md`
-- `docs/context/cache-strategy.ctx.md`
+- `docs/context/cache-strategy.md`
 - `docs/requirements/billing-rounding.md`

@@ -55,7 +55,7 @@ func MustEncode(payload map[string]any) []byte {
 	return body
 }
 
-// @context:decision:tradeoff #examples/docs/context/cache-strategy.ctx.md -- Legacy form remains accepted during migration.
+// @context:decision:tradeoff #examples/docs/context/cache-strategy.md -- Legacy form remains accepted during migration.
 func CacheStrategy() string {
 	return "lru"
 }

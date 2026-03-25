@@ -12,7 +12,7 @@ const rule: Rule.RuleModule = {
       description: "Check that #references in @context comments resolve to existing local files",
     },
     messages: {
-      missingCtxFile: "Context reference not found for #{{id}}. Looked for: {{expectedPath}}.",
+      missingReference: "Context reference not found for #{{id}}. Looked for: {{expectedPath}}.",
     },
     schema: [
       {
@@ -39,11 +39,7 @@ const rule: Rule.RuleModule = {
         return [path.resolve(cwd, value)];
       }
 
-      return [
-        path.resolve(cwd, value),
-        path.resolve(cwd, contextDir, value),
-        path.resolve(cwd, contextDir, `${value}.ctx.md`),
-      ];
+      return [path.resolve(cwd, value), path.resolve(cwd, contextDir, value)];
     };
 
     return {
@@ -62,7 +58,7 @@ const rule: Rule.RuleModule = {
           if (!resolvedFile) {
             context.report({
               loc: { line: tag.line, column: tag.column },
-              messageId: "missingCtxFile",
+              messageId: "missingReference",
               data: {
                 id: tag.id,
                 expectedPath: candidates

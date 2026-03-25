@@ -126,17 +126,6 @@ export function formatProjectReportJson(report: ProjectReport): string {
         priority: entry.priority ?? null,
         status: entry.status,
         summary: entry.summary,
-        ctxFile: entry.ctxFile
-          ? {
-              id: entry.ctxFile.frontmatter.id,
-              type: entry.ctxFile.frontmatter.type,
-              status: entry.ctxFile.frontmatter.status,
-              verified: entry.ctxFile.frontmatter.verified,
-              owners: entry.ctxFile.frontmatter.owners,
-              traces: entry.ctxFile.frontmatter.traces,
-              filePath: entry.ctxFile.filePath,
-            }
-          : null,
       })),
     },
     null,

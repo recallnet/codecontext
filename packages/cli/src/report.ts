@@ -1,9 +1,4 @@
-import type {
-  CtxFile,
-  FileContext,
-  Priority,
-  StalenessStatus,
-} from "@recallnet/codecontext-parser";
+import type { FileContext, Priority, StalenessStatus } from "@recallnet/codecontext-parser";
 
 type ReportTag = FileContext["tags"][number] & { verified?: string };
 type ReportAnchored = FileContext["anchored"][number] & { reason?: string };
@@ -19,7 +14,6 @@ export interface ReportEntry {
   status: StalenessStatus;
   reason?: string;
   summary: string;
-  ctxFile?: CtxFile;
 }
 
 export interface ProjectReport {
@@ -49,10 +43,6 @@ function buildReportEntry(
   }
   if (tag.id) {
     entry.id = tag.id;
-    const ctxFile = ctx.resolvedCtxFiles.get(tag.id);
-    if (ctxFile) {
-      entry.ctxFile = ctxFile;
-    }
   }
   if (tag.priority) {
     entry.priority = tag.priority;

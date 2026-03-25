@@ -156,7 +156,6 @@ func referenceExists(projectRoot string, contextDir string, ref string) bool {
 		candidates = append(candidates,
 			filepath.Join(projectRoot, ref),
 			filepath.Join(projectRoot, contextDir, ref),
-			filepath.Join(projectRoot, contextDir, ref+".ctx.md"),
 		)
 	}
 

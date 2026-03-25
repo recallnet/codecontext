@@ -41,30 +41,6 @@ export interface ContextTag {
   location: SourceLocation;
 }
 
-export interface CtxFileFrontmatter {
-  id: string;
-  type: ContextType;
-  status: "active" | "superseded" | "deprecated";
-  verified: string; // ISO date string
-  owners: string[];
-  traces: string[]; // External references (JIRA, REQ, etc.)
-}
-
-export interface CtxFileSection {
-  heading: string;
-  content: string;
-}
-
-export interface CtxFile {
-  frontmatter: CtxFileFrontmatter;
-  /** Raw markdown body (after frontmatter) */
-  body: string;
-  /** Parsed sections keyed by heading */
-  sections: CtxFileSection[];
-  /** File path where this was loaded from */
-  filePath: string;
-}
-
 export interface AnchoredContext {
   tag: ContextTag;
   /** Hash of the logical code block the tag annotates */
@@ -73,7 +49,7 @@ export interface AnchoredContext {
   status: StalenessStatus;
   /** ISO date of last verification, if known */
   verifiedAt?: string;
-  /** Verification date declared on the tag or resolved .ctx.md file */
+  /** Verification date declared directly on the tag */
   verifiedDate?: string;
   /** Why the current status was assigned */
   reason: StalenessReason;
@@ -82,7 +58,6 @@ export interface AnchoredContext {
 export interface FileContext {
   file: string;
   tags: ContextTag[];
-  resolvedCtxFiles: Map<string, CtxFile>;
   anchored: AnchoredContext[];
 }
 
@@ -92,6 +67,5 @@ export interface ScopeBriefing {
   entries: {
     tag: ContextTag;
     status: StalenessStatus;
-    ctxFile?: CtxFile;
   }[];
 }

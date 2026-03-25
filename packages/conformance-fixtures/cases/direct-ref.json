@@ -1,0 +1,29 @@
+{
+  "id": "direct-ref",
+  "description": "Direct project-relative references are accepted without special file semantics",
+  "implementations": ["ts", "go", "py"],
+  "filePath": "src/example.go",
+  "source": "// @context decision:tradeoff #docs/context/cache-strategy.md -- LRU keeps eviction O(1)\npackage fixture\n",
+  "filePathByImplementation": {
+    "py": "src/example.py"
+  },
+  "sourceByImplementation": {
+    "py": "# @context decision:tradeoff #docs/context/cache-strategy.md -- LRU keeps eviction O(1)\nvalue = 1\n"
+  },
+  "supportFiles": {
+    "docs/context/cache-strategy.md": "# Cache strategy\n\nUse LRU.\n"
+  },
+  "expected": {
+    "tags": [
+      {
+        "type": "decision",
+        "subtype": "tradeoff",
+        "id": "docs/context/cache-strategy.md",
+        "priority": null,
+        "summary": "LRU keeps eviction O(1)",
+        "line": 1
+      }
+    ],
+    "errors": []
+  }
+}

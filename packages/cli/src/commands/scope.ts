@@ -30,12 +30,10 @@ export function runScope(filePath: string): void {
   // Build entries sorted by priority
   const entries = ctx.tags
     .map((tag) => {
-      const ctxFile = tag.id ? ctx.resolvedCtxFiles.get(tag.id) : undefined;
-      const base = {
+      return {
         tag,
         status: statusByLine.get(tag.location.line) ?? ("review-required" as StalenessStatus),
       };
-      return ctxFile ? { ...base, ctxFile } : base;
     })
     .sort((a, b) => priorityRank(a.tag.priority) - priorityRank(b.tag.priority));
 

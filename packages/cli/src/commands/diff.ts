@@ -36,22 +36,9 @@ export function runDiff(filePath: string, ref = "HEAD"): void {
 
   const filteredAnchored = ctx.anchored.filter((a) => lineInRanges(a.tag.location.line, ranges));
 
-  // Collect only referenced ctx files
-  const filteredCtxFiles = new Map<
-    string,
-    typeof ctx.resolvedCtxFiles extends Map<string, infer V> ? V : never
-  >();
-  for (const tag of filteredTags) {
-    const ctxFile = tag.id ? ctx.resolvedCtxFiles.get(tag.id) : undefined;
-    if (tag.id && ctxFile) {
-      filteredCtxFiles.set(tag.id, ctxFile);
-    }
-  }
-
   const filtered: FileContext = {
     file: ctx.file,
     tags: filteredTags,
-    resolvedCtxFiles: filteredCtxFiles,
     anchored: filteredAnchored,
   };
 

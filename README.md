@@ -76,12 +76,8 @@ $ npx codecontext --scope src/payments/gateway.ts --json
       "id": "docs/context/gate-42.md",
       "priority": "critical",
       "status": "verified",
-      "summary": "strict > (not >=): upstream sends at-threshold values during clock skew",
-      "ctxFile": {
-        "body": "## Decision\n\nUse strict greater-than...",
-        "verified": "2025-11-15",
-        "traces": ["JIRA-1234", "INCIDENT-5678"]
-      }
+      "verified": "2026-03-24",
+      "summary": "strict > (not >=): upstream sends at-threshold values during clock skew"
     }
   ]
 }
@@ -292,7 +288,7 @@ The canonical form is `@context <type>...`, which is valid TSDoc. The legacy `@c
 
 Freshness has two modes:
 
-1. `max age`: a tag or `.ctx.md` `verified` date older than the configured threshold requires review.
+1. `max age`: a tag `verified` date older than the configured threshold requires review.
 2. `not older than code`: if the anchored code changes and the verification date did not advance, the staged check fails and tells the developer to either bump the date or delete the stale context.
 
 ## Extended Docs
