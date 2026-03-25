@@ -27,6 +27,21 @@ if (message.timestamp > cutoff) {
 
 Now the constraint is visible before anyone edits the code, human or agent. If someone changes the code without re-verifying the attached context, the freshness gate fails.
 
+And the linked reference can be any supporting artifact. In this case it might be a plain Markdown note committed in the repo:
+
+```md
+<!-- docs/context/gate-42.md -->
+
+# Gate 42
+
+Use `>` instead of `>=`.
+
+The upstream gateway emits boundary timestamps during clock-skew windows.
+Including the boundary replays 0.3% of payments.
+
+See: INCIDENT-5678
+```
+
 A test would help, and you should still want one. But tests and context do different jobs. A test proves that `>=` breaks behavior only if someone already wrote the exact boundary-case test. `@context` explains why the odd-looking `>` is intentional before an editor, reviewer, or agent "cleans it up." Tests protect behavior. `@context` protects intent.
 
 Agents can read code and tests, but they still miss intent when the rationale is trapped in history instead of attached to the line they are editing.
@@ -195,6 +210,28 @@ export default [codecontext.configs.recommended];
 ```
 
 The linter and staged-file gate catch unresolved references, invalid types, expired verification dates, and code changes where the verification date was not advanced.
+
+If an agent edits the guarded code without renewing the inline verification date, the failure should be obvious:
+
+```text
+/src/payments/gateway.ts
+  42:1  error  @context annotation is stale: anchored code changed without advancing [verified:YYYY-MM-DD]  codecontext/no-stale-context
+
+✖ 1 problem (1 error, 0 warnings)
+```
+
+The same rule also trips through the staged-file workflow:
+
+```bash
+$ npx codecontext --staged
+
+src/payments/gateway.ts:42
+  decision #docs/context/gate-42.md
+  status: review-required
+  reason: code changed without verification-date bump
+
+Update [verified:YYYY-MM-DD] or delete the stale context.
+```
 
 Examples live in [`examples/`](examples/) and include TypeScript, Go, and Python source with different context variations.
 
