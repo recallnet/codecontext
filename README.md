@@ -17,9 +17,9 @@ Three days later, 0.3% of transactions started processing twice. The payment gat
 That is the problem codecontext solves.
 
 ```typescript
-// @context decision #docs/context/gate-42.md !critical [verified:2026-03-24] — strict > (not >=): upstream sends
-//   at-threshold values during clock skew. >= causes double-processing.
-//   See INCIDENT-5678.
+// @context decision #.claude/skills/payments-gateway/SKILL.md !critical [verified:2026-03-24] — before editing
+//   this cutoff logic, load the payments-gateway skill. strict > (not >=): upstream sends at-threshold
+//   values during clock skew. >= causes double-processing.
 if (message.timestamp > cutoff) {
   process(message);
 }
@@ -27,19 +27,19 @@ if (message.timestamp > cutoff) {
 
 Now the constraint is visible before anyone edits the code, human or agent. And if an agent changes the guarded code without re-verifying the inline context it just ignored, the freshness gate fails deterministically before the change lands.
 
-And the linked reference can be any supporting artifact. In this case it might be a plain Markdown note committed in the repo:
+And the linked reference can be any supporting artifact. In this case it might be a repo-local skill the agent is expected to load before touching the code:
 
 ```md
-<!-- docs/context/gate-42.md -->
+<!-- .claude/skills/payments-gateway/SKILL.md -->
 
-# Gate 42
+# Payments Gateway Skill
 
-Use `>` instead of `>=`.
+Load this skill before editing the gateway cutoff path.
 
-The upstream gateway emits boundary timestamps during clock-skew windows.
-Including the boundary replays 0.3% of payments.
-
-See: INCIDENT-5678
+- Keep the cutoff comparison strict: `>`, never `>=`.
+- The upstream gateway emits boundary timestamps during clock-skew windows.
+- Including the boundary replays 0.3% of payments.
+- See INCIDENT-5678 for the original production failure.
 ```
 
 A test would help, and you should still want one. But tests and context do different jobs. A test proves that `>=` breaks behavior only if someone already wrote the exact boundary-case test. `@context` explains why the odd-looking `>` is intentional before an editor, reviewer, or agent "cleans it up." Tests protect behavior. `@context` protects intent.
