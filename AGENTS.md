@@ -6,7 +6,8 @@
   merge to `main`.
 - The publish automation lives in
   `.github/workflows/publish-packages.yml`.
-- The canonical public registry is npmjs, not GitHub Packages.
+- The only user-facing package registry for this repo is npmjs.
+- Do not send users to GitHub Packages for install or version verification.
 - npmjs publishing uses GitHub Actions trusted publishing via OIDC, not an
   `NPM_TOKEN` secret.
 - That workflow only publishes when CI succeeds on `main` and there is at
@@ -29,7 +30,6 @@
   behavior. Parser releases do not ship CLI-only fixes.
 - Do not close a bug as "published" just because the fix merged. Confirm the
   package version changed on the registry.
-- For public installs, verify against npmjs with `npm view`, not GitHub
-  Packages.
+- For public installs and published-version checks, use npmjs with `npm view`.
 - If a package fix merged without a changeset, publishing will not happen until
   a new commit adds the missing changeset.
