@@ -7,6 +7,8 @@
 - The publish automation lives in
   `.github/workflows/publish-packages.yml`.
 - The canonical public registry is npmjs, not GitHub Packages.
+- npmjs publishing uses GitHub Actions trusted publishing via OIDC, not an
+  `NPM_TOKEN` secret.
 - That workflow only publishes when CI succeeds on `main` and there is at
   least one pending file in `.changeset/`.
 - If there is no pending changeset, the workflow does nothing, even if code in
