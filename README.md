@@ -391,18 +391,49 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 
 ## Quick Start
 
-### 1. Configure the GitHub Packages registry
+### 1. Authenticate for GitHub Packages
 
-Packages are published to GitHub Packages under the `@recallnet` scope. Add this to your project's `.npmrc`:
+The npm packages in the `@recallnet` scope are published to GitHub Packages, so
+you need a token before `pnpm` or `npm` can install them.
+
+Check whether the GitHub CLI is already authenticated:
+
+```bash
+gh auth status
+```
+
+If not, log in:
+
+```bash
+gh auth login
+```
+
+For project or CI use, prefer an environment variable backed by your GitHub CLI
+token:
+
+```bash
+export NODE_AUTH_TOKEN=$(gh auth token)
+```
+
+Then configure your project's `.npmrc`:
 
 ```ini
 @recallnet:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
 ```
 
-You will need a GitHub personal access token with `read:packages` scope. Set it as `GITHUB_TOKEN`, or use `npm login --registry=https://npm.pkg.github.com`.
+For a one-off local setup, you can also write the token directly to your npm
+config:
 
-### 2. Install
+```bash
+npm config set @recallnet:registry https://npm.pkg.github.com
+npm config set //npm.pkg.github.com/:_authToken "$(gh auth token)"
+```
+
+If you manage tokens manually instead of using `gh`, the token needs
+`read:packages` access to install private packages from GitHub Packages.
+
+### 2. Install the CLI
 
 ```bash
 pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-parser
@@ -411,6 +442,22 @@ pnpm add -D @recallnet/codecontext-eslint-plugin
 # Optional: TSDoc extension if you use eslint-plugin-tsdoc / API Extractor
 pnpm add -D @recallnet/codecontext-tsdoc
 ```
+
+You can also use npm:
+
+```bash
+npm install -D @recallnet/codecontext-cli @recallnet/codecontext-parser
+```
+
+Verify the CLI is available:
+
+```bash
+npx codecontext --help
+```
+
+If install fails with `401 Unauthorized` or `403 Forbidden`, re-run
+`gh auth status`, refresh `NODE_AUTH_TOKEN`, and confirm your `.npmrc` points at
+`https://npm.pkg.github.com` for the `@recallnet` scope.
 
 ### 3. Run the core agent loop
 
