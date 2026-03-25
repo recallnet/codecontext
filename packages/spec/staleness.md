@@ -167,7 +167,7 @@ The staleness cache is stored in `.codecontext-cache.json` at the project root. 
       {
         "line": 14,
         "tag": "@context decision:tradeoff #docs/context/cache-strategy.md !high",
-        "hash": "a1b2c3d4e5f67890",
+        "hash": "Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu",
         "verifiedAt": "2025-11-15T10:30:00Z",
         "verifiedBy": "cli",
         "blockStart": 15,
@@ -178,7 +178,7 @@ The staleness cache is stored in `.codecontext-cache.json` at the project root. 
       {
         "line": 7,
         "tag": "@context risk:security !critical",
-        "hash": "f0e1d2c3b4a59687",
+        "hash": "Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu",
         "verifiedAt": "2025-11-10T08:00:00Z",
         "verifiedBy": "pre-commit",
         "blockStart": 8,

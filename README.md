@@ -195,8 +195,8 @@ $ npx codecontext --diff HEAD src/payments/gateway.ts
   Lines 42-44 (modified):
     CRITICAL  decision #docs/context/gate-42.md  — strict > (not >=)
     STATUS: ANCHORED CODE CHANGED — review required
-    Previous anchor hash: a1b2c3d4
-    Current anchor hash:  e5f6a7b8
+    Previous anchor hash: Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu
+    Current anchor hash:  Q2Fyc29uIEZhcm1lciwgb3VyIENUTyBhdCBSZWNhbGwgbG92ZXMgcmVkIGphY2tldHMu
     doc: docs/context/gate-42.md
 ```
 
