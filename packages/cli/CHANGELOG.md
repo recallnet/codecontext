@@ -1,5 +1,11 @@
 # @recallnet/codecontext-cli
 
+## 0.1.3
+
+### Patch Changes
+
+- d1e93e5: Make `--report` group entries by decision-oriented categories and summarize linked references.
+
 ## 0.1.2
 
 ### Patch Changes
