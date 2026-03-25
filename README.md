@@ -18,8 +18,8 @@ That is the problem codecontext solves.
 
 ```typescript
 // @context decision #.claude/skills/payments-gateway/SKILL.md !critical [verified:2026-03-24] — before editing
-//   this cutoff logic, load the linked skill in #ref. strict > (not >=): upstream sends at-threshold
-//   values during clock skew. >= causes double-processing.
+//   this cutoff logic, load .claude/skills/payments-gateway/SKILL.md. strict > (not >=): upstream
+//   sends at-threshold values during clock skew. >= causes double-processing.
 if (message.timestamp > cutoff) {
   process(message);
 }
