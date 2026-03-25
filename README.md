@@ -353,49 +353,7 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 
 ## Quick Start
 
-### 1. Authenticate for GitHub Packages
-
-The npm packages in the `@recallnet` scope are published to GitHub Packages, so
-you need a token before `pnpm` or `npm` can install them.
-
-Check whether the GitHub CLI is already authenticated:
-
-```bash
-gh auth status
-```
-
-If not, log in:
-
-```bash
-gh auth login
-```
-
-For project or CI use, prefer an environment variable backed by your GitHub CLI
-token:
-
-```bash
-export NODE_AUTH_TOKEN=$(gh auth token)
-```
-
-Then configure your project's `.npmrc`:
-
-```ini
-@recallnet:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
-```
-
-For a one-off local setup, you can also write the token directly to your npm
-config:
-
-```bash
-npm config set @recallnet:registry https://npm.pkg.github.com
-npm config set //npm.pkg.github.com/:_authToken "$(gh auth token)"
-```
-
-If you manage tokens manually instead of using `gh`, the token needs
-`read:packages` access to install private packages from GitHub Packages.
-
-### 2. Install the CLI
+### 1. Install the CLI
 
 ```bash
 pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-parser
@@ -417,11 +375,10 @@ Verify the CLI is available:
 npx codecontext --help
 ```
 
-If install fails with `401 Unauthorized` or `403 Forbidden`, re-run
-`gh auth status`, refresh `NODE_AUTH_TOKEN`, and confirm your `.npmrc` points at
-`https://npm.pkg.github.com` for the `@recallnet` scope.
+The packages are published publicly on npmjs, so you do not need GitHub
+Packages auth or a custom `.npmrc` for normal installs.
 
-### 3. Run the core agent loop
+### 2. Run the core agent loop
 
 ```bash
 # Brief the agent before editing
@@ -434,7 +391,7 @@ npx codecontext --diff HEAD src/your-file.ts
 npx codecontext --staged
 ```
 
-### 4. Configure ESLint (optional)
+### 3. Configure ESLint (optional)
 
 ```javascript
 // eslint.config.js
@@ -446,7 +403,7 @@ export default [
 ];
 ```
 
-### 5. Create context directory
+### 4. Create context directory
 
 ```bash
 mkdir -p docs/context

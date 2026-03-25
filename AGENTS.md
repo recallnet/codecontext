@@ -6,6 +6,7 @@
   merge to `main`.
 - The publish automation lives in
   `.github/workflows/publish-packages.yml`.
+- The canonical public registry is npmjs, not GitHub Packages.
 - That workflow only publishes when CI succeeds on `main` and there is at
   least one pending file in `.changeset/`.
 - If there is no pending changeset, the workflow does nothing, even if code in
@@ -26,5 +27,7 @@
   behavior. Parser releases do not ship CLI-only fixes.
 - Do not close a bug as "published" just because the fix merged. Confirm the
   package version changed on the registry.
+- For public installs, verify against npmjs with `npm view`, not GitHub
+  Packages.
 - If a package fix merged without a changeset, publishing will not happen until
   a new commit adds the missing changeset.

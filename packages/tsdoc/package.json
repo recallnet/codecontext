@@ -9,8 +9,7 @@
     "directory": "packages/tsdoc"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "public"
   },
   "files": [
     "tsdoc-base.json"

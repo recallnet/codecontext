@@ -1,8 +1,8 @@
-# Publish Packages — publishes @codecontext/* packages to GitHub Packages (npm).
+# Publish Packages — publishes @recallnet/* packages to npmjs.
 #
 # Triggers after CI completes on main. Uses changesets to determine which
-# packages have version bumps pending. Versions, commits, and publishes
-# when changesets are present.
+# packages have version bumps pending. Versions, commits, and publishes to
+# npmjs when changesets are present.
 #
 # Only runs on the main repo (not forks) and only on main branch pushes.
 
@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -45,8 +44,7 @@ jobs:
         with:
           node-version: 22
           cache: "pnpm"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@recallnet"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -88,4 +86,4 @@ jobs:
         if: steps.changesets.outputs.has_changesets == 'true'
         run: pnpm changeset publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
