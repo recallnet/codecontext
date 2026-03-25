@@ -1,6 +1,8 @@
 # codecontext
 
-Repo-native decision context for coding agents, with freshness checks when code changes.
+TSDoc-style critical context sharing for coding agents, attached directly to the code they are editing.
+
+`codecontext` makes non-obvious constraints, tradeoffs, and risks machine-readable inline so intent survives agent handoffs, edits, and reviews.
 
 ---
 
@@ -350,6 +352,8 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 ## Quick Start
 
 ### 1. Install the CLI
+
+Install from npmjs:
 
 ```bash
 pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-parser
