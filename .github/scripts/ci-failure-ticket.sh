@@ -10,7 +10,10 @@ RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}"
 
 TITLE="CI: ${JOB_NAME} failed on ${BRANCH}"
 
-LOGS=$(gh run view "$RUN_ID" --log-failed 2>&1 | tail -80 || echo "Logs unavailable")
+LOGS=$(gh run view "$RUN_ID" --log-failed 2>/dev/null | tail -80 || true)
+if [ -z "$LOGS" ]; then
+  LOGS="Logs unavailable"
+fi
 
 EXISTING=$(gh issue list --label bug --state open \
   --search "\"${JOB_NAME} failed on ${BRANCH}\"" \
