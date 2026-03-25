@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   lint-and-typecheck:
     runs-on: ubuntu-latest
@@ -26,6 +30,13 @@ jobs:
         run: pnpm typecheck
       - name: Format check
         run: pnpm format:check
+      - name: Open ticket on failure
+        if: >-
+          failure() &&
+          (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/ci-failure-ticket.sh "lint-and-typecheck" "${{ github.run_id }}"
 
   go-qa:
     runs-on: ubuntu-latest
@@ -38,6 +49,13 @@ jobs:
         run: test -z "$(cd packages/golangci-lint && gofmt -l analyzer plugin)"
       - name: Verify Go analyzer
         run: cd packages/golangci-lint && go test ./...
+      - name: Open ticket on failure
+        if: >-
+          failure() &&
+          (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/ci-failure-ticket.sh "go-qa" "${{ github.run_id }}"
 
   python-qa:
     runs-on: ubuntu-latest
@@ -50,6 +68,13 @@ jobs:
         run: |
           python3 -m unittest discover -s packages/python/tests -t packages/python
           python3 -m compileall -q packages/python/codecontext_python
+      - name: Open ticket on failure
+        if: >-
+          failure() &&
+          (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/ci-failure-ticket.sh "python-qa" "${{ github.run_id }}"
 
   test:
     runs-on: ubuntu-latest
@@ -67,6 +92,13 @@ jobs:
       - run: pnpm build
       - name: Run tests with coverage
         run: pnpm --filter @recallnet/codecontext-parser test:coverage
+      - name: Open ticket on failure
+        if: >-
+          failure() &&
+          (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/ci-failure-ticket.sh "test" "${{ github.run_id }}"
 
   build-verify:
     runs-on: ubuntu-latest
@@ -93,6 +125,13 @@ jobs:
         run: node -e "const m = await import('./packages/eslint-plugin/dist/index.js'); if (!m.default?.rules) throw new Error('Missing rules'); console.log('ESLint plugin exports OK');"
       - name: Verify Go analyzer package
         run: pnpm go:test
+      - name: Open ticket on failure
+        if: >-
+          failure() &&
+          (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/ci-failure-ticket.sh "build-verify" "${{ github.run_id }}"
 
   changeset-check:
     runs-on: ubuntu-latest
@@ -118,3 +157,10 @@ jobs:
               echo "::warning::Source files changed in publishable packages but no changeset found. Run 'pnpm changeset' before merging."
             fi
           fi
+      - name: Open ticket on failure
+        if: >-
+          failure() &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: .github/scripts/ci-failure-ticket.sh "changeset-check" "${{ github.run_id }}"
