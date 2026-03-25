@@ -1,5 +1,13 @@
 # @recallnet/codecontext-cli
 
+## 0.1.5
+
+### Patch Changes
+
+- 32f6214: Add package-level READMEs so npmjs package pages render useful install and usage docs.
+- Updated dependencies [32f6214]
+  - @recallnet/codecontext-parser@0.2.2
+
 ## 0.1.4
 
 ### Patch Changes

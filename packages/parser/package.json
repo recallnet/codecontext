@@ -1,6 +1,6 @@
 {
   "name": "@recallnet/codecontext-parser",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": false,
   "description": "Core parser for @context tags and supporting refs",
   "repository": {
