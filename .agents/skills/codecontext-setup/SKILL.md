@@ -41,7 +41,7 @@ By the end of this workflow, the repo should have:
 
 - a clear `AGENTS.md` section for `codecontext`
 - a sane CLI workflow for agents
-- lint enforcement if the repo uses ESLint
+- the right enforcement surface for the repo's languages and toolchain
 - no misleading guidance about structured sidecar docs
 
 ## Workflow
@@ -53,6 +53,8 @@ Inspect:
 - package manager and workspace layout
 - whether the repo already depends on `@recallnet/codecontext-cli`
 - whether the repo already depends on `@recallnet/codecontext-eslint-plugin`
+- whether the repo already has Python, Go, Rust, or other language-native
+  checkers where `codecontext` enforcement belongs
 - whether ESLint is present and where its shared config lives
 - whether `AGENTS.md` exists at repo root and in subtrees/worktrees
 - whether existing agent docs already mention `@context`, `codecontext`, ADRs,
@@ -72,6 +74,8 @@ Install the minimum useful surface:
   `--report`
 - `@recallnet/codecontext-eslint-plugin` when the repo uses ESLint and wants
   comment validation
+- a language-native checker or analyzer when the repo's main enforcement
+  surface is Python, Go, Rust, or something else outside ESLint
 - `@recallnet/codecontext-parser` only if the repo has custom code that imports
   parser APIs directly
 
@@ -169,13 +173,22 @@ npx @recallnet/codecontext-cli --report
 Use `--report` for repo orientation and decision review. Use `--scope` and
 `--diff` around concrete edits.
 
-## ESLint setup guidance
+## Enforcement guidance
 
 If the repo already has a shared ESLint config, integrate the plugin there.
 Prefer enforcing syntax and stale/invalid ref checks centrally rather than
 telling agents to self-police.
 
 If the repo does not use ESLint, do not force it just for `codecontext`.
+Prefer the native enforcement surface for the repo's actual stack:
+
+- Python repo: native checker or PyPI-distributed tool
+- Go repo: analyzer / `golangci-lint` integration
+- Rust repo: crate / Clippy-style integration
+- mixed or tool-agnostic repo: CLI workflow may be enough initially
+
+The important question is not "did we install the ESLint plugin?"
+It is "what actually enforces `@context` correctness in this ecosystem?"
 
 ## What to look for in a review
 
@@ -195,7 +208,7 @@ When you finish setup or audit work:
 1. state what was installed or changed
 2. call out any stale or contradictory `AGENTS.md` guidance you fixed
 3. mention any remaining gaps
-4. if you did not install the CLI or lint plugin, explain why
+4. if you did not install an enforcement surface, explain why
 
 ## Default recommendation
 
