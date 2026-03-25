@@ -304,48 +304,10 @@ Freshness has two modes:
 // @context related #src/payments/gateway.ts — Matching implementation lives here
 ```
 
-If you want a structured long-form document, `.ctx.md` is still supported, but optional rather than required.
-
-## Structured Context Files (.ctx.md)
-
-When a decision needs more than a one-liner and you want frontmatter plus predictable sections, use a `.ctx.md` file:
-
-```markdown
----
-id: gate-42
-type: decision
-status: active
-verified: 2025-11-15
-owners: ["@alice", "@bob"]
-traces: ["JIRA-1234", "INCIDENT-5678"]
----
-
-## Decision
-
-Use strict greater-than (`>`) not greater-than-or-equal (`>=`) when
-comparing `message.timestamp` against `cutoff`.
-
-## Why
-
-The upstream payment gateway sends messages with timestamps that land
-exactly on the cutoff boundary during clock-skew windows (observed in
-INCIDENT-5678). Using `>=` caused duplicate processing of ~0.3% of
-transactions during peak hours, totaling $12,000 in Q4.
-
-## Alternatives Considered
-
-1. **`>=` with Redis dedup** — Adds a hard dependency on Redis for a
-   case that only matters during clock skew. Rejected.
-2. **Widen the window by 1ms** — Masks the problem, creates a different
-   off-by-one. Rejected.
-3. **Fix upstream clock skew** — Gateway team has no plans to fix.
-   Not an option.
-
-## Constraints
-
-- Upstream gateway will not fix clock-skew behavior
-- SLA requires zero duplicate processing
-```
+The linked file format is intentionally unconstrained. Use Markdown, HTML,
+plain text, diagrams, specs, or any other project artifact that helps explain
+the decision. codecontext treats the reference as a pointer, not a schema
+contract.
 
 ## ESLint Rules
 
@@ -382,7 +344,7 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 | Package                                                          | Description                                         |
 | ---------------------------------------------------------------- | --------------------------------------------------- |
 | [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check          |
-| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and structured docs |
+| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and supporting refs |
 | [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity             |
 | [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint   |
 | [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations  |

@@ -27,6 +27,22 @@ function priorityRank(entry: ReportEntry): number {
   }
 }
 
+function sortEntries(entries: ReportEntry[]): ReportEntry[] {
+  return [...entries].sort((a, b) => {
+    const priorityDelta = priorityRank(a) - priorityRank(b);
+    if (priorityDelta !== 0) {
+      return priorityDelta;
+    }
+
+    const fileDelta = a.file.localeCompare(b.file);
+    if (fileDelta !== 0) {
+      return fileDelta;
+    }
+
+    return a.line - b.line;
+  });
+}
+
 function relativeFile(report: ProjectReport, file: string): string {
   return relative(report.root, file) || file;
 }
@@ -54,14 +70,19 @@ function renderSection(title: string, entries: ReportEntry[], report: ProjectRep
 }
 
 export function formatProjectReport(report: ProjectReport): string {
-  const critical = report.entries
-    .filter((entry) => entry.priority === "critical")
-    .sort((a, b) => priorityRank(a) - priorityRank(b));
-  const stale = report.entries.filter(
-    (entry) => entry.status === "stale" || entry.status === "review-required"
+  const needsReview = sortEntries(
+    report.entries.filter((entry) => entry.status === "stale" || entry.status === "review-required")
   );
-  const assumptions = report.entries.filter(
-    (entry) => entry.type === "decision" && entry.subtype === "assumption"
+  const decisions = sortEntries(
+    report.entries.filter((entry) => entry.type === "decision" && entry.subtype !== "assumption")
+  );
+  const risks = sortEntries(report.entries.filter((entry) => entry.type === "risk"));
+  const assumptions = sortEntries(
+    report.entries.filter((entry) => entry.type === "decision" && entry.subtype === "assumption")
+  );
+  const history = sortEntries(report.entries.filter((entry) => entry.type === "history"));
+  const other = sortEntries(
+    report.entries.filter((entry) => !["decision", "risk", "history"].includes(entry.type))
   );
 
   const lines: string[] = [];
@@ -71,15 +92,20 @@ export function formatProjectReport(report: ProjectReport): string {
   );
   lines.push("");
 
-  lines.push(...renderSection(`Critical Decisions (${String(critical.length)})`, critical, report));
-  lines.push(
-    ...renderSection(`Stale Context Requiring Review (${String(stale.length)})`, stale, report)
-  );
+  lines.push(...renderSection(`Needs Review (${String(needsReview.length)})`, needsReview, report));
+  lines.push(...renderSection(`Decisions (${String(decisions.length)})`, decisions, report));
+  lines.push(...renderSection(`Risks (${String(risks.length)})`, risks, report));
   lines.push(...renderSection(`Assumptions (${String(assumptions.length)})`, assumptions, report));
+  lines.push(...renderSection(`History (${String(history.length)})`, history, report));
+  lines.push(...renderSection(`Other Context (${String(other.length)})`, other, report));
 
   const verified = report.entries.filter((entry) => entry.status === "verified").length;
+  const referenced = report.entries.filter((entry) => entry.id).length;
   lines.push(
     `${DIM}Status summary: ${GREEN}${String(verified)} verified${RESET}${DIM}, ${RED}${String(report.entries.filter((entry) => entry.status === "stale").length)} stale${RESET}${DIM}, ${YELLOW}${String(report.entries.filter((entry) => entry.status === "review-required").length)} review-required${RESET}${DIM}.${RESET}`
+  );
+  lines.push(
+    `${DIM}Reference summary: ${String(referenced)} linked, ${String(report.entries.length - referenced)} inline-only.${RESET}`
   );
 
   return lines.join("\n");

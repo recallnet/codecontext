@@ -5,14 +5,14 @@
 
 ## Abstract
 
-codecontext is a specification for embedding structured decision context directly in source code comments, designed for both human readability and machine consumption. By using a universal `@context` tag syntax that works within any programming language's native comment delimiters, codecontext enables developers, tools, and AI agents to capture, discover, and reason about the _why_ behind code — tradeoffs, constraints, risks, and historical decisions — without leaving the source file. Supporting references can point to any project file, and optional `.ctx.md` documents provide a structured long-form format when teams want one.
+codecontext is a specification for embedding structured decision context directly in source code comments, designed for both human readability and machine consumption. By using a universal `@context` tag syntax that works within any programming language's native comment delimiters, codecontext enables developers, tools, and AI agents to capture, discover, and reason about the _why_ behind code — tradeoffs, constraints, risks, and historical decisions — without leaving the source file. Supporting references can point to any project file, and the specification does not require any particular sidecar document format.
 
 ## Terminology
 
 | Term              | Definition                                                                                                                                                                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Context tag**   | A structured annotation beginning with the `@context` sigil, embedded in a source code comment. A context tag carries a type, optional subtype, optional reference, optional priority, and a human-readable summary.                       |
-| **Context file**  | An optional long-form supporting document referenced from a context tag. A project MAY use ordinary files such as `.md`, `.html`, or source files, or it MAY use the structured `.ctx.md` format defined by this specification.            |
+| **Context file**  | An optional long-form supporting document referenced from a context tag. A project MAY use ordinary files such as `.md`, `.html`, `.txt`, diagrams, or source files. The core specification does not prescribe the file format.            |
 | **Logical block** | The contiguous region of code immediately following a context tag. The logical block is the scope to which the tag applies. Block boundaries are language-dependent (e.g., the next function, class, statement, or brace-delimited block). |
 | **Anchor**        | The association between a context tag and its logical block. The anchor is what makes staleness detection possible: when the logical block changes, the anchor's hash changes.                                                             |
 | **Staleness**     | The condition where the logical block associated with a context tag has been modified since the tag was last verified. Staleness indicates that the context may no longer accurately describe the code.                                    |
@@ -126,7 +126,7 @@ Resolution order:
 2. If a tool supports legacy bare IDs, it MAY also search configured context directories such as `docs/context/`.
 3. If not found, report an unresolved reference (tools SHOULD warn, not error).
 
-See [ctx-files.md](ctx-files.md) for the optional structured `.ctx.md` file format.
+Implementations MAY offer richer previews or parsing for specific file types, but that behavior is implementation-specific and not required by the core specification.
 
 ## Language Adaptation
 
@@ -175,7 +175,6 @@ A **Minimal** conforming implementation MUST:
 A **Standard** conforming implementation MUST satisfy all Minimal requirements and additionally:
 
 - Resolve `#ref` references to project files.
-- If the target uses the structured `.ctx.md` format, parse its YAML frontmatter and Markdown body.
 - Report unresolved references as warnings.
 
 ### Level 3: Full
@@ -232,5 +231,4 @@ Custom types MUST NOT collide with the built-in types defined in this specificat
 ## References
 
 - [syntax.md](syntax.md) — Detailed syntax reference and formal grammar
-- [ctx-files.md](ctx-files.md) — The `.ctx.md` file format
 - [staleness.md](staleness.md) — The staleness detection model
