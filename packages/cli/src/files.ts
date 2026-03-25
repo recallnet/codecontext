@@ -3,7 +3,8 @@ import { join } from "node:path";
 
 const IGNORED_DIRS = new Set([".git", ".turbo", "coverage", "dist", "node_modules"]);
 
-const SOURCE_EXTENSIONS = /\.(ts|tsx|js|jsx|py|rs|go|java|c|cpp|h|hpp|rb|swift|kt)$/;
+const SOURCE_EXTENSIONS =
+  /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs|py|rs|go|java|c|cpp|h|hpp|rb|swift|kt)$/;
 
 export function isSourceFile(relativePath: string): boolean {
   return SOURCE_EXTENSIONS.test(relativePath);
