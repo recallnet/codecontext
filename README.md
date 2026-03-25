@@ -18,7 +18,7 @@ That is the problem codecontext solves.
 
 ```typescript
 // @context decision #.claude/skills/payments-gateway/SKILL.md !critical [verified:2026-03-24] — before editing
-//   this cutoff logic, load the payments-gateway skill. strict > (not >=): upstream sends at-threshold
+//   this cutoff logic, load the linked skill in #ref. strict > (not >=): upstream sends at-threshold
 //   values during clock skew. >= causes double-processing.
 if (message.timestamp > cutoff) {
   process(message);
@@ -27,7 +27,7 @@ if (message.timestamp > cutoff) {
 
 Now the constraint is visible before anyone edits the code, human or agent. And if an agent changes the guarded code without re-verifying the inline context it just ignored, the freshness gate fails deterministically before the change lands.
 
-And the linked reference can be any supporting artifact. In this case it might be a repo-local skill the agent is expected to load before touching the code:
+And the linked reference can be any supporting artifact. Here the `#ref` points directly at a repo-local skill the agent is expected to load before touching the code:
 
 ```md
 <!-- .claude/skills/payments-gateway/SKILL.md -->
