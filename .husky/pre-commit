@@ -36,9 +36,9 @@ pnpm install --frozen-lockfile --ignore-scripts 2>/dev/null || {
 echo "[2/10] Type-checking..."
 npx turbo typecheck
 
-# ── Stage 3: Lint (affected packages) ───────────────────────────────
+# ── Stage 3: Lint (match CI scope) ──────────────────────────────────
 echo "[3/10] Linting..."
-npx turbo lint
+pnpm lint
 
 # ── Stage 4: Build ──────────────────────────────────────────────────
 echo "[4/10] Building..."
