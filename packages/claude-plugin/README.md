@@ -23,11 +23,11 @@ claude --plugin-dir ./node_modules/@recallnet/codecontext-claude-plugin
 
 The plugin adds three native hooks:
 
-| Hook            | Event                 | Behavior                                                                                                                     |
-| --------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `on-read`       | `PostToolUse -> Read` | When Claude reads a file with `@context` tags, a priority-tiered reminder is injected so critical annotations surface first. |
-| `on-edit-guard` | `PreToolUse -> Edit\\ | Write`                                                                                                                       | Before Claude edits a file with `!critical` annotations, an advisory warning reminds it about those constraints. |
-| `on-stop-check` | `Stop`                | When Claude finishes responding, staged files are checked for stale context before commit.                                   |
+| Hook            | Event                         | Behavior                                                                                                                     |
+| --------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `on-read`       | `PostToolUse -> Read`         | When Claude reads a file with `@context` tags, a priority-tiered reminder is injected so critical annotations surface first. |
+| `on-edit-guard` | `PreToolUse -> Edit or Write` | Before Claude edits a file with `!critical` annotations, an advisory warning reminds it about those constraints.             |
+| `on-stop-check` | `Stop`                        | When Claude finishes responding, staged files are checked for stale context before commit.                                   |
 
 It also installs three slash commands:
 
