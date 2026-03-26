@@ -1,5 +1,13 @@
 # @recallnet/codecontext-claude-plugin
 
+## 0.1.3
+
+### Patch Changes
+
+- 0917171: Expand the Claude Code plugin package README so the npm page carries install,
+  hook, command, and workflow details without requiring a jump back to the repo
+  root README.
+
 ## 0.1.2
 
 ### Patch Changes
