@@ -15,12 +15,15 @@
     "python:test": "python3 -m unittest discover -s packages/python/tests -t packages/python",
     "python:qa": "pnpm python:test && python3 -m compileall -q packages/python/codecontext_python",
     "demo:render": "./docs/demos/scripts/render.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs:lint": "recall-docs-governance lint",
+    "docs:lint:changed": "recall-docs-governance lint --changed"
   },
   "devDependencies": {
-    "@microsoft/tsdoc": "^0.16.0",
     "@changesets/cli": "^2.27.0",
     "@eslint/js": "^9.0.0",
+    "@microsoft/tsdoc": "^0.16.0",
+    "@recallnet/docs-governance-preset": "^0.2.2",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-import-x": "^4.0.0",

@@ -1,0 +1,45 @@
+{
+  "docs_policy/v1": {
+    "freshness": {
+      "default_review_policy": "periodic-7",
+      "review_policies": [
+        {
+          "id": "codebound",
+          "mode": "codebound"
+        },
+        {
+          "id": "generated",
+          "mode": "generated"
+        },
+        {
+          "id": "historical",
+          "mode": "historical"
+        },
+        {
+          "id": "periodic-7",
+          "mode": "periodic",
+          "max_age_days": 7
+        }
+      ],
+      "path_defaults": [
+        {
+          "path": "docs/**",
+          "review_policy": "periodic-7"
+        },
+        {
+          "path": "docs/INDEX.md",
+          "review_policy": "generated"
+        }
+      ]
+    },
+    "in_scope_paths": ["docs/**"],
+    "frontmatter_exclude_globs": ["docs/templates/**"],
+    "required_doc_types": [],
+    "root_docs_allowlist": ["docs/INDEX.md"],
+    "root_level_exceptions": [],
+    "orphan_exclude_globs": ["docs/templates/**"],
+    "migration_debt": {
+      "legacy_in_scope_allowlist": []
+    }
+  }
+}

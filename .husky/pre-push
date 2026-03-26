@@ -26,6 +26,10 @@ npx turbo typecheck
 echo "[5/6] Running all tests..."
 npx turbo test
 
+# ── Check 5b: Docs governance ───────────────────────────────────────
+echo "[5b/7] Running docs governance..."
+pnpm docs:lint
+
 # ── Check 6: Go QA gates ────────────────────────────────────────────
 echo "[6/7] Running Go QA gates..."
 pnpm go:qa

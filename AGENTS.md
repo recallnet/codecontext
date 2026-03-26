@@ -61,3 +61,15 @@
 - For public installs and published-version checks, use npmjs with `npm view`.
 - If a package fix merged without a changeset, publishing will not happen until
   a new commit adds the missing changeset.
+
+## Docs Governance
+
+- Use the repo docs governance stack instead of hand-rolled markdown parsing.
+- Keep docs frontmatter valid and review dates current.
+- Default active docs to `periodic-7`. This is the recommended default because active docs drift quickly; if a repo cannot sustain 7-day review, it usually has too many docs.
+- Use `generated`, `codebound`, or `historical` only when they are genuinely correct, not as an escape hatch from freshness enforcement.
+- Add new docs to the rooted docs graph so orphan checks stay clean.
+- Root the graph from `docs/INDEX.md` unless the repo has a stronger canonical entrypoint.
+- Prefer deleting stale docs over re-dating them. Git history already preserves old text; the live docs tree should describe current reality, not accumulate dead docs.
+- Removing stale or duplicate docs is a good default behavior. `rm` is often the right answer.
+- Run `pnpm docs:lint` before merging doc structure or policy changes.

@@ -5,6 +5,7 @@ echo "=== Pre-commit checks ==="
 
 GO_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^packages/golangci-lint/.*\.(go|mod|sum)$' || true)
 PYTHON_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(packages/python/.*\.(py|toml)|examples/python/.*\.py)$' || true)
+DOCS_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(docs/|\.remarkrc\.mjs$|AGENTS\.md$|package\.json$)' || true)
 
 is_js_secret_scan_target() {
   case "$1" in
@@ -63,6 +64,14 @@ if [ -n "$PYTHON_CHANGED" ]; then
   pnpm python:qa
 else
   echo "[7/11] Skipping Python QA gates (no Python changes)"
+fi
+
+# ── Stage 7b: Docs governance ───────────────────────────────────────
+if [ -n "$DOCS_CHANGED" ]; then
+  echo "[7b/11] Running docs governance..."
+  pnpm docs:lint
+else
+  echo "[7b/11] Skipping docs governance (no docs changes)"
 fi
 
 # ── Stage 8: Hardcoded secrets check ────────────────────────────────

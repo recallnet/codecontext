@@ -17,6 +17,7 @@ export default tseslint.config(
       "**/coverage/**",
       "**/node_modules/**",
       "**/.turbo/**",
+      ".remarkrc.mjs",
       "*.config.mjs",
       "**/tsup.config.ts",
       "vitest.config.ts",

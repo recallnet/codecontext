@@ -31,6 +31,8 @@ jobs:
         run: pnpm typecheck
       - name: Format check
         run: pnpm format:check
+      - name: Docs governance
+        run: pnpm docs:lint
       - name: Open ticket on failure
         if: >-
           failure() &&
