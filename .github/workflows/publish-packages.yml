@@ -86,3 +86,90 @@ jobs:
         env:
           NPM_CONFIG_PROVENANCE: "true"
         run: pnpm changeset publish
+
+      - name: Collect published package releases
+        if: steps.changesets.outputs.has_changesets == 'true'
+        id: releases
+        run: |
+          # @context decision: GitHub Releases are package-scoped rather than
+          # repo-scoped because a single Changesets run can publish multiple npm
+          # packages. Collapsing that into one repo release would hide which
+          # package/version pairs actually shipped.
+          node <<'EOF'
+          const fs = require('node:fs');
+          const { execFileSync } = require('node:child_process');
+
+          const outputPath = process.env.RUNNER_TEMP + '/published-releases.json';
+          const diff = execFileSync(
+            'git',
+            ['diff', '--name-only', 'HEAD^', 'HEAD', '--', 'packages/*/package.json'],
+            { encoding: 'utf8' },
+          )
+            .trim()
+            .split('\n')
+            .filter(Boolean);
+
+          const releases = [];
+          for (const file of diff) {
+            const before = JSON.parse(execFileSync('git', ['show', `HEAD^:${file}`], { encoding: 'utf8' }));
+            const after = JSON.parse(fs.readFileSync(file, 'utf8'));
+            if (!after.name || after.private || before.version === after.version) {
+              continue;
+            }
+
+            const shortName = after.name.replace(/^@[^/]+\//, '');
+            releases.push({
+              packageName: after.name,
+              version: after.version,
+              tag: `${shortName}-v${after.version}`,
+              npmUrl: `https://www.npmjs.com/package/${after.name}/v/${after.version}`,
+            });
+          }
+
+          fs.writeFileSync(outputPath, JSON.stringify(releases, null, 2) + '\n');
+          process.stdout.write(`release_count=${releases.length}\n`);
+          process.stdout.write(`release_manifest=${outputPath}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `release_count=${releases.length}\nrelease_manifest=${outputPath}\n`);
+          EOF
+
+      - name: Create GitHub Releases
+        if: >-
+          steps.changesets.outputs.has_changesets == 'true' &&
+          steps.releases.outputs.release_count != '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_MANIFEST: ${{ steps.releases.outputs.release_manifest }}
+        run: |
+          node <<'EOF' > "$RUNNER_TEMP/release-lines.tsv"
+          const fs = require('node:fs');
+
+          const releases = JSON.parse(fs.readFileSync(process.env.RELEASE_MANIFEST, 'utf8'));
+          for (const release of releases) {
+            const body = [
+              `${release.packageName} ${release.version} was published to npmjs from this workflow run.`,
+              '',
+              `npm: ${release.npmUrl}`,
+            ].join('\n');
+            process.stdout.write([
+              release.tag,
+              release.packageName,
+              release.version,
+              Buffer.from(body, 'utf8').toString('base64'),
+            ].join('\t') + '\n');
+          }
+          EOF
+
+          while IFS=$'\t' read -r tag package_name version body_b64; do
+            [ -n "$tag" ] || continue
+            body=$(printf '%s' "$body_b64" | base64 --decode)
+            if gh release view "$tag" >/dev/null 2>&1; then
+              gh release edit "$tag" \
+                --title "$package_name@$version" \
+                --notes "$body"
+            else
+              gh release create "$tag" \
+                --target HEAD \
+                --title "$package_name@$version" \
+                --notes "$body"
+            fi
+          done < "$RUNNER_TEMP/release-lines.tsv"
