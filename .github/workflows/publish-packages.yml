@@ -1,7 +1,7 @@
 # Publish Packages — publishes @recallnet/* packages to npmjs via trusted
-# publishing. This workflow must be the direct publishing workflow configured
-# in npmjs, so it runs on pushes to main instead of chaining off another
-# workflow.
+# publishing and mirrors them to GitHub Packages. This workflow must be the
+# direct publishing workflow configured in npmjs, so it runs on pushes to main
+# instead of chaining off another workflow.
 
 name: Publish Packages
 
@@ -24,6 +24,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +87,21 @@ jobs:
         env:
           NPM_CONFIG_PROVENANCE: "true"
         run: pnpm changeset publish
+
+      - name: Configure GitHub Packages auth
+        if: steps.changesets.outputs.has_changesets == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@recallnet"
+
+      - name: Publish packages to GitHub Packages
+        if: steps.changesets.outputs.has_changesets == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "false"
+        run: pnpm changeset publish --registry=https://npm.pkg.github.com
 
       - name: Collect published package releases
         if: steps.changesets.outputs.has_changesets == 'true'
