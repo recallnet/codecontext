@@ -1,9 +1,7 @@
 import path from "node:path";
 
-import { parseContextTags, type ContextTag } from "@recallnet/codecontext-parser";
-
-const MAX_TAGS_IN_MESSAGE = 6;
-const REMINDER_COOLDOWN_MS = 20_000;
+import { ReminderCooldown, formatReminder } from "@recallnet/codecontext-formatter";
+import { parseContextTags } from "@recallnet/codecontext-parser";
 
 interface PiTextPart {
   type: "text";
@@ -72,15 +70,8 @@ function getTextContent(content: unknown): string {
     .join("\n");
 }
 
-function formatTagLabel(tag: ContextTag): string {
-  const typeLabel = tag.subtype ? `${tag.type}:${tag.subtype}` : tag.type;
-  const priority = tag.priority ? ` !${tag.priority}` : "";
-  const ref = tag.id ? ` {@link ${tag.id}}` : "";
-  return `- L${String(tag.location.line)} @context ${typeLabel}${priority}${ref} — ${tag.summary}`;
-}
-
 export default function codecontextSteeringExtension(pi: PiHost): void {
-  const lastReminderBySnippet = new Map<string, number>();
+  const cooldown = new ReminderCooldown();
 
   pi.on("tool_result", (event, ctx) => {
     if (event.toolName !== "read" || event.isError === true) {
@@ -105,33 +96,21 @@ export default function codecontextSteeringExtension(pi: PiHost): void {
     }
 
     const offset = input.offset ?? 1;
-    const limitKey = input.limit === undefined ? "all" : String(input.limit);
-    const snippetKey = `${absolutePath}:${String(offset)}:${limitKey}`;
-    const now = Date.now();
-    const lastReminderAt = lastReminderBySnippet.get(snippetKey) ?? 0;
-    if (now - lastReminderAt < REMINDER_COOLDOWN_MS) {
+    const snippetKey = ReminderCooldown.readKey(absolutePath, offset, input.limit);
+    if (!cooldown.shouldRemind(snippetKey)) {
       return;
     }
-    lastReminderBySnippet.set(snippetKey, now);
 
     const lineShift = Math.max(offset - 1, 0);
-    const adjustedTags: ContextTag[] = parse.tags.map((tag) => ({
+    const adjustedTags = parse.tags.map((tag) => ({
       ...tag,
       location: { ...tag.location, line: tag.location.line + lineShift },
     }));
 
-    const shown = adjustedTags.slice(0, MAX_TAGS_IN_MESSAGE);
-    const omittedCount = adjustedTags.length - shown.length;
-
-    const reminder = [
-      `Detected ${String(adjustedTags.length)} @context annotation(s) in ${relativePath}.`,
-      "Before changing this area, review the annotation intent and follow any {@link ...} refs that affect your edit.",
-      "",
-      ...shown.map(formatTagLabel),
-      omittedCount > 0 ? `- ...and ${String(omittedCount)} more tag(s) in this read snippet.` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const reminder = formatReminder({
+      file: relativePath,
+      tags: adjustedTags,
+    });
 
     pi.sendMessage(
       {

@@ -1,37 +1,30 @@
 {
-  "name": "@recallnet/codecontext-pi",
+  "name": "@recallnet/codecontext-formatter",
   "version": "0.1.0",
   "private": false,
-  "description": "pi steering extension for surfacing @context annotations during reads",
+  "description": "Shared formatting and reminder utilities for @context annotations",
   "repository": {
     "type": "git",
     "url": "https://github.com/recallnet/codecontext.git",
-    "directory": "packages/pi"
+    "directory": "packages/formatter"
   },
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "keywords": [
-    "pi-package",
-    "codecontext",
-    "agents"
-  ],
-  "pi": {
-    "extensions": [
-      "./dist/index.js"
-    ]
-  },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "lint": "eslint src/",
@@ -39,7 +32,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@recallnet/codecontext-formatter": "workspace:*",
     "@recallnet/codecontext-parser": "workspace:*"
   },
   "devDependencies": {
