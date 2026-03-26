@@ -374,17 +374,19 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 
 ## Packages
 
-| Package                                                          | Description                                          |
-| ---------------------------------------------------------------- | ---------------------------------------------------- |
-| [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check           |
-| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and supporting refs  |
-| [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity              |
-| [`@recallnet/codecontext-pi`](packages/pi)                       | `pi` steering extension for `@context` read hints    |
-| [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint    |
-| [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations   |
-| [`packages/ruby`](packages/ruby)                                 | Ruby-native checker gem for `# @context` annotations |
-| [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                      |
-| [`@recallnet/codecontext-tsdoc`](packages/tsdoc)                 | TSDoc extension for the `@context` block tag         |
+| Package                                                          | Description                                           |
+| ---------------------------------------------------------------- | ----------------------------------------------------- |
+| [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check            |
+| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and supporting refs   |
+| [`@recallnet/codecontext-formatter`](packages/formatter)         | Shared formatting, priority tiers, and cooldown utils |
+| [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity               |
+| [`@recallnet/codecontext-claude-plugin`](packages/claude-plugin) | Installable Claude Code plugin with hooks and skills  |
+| [`@recallnet/codecontext-pi`](packages/pi)                       | `pi` steering extension for `@context` read hints     |
+| [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint     |
+| [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations    |
+| [`packages/ruby`](packages/ruby)                                 | Ruby-native checker gem for `# @context` annotations  |
+| [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                       |
+| [`@recallnet/codecontext-tsdoc`](packages/tsdoc)                 | TSDoc extension for the `@context` block tag          |
 
 ## Quick Start
 
@@ -481,6 +483,66 @@ mkdir -p docs/context
 # .husky/pre-commit or .git/hooks/pre-commit
 npx codecontext --staged
 ```
+
+## Claude Code Integration
+
+codecontext ships an installable Claude Code plugin that surfaces `@context` annotations automatically during your workflow — no manual CLI calls required.
+
+### Install the plugin
+
+```bash
+# From npm (via a marketplace or local dev)
+claude --plugin-dir ./node_modules/@recallnet/codecontext-claude-plugin
+```
+
+Or install the npm package and point your plugin config at it:
+
+```bash
+npm install @recallnet/codecontext-claude-plugin
+```
+
+### What you get
+
+**Three native hooks** activate automatically:
+
+| Hook            | Event                      | What it does                                                                                                                                     |
+| --------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `on-read`       | `PostToolUse → Read`       | When Claude reads a file with `@context` tags, a priority-tiered reminder is injected into the conversation. Critical annotations surface first. |
+| `on-edit-guard` | `PreToolUse → Edit\|Write` | Before Claude edits a file with `!critical` annotations, an advisory warning reminds it of the constraints.                                      |
+| `on-stop-check` | `Stop`                     | When Claude finishes responding, staged files are checked for stale context.                                                                     |
+
+**Three slash commands** become available:
+
+| Command                 | Purpose                                                          |
+| ----------------------- | ---------------------------------------------------------------- |
+| `/context-scope <file>` | Pre-edit briefing — surface all annotations sorted by priority   |
+| `/context-diff <file>`  | Post-edit check — show which annotations are affected by changes |
+| `/context-staged`       | Pre-commit gate — check all staged files for staleness           |
+
+**Priority-tiered steering** groups annotations by urgency:
+
+```
+── MUST-READ (critical) ──
+L42  @context decision:constraint !critical — Strict > avoids duplicate processing
+
+── WARNING (high) ──
+L78  @context risk:security !high — Rate limit bypass if cache evicted
+
+── INFO ──
+L103 @context history — Migrated from v1 API
+```
+
+**Skill-ref detection** — when an annotation links to a Claude skill via `{@link file:.claude/skills/.../SKILL.md}`, the hook explicitly tells Claude to load that skill before editing.
+
+### How it works with the agent loop
+
+Without the plugin, the agent loop requires manual CLI calls. With it:
+
+1. Claude reads a file → the `on-read` hook automatically surfaces `@context` reminders
+2. Claude starts an edit → the `on-edit-guard` hook warns about `!critical` constraints
+3. Claude finishes → the `on-stop-check` hook catches stale context before commit
+
+The plugin uses the same `codecontext` CLI under the hood. All hook scripts include cooldown/dedup logic to avoid nagging on repeated reads of the same file.
 
 ## License
 
