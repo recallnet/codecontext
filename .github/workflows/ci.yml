@@ -33,6 +33,8 @@ jobs:
         run: pnpm format:check
       - name: Docs governance
         run: pnpm docs:lint
+      - name: Skills validation
+        run: pnpm skills:lint
       - name: Open ticket on failure
         if: >-
           failure() &&

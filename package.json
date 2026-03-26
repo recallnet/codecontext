@@ -17,7 +17,8 @@
     "demo:render": "./docs/demos/scripts/render.sh",
     "prepare": "husky",
     "docs:lint": "recall-docs-governance lint",
-    "docs:lint:changed": "recall-docs-governance lint --changed"
+    "docs:lint:changed": "recall-docs-governance lint --changed",
+    "skills:lint": "ruby scripts/validate-skills.rb"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

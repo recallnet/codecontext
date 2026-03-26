@@ -1,5 +1,15 @@
 # AGENTS
 
+## Commit Flow
+
+- This is a Recall Labs repo. Use the global `recall-commit` skill for commits
+  here.
+- Default commit flow for this repo:
+  stage the intended changes
+  capture any high-leverage learnings in `AGENT-LEARNINGS.md` if warranted
+  commit with a conventional commit message using the recall-commit format
+- Do not use ad hoc one-line commits when the recall-commit guard applies.
+
 ## codecontext
 
 - Use inline `@context` annotations for non-obvious, high-value reasoning that

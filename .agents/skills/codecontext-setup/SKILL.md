@@ -1,6 +1,6 @@
 ---
 name: codecontext-setup
-description: >
+description: >-
   Set up or repair codecontext adoption in a project. Use this whenever the user
   wants to add @context annotations to a repo, install the codecontext toolchain,
   update AGENTS.md guidance, improve agent workflows around decision capture, or

@@ -30,12 +30,16 @@ npx turbo test
 echo "[5b/7] Running docs governance..."
 pnpm docs:lint
 
+# ── Check 5c: Skills validation ─────────────────────────────────────
+echo "[5c/8] Validating skills..."
+pnpm skills:lint
+
 # ── Check 6: Go QA gates ────────────────────────────────────────────
-echo "[6/7] Running Go QA gates..."
+echo "[6/8] Running Go QA gates..."
 pnpm go:qa
 
 # ── Check 7: Python QA gates ────────────────────────────────────────
-echo "[7/7] Running Python QA gates..."
+echo "[7/8] Running Python QA gates..."
 pnpm python:qa
 
 echo "✅ All pre-push checks passed"

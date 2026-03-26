@@ -6,6 +6,7 @@ echo "=== Pre-commit checks ==="
 GO_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^packages/golangci-lint/.*\.(go|mod|sum)$' || true)
 PYTHON_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(packages/python/.*\.(py|toml)|examples/python/.*\.py)$' || true)
 DOCS_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(docs/|\.remarkrc\.mjs$|AGENTS\.md$|package\.json$)' || true)
+SKILLS_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(\.agents/skills/.*/SKILL\.md|scripts/validate-skills\.rb|package\.json$)' || true)
 
 is_js_secret_scan_target() {
   case "$1" in
@@ -72,6 +73,14 @@ if [ -n "$DOCS_CHANGED" ]; then
   pnpm docs:lint
 else
   echo "[7b/11] Skipping docs governance (no docs changes)"
+fi
+
+# ── Stage 7c: Skills validation ─────────────────────────────────────
+if [ -n "$SKILLS_CHANGED" ]; then
+  echo "[7c/11] Validating skills..."
+  pnpm skills:lint
+else
+  echo "[7c/11] Skipping skills validation (no skill changes)"
 fi
 
 # ── Stage 8: Hardcoded secrets check ────────────────────────────────

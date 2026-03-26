@@ -13,6 +13,25 @@ Entries tagged `meta` are cross-cutting (not repo-specific) and surfaced team-wi
 
 <!-- Entries below, newest first -->
 
+### 2026-03-25 — Skill files need a repo-enforced YAML parse gate (confirmed)
+
+Author: devrel
+Insight: Fixing one broken `SKILL.md` file is not enough; repos that rely on
+agent skills need an explicit frontmatter parse check in local hooks and CI or
+the same class of load failure will reappear silently.
+
+Detail: `codecontext-setup` had already been manually repaired, but the GitHub
+issue stayed open because there was no guardrail preventing future invalid YAML
+frontmatter. The durable fix was to lint every repo-local `SKILL.md` file with
+YAML parsing and required-field checks, then wire that command into pre-commit,
+pre-push, and CI.
+
+Directive: Validate all repo-local skill frontmatter in automation. Do not rely
+on manual fixes or spot checks for skill loadability.
+Action: Keep `pnpm skills:lint` wired into hooks and CI, and require `name` and
+`description` as non-empty frontmatter strings for every `SKILL.md`.
+Context: main branch, closing issue #5 about invalid skill YAML frontmatter
+
 ### 2026-03-24 — Shared conformance fixtures must allow language-specific source shapes (confirmed)
 
 Author: Hatch
