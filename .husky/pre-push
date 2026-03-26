@@ -42,4 +42,8 @@ pnpm go:qa
 echo "[7/8] Running Python QA gates..."
 pnpm python:qa
 
+# ── Check 8: Ruby QA gates ──────────────────────────────────────────
+echo "[8/9] Running Ruby QA gates..."
+pnpm ruby:qa
+
 echo "✅ All pre-push checks passed"

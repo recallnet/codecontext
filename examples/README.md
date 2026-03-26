@@ -1,6 +1,6 @@
 # Examples
 
-This folder contains small TypeScript, Go, and Python examples showing different
+This folder contains small TypeScript, Go, and Ruby examples showing different
 `@context` variations:
 
 - canonical `@context <type>` syntax
@@ -8,13 +8,13 @@ This folder contains small TypeScript, Go, and Python examples showing different
 - `decision`, `requirement`, `risk`, `related`, `history`, and `doc`
 - subtype usage
 - explicit `[verified:YYYY-MM-DD]` dates on tags
-- direct `#ref` links to ordinary project files
+- direct `{@link file:...}` links to ordinary project files
 
 Files:
 
 - `ts/payments/gateway.ts`
 - `go/payments/gateway.go`
-- `python/payments/gateway.py`
+- `ruby/payments/gateway.rb`
 - `docs/context/gate-42.md`
 - `docs/context/cache-strategy.md`
 - `docs/requirements/billing-rounding.md`

@@ -233,7 +233,7 @@ src/payments/gateway.ts:42
 Update [verified:YYYY-MM-DD] or delete the stale context.
 ```
 
-Examples live in [`examples/`](examples/) and include TypeScript, Go, and Python source with different context variations.
+Examples live in [`examples/`](examples/) and include TypeScript, Go, and Ruby source with different context variations.
 
 ## Terminal Demos
 
@@ -368,22 +368,23 @@ codecontext is a **language-agnostic specification**. The `@context` tag works i
 | `<!-- -->`    | HTML, XML, SVG                                                    |
 | `{/* */}`     | JSX, TSX                                                          |
 
-The TypeScript implementation landed first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where that matters. Go support is available through the `go/analysis` package in `packages/golangci-lint`, and Python support is available through the native checker in `packages/python`.
+The TypeScript implementation landed first. The parser and CLI already work on files in any of these languages. Language-specific packages provide native linting integrations where that matters. Go support is available through the `go/analysis` package in `packages/golangci-lint`, Python support is available through the native checker in `packages/python`, and Ruby support is available through the native checker gem in `packages/ruby`.
 
 See the full [specification](packages/spec/SPEC.md) for adaptation rules and conformance levels.
 
 ## Packages
 
-| Package                                                          | Description                                         |
-| ---------------------------------------------------------------- | --------------------------------------------------- |
-| [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check          |
-| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and supporting refs |
-| [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity             |
-| [`@recallnet/codecontext-pi`](packages/pi)                       | `pi` steering extension for `@context` read hints   |
-| [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint   |
-| [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations  |
-| [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                     |
-| [`@recallnet/codecontext-tsdoc`](packages/tsdoc)                 | TSDoc extension for the `@context` block tag        |
+| Package                                                          | Description                                          |
+| ---------------------------------------------------------------- | ---------------------------------------------------- |
+| [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check           |
+| [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and supporting refs  |
+| [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity              |
+| [`@recallnet/codecontext-pi`](packages/pi)                       | `pi` steering extension for `@context` read hints    |
+| [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint    |
+| [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations   |
+| [`packages/ruby`](packages/ruby)                                 | Ruby-native checker gem for `# @context` annotations |
+| [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                      |
+| [`@recallnet/codecontext-tsdoc`](packages/tsdoc)                 | TSDoc extension for the `@context` block tag         |
 
 ## Quick Start
 
@@ -411,6 +412,12 @@ If you use `pi`, install the extension from npmjs instead of a git URL:
 
 ```bash
 pi install @recallnet/codecontext-pi
+```
+
+If you want native Ruby checking from this repo today:
+
+```bash
+ruby -Ipackages/ruby/lib packages/ruby/exe/codecontext-ruby app lib
 ```
 
 Verify the CLI is available:

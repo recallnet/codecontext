@@ -54,6 +54,7 @@ Inspect:
 - whether the repo already depends on `@recallnet/codecontext-cli`
 - whether the repo already depends on `@recallnet/codecontext-eslint-plugin`
 - whether the repo already has Python, Go, Rust, or other language-native
+- whether the repo already has Python, Go, Ruby, Rust, or other language-native
   checkers where `codecontext` enforcement belongs
 - whether ESLint is present and where its shared config lives
 - whether `AGENTS.md` exists at repo root and in subtrees/worktrees
@@ -184,6 +185,7 @@ Prefer the native enforcement surface for the repo's actual stack:
 
 - Python repo: native checker or PyPI-distributed tool
 - Go repo: analyzer / `golangci-lint` integration
+- Ruby repo: native checker gem or RuboCop-style integration
 - Rust repo: crate / Clippy-style integration
 - mixed or tool-agnostic repo: CLI workflow may be enough initially
 

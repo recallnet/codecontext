@@ -14,7 +14,7 @@ context-tag     ::= "@context" <space> type sub-type? ref? priority? verified? s
 
 type            ::= <[a-z][a-z0-9]*>
 sub-type        ::= ":" <[a-z][a-z0-9]*>
-ref             ::= "#" <non-space path text>
+ref             ::= "{@link" <space> <non-space target text> "}"
 priority        ::= "!" priority-level
 priority-level  ::= "critical" | "high" | "low"
 verified        ::= "[verified:" iso-date "]"

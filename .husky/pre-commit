@@ -5,6 +5,7 @@ echo "=== Pre-commit checks ==="
 
 GO_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^packages/golangci-lint/.*\.(go|mod|sum)$' || true)
 PYTHON_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(packages/python/.*\.(py|toml)|examples/python/.*\.py)$' || true)
+RUBY_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(packages/ruby/.*\.(rb|gemspec|md)|examples/ruby/.*\.rb)$' || true)
 DOCS_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(docs/|\.remarkrc\.mjs$|AGENTS\.md$|package\.json$)' || true)
 SKILLS_CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(\.agents/skills/.*/SKILL\.md|scripts/validate-skills\.rb|package\.json$)' || true)
 
@@ -65,6 +66,14 @@ if [ -n "$PYTHON_CHANGED" ]; then
   pnpm python:qa
 else
   echo "[7/11] Skipping Python QA gates (no Python changes)"
+fi
+
+# ── Stage 7a: Ruby QA gates ─────────────────────────────────────────
+if [ -n "$RUBY_CHANGED" ]; then
+  echo "[7a/11] Running Ruby QA gates..."
+  pnpm ruby:qa
+else
+  echo "[7a/11] Skipping Ruby QA gates (no Ruby changes)"
 fi
 
 # ── Stage 7b: Docs governance ───────────────────────────────────────
