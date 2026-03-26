@@ -212,8 +212,8 @@ jobs:
 
             execFileSync(
               'npm',
-              ['publish', release.directory, '--provenance', '--registry=https://registry.npmjs.org'],
-              { stdio: 'inherit' },
+              ['publish', '.', '--provenance', '--registry=https://registry.npmjs.org'],
+              { cwd: release.directory, stdio: 'inherit' },
             );
           }
           EOF
@@ -265,8 +265,8 @@ jobs:
 
             execFileSync(
               'npm',
-              ['publish', release.directory, '--registry=https://npm.pkg.github.com'],
-              { stdio: 'inherit' },
+              ['publish', '.', '--registry=https://npm.pkg.github.com'],
+              { cwd: release.directory, stdio: 'inherit' },
             );
           }
           EOF
