@@ -279,6 +279,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_MANIFEST: ${{ steps.releases.outputs.release_manifest }}
         run: |
+          release_target=$(git rev-parse HEAD)
           node <<'EOF' > "$RUNNER_TEMP/release-lines.tsv"
           const fs = require('node:fs');
 
@@ -308,7 +309,7 @@ jobs:
                 --notes "$body"
             else
               gh release create "$tag" \
-                --target HEAD \
+                --target "$release_target" \
                 --title "$package_name@$version" \
                 --notes "$body"
             fi
