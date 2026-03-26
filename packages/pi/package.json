@@ -1,6 +1,6 @@
 {
   "name": "@recallnet/codecontext-pi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "pi steering extension for surfacing @context annotations during reads",
   "repository": {

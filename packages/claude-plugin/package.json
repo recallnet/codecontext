@@ -1,6 +1,6 @@
 {
   "name": "@recallnet/codecontext-claude-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Claude Code plugin for surfacing @context annotations during reads and edits",
   "repository": {
