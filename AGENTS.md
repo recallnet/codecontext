@@ -46,8 +46,14 @@
   `.github/workflows/publish-packages.yml`.
 - The only user-facing package registry for this repo is npmjs.
 - Do not send users to GitHub Packages for install or version verification.
+- Do not send users to repo git URLs for install when a public npm package
+  exists. The `pi` extension should be installed as `@recallnet/codecontext-pi`
+  from npmjs, not from `git:github.com/recallnet/codecontext.git`.
 - npmjs publishing uses GitHub Actions trusted publishing via OIDC, not an
   `NPM_TOKEN` secret.
+- New npm packages need their own npmjs trusted-publisher entry pointing at
+  `recallnet/codecontext` and `.github/workflows/publish-packages.yml` before
+  automated releases will work for that package.
 - That workflow only publishes when CI succeeds on `main` and there is at
   least one pending file in `.changeset/`.
 - If there is no pending changeset, the workflow does nothing, even if code in

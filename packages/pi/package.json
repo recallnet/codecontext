@@ -1,0 +1,50 @@
+{
+  "name": "@recallnet/codecontext-pi",
+  "version": "0.1.0",
+  "private": false,
+  "description": "pi steering extension for surfacing @context annotations during reads",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recallnet/codecontext.git",
+    "directory": "packages/pi"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "codecontext",
+    "agents"
+  ],
+  "pi": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint src/",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@recallnet/codecontext-parser": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

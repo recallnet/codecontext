@@ -128,6 +128,8 @@ jobs:
         run: node -e "const m = await import('./packages/parser/dist/index.js'); if (!m.parseContextTags) throw new Error('Missing export'); console.log('Parser exports OK');"
       - name: Verify ESLint plugin exports
         run: node -e "const m = await import('./packages/eslint-plugin/dist/index.js'); if (!m.default?.rules) throw new Error('Missing rules'); console.log('ESLint plugin exports OK');"
+      - name: Verify pi extension exports
+        run: node -e "const m = await import('./packages/pi/dist/index.js'); if (typeof m.default !== 'function') throw new Error('Missing extension export'); console.log('pi extension exports OK');"
       - name: Verify Go analyzer package
         run: pnpm go:test
       - name: Open ticket on failure

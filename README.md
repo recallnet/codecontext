@@ -379,6 +379,7 @@ See the full [specification](packages/spec/SPEC.md) for adaptation rules and con
 | [`@recallnet/codecontext-cli`](packages/cli)                     | CLI tool — query, scope, diff, stale-check          |
 | [`@recallnet/codecontext-parser`](packages/parser)               | Core parser for `@context` tags and supporting refs |
 | [`@recallnet/codecontext-eslint-plugin`](packages/eslint-plugin) | ESLint rules for freshness and validity             |
+| [`@recallnet/codecontext-pi`](packages/pi)                       | `pi` steering extension for `@context` read hints   |
 | [`packages/golangci-lint`](packages/golangci-lint)               | Go analyzer and `golangci-lint` plugin entrypoint   |
 | [`packages/python`](packages/python)                             | Python-native checker for `# @context` annotations  |
 | [`@recallnet/codecontext-spec`](packages/spec)                   | Language-agnostic specification                     |
@@ -394,6 +395,8 @@ Install from npmjs:
 pnpm add -D @recallnet/codecontext-cli @recallnet/codecontext-parser
 # Optional: ESLint plugin for freshness enforcement
 pnpm add -D @recallnet/codecontext-eslint-plugin
+# Optional: pi steering extension for read-time @context reminders
+pnpm add @recallnet/codecontext-pi
 # Optional: TSDoc extension if you use eslint-plugin-tsdoc / API Extractor
 pnpm add -D @recallnet/codecontext-tsdoc
 ```
@@ -402,6 +405,12 @@ You can also use npm:
 
 ```bash
 npm install -D @recallnet/codecontext-cli @recallnet/codecontext-parser
+```
+
+If you use `pi`, install the extension from npmjs instead of a git URL:
+
+```bash
+pi install @recallnet/codecontext-pi
 ```
 
 Verify the CLI is available:
