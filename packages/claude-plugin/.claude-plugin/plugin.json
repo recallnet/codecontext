@@ -1,0 +1,14 @@
+{
+  "name": "codecontext",
+  "version": "0.1.0",
+  "description": "Surface inline @context annotations automatically during code reads and edits. Priority-tiered steering for critical constraints, tradeoffs, and risks.",
+  "author": {
+    "name": "Recall Labs"
+  },
+  "homepage": "https://github.com/recallnet/codecontext",
+  "repository": "https://github.com/recallnet/codecontext",
+  "license": "MIT",
+  "keywords": ["codecontext", "context", "annotations", "steering", "code-review"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}

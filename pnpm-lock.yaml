@@ -66,6 +66,8 @@ importers:
         specifier: ^8.0.0
         version: 8.57.2(eslint@9.39.4)(typescript@5.9.3)
 
+  packages/claude-plugin: {}
+
   packages/cli:
     dependencies:
       '@recallnet/codecontext-parser':

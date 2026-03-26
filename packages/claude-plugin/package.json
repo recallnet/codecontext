@@ -1,0 +1,27 @@
+{
+  "name": "@recallnet/codecontext-claude-plugin",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Claude Code plugin for surfacing @context annotations during reads and edits",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recallnet/codecontext.git",
+    "directory": "packages/claude-plugin"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "claude-code-plugin",
+    "codecontext",
+    "annotations",
+    "code-review"
+  ],
+  "files": [
+    ".claude-plugin",
+    "skills",
+    "hooks",
+    "scripts"
+  ],
+  "license": "MIT"
+}
