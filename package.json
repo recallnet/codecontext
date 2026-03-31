@@ -27,7 +27,7 @@
     "@changesets/cli": "^2.27.0",
     "@eslint/js": "^9.0.0",
     "@microsoft/tsdoc": "^0.16.0",
-    "@recallnet/docs-governance-preset": "^0.2.2",
+    "@recallnet/docs-governance-preset": "^0.3.3",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-import-x": "^4.0.0",

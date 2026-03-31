@@ -1,5 +1,6 @@
 {
   "docs_policy/v1": {
+    "profile": "repo-docs",
     "freshness": {
       "default_review_policy": "periodic-7",
       "review_policies": [
@@ -29,6 +30,10 @@
         {
           "path": "docs/INDEX.md",
           "review_policy": "generated"
+        },
+        {
+          "path": "docs/templates/**",
+          "review_policy": "generated"
         }
       ]
     },
@@ -38,6 +43,43 @@
     "root_docs_allowlist": ["docs/INDEX.md"],
     "root_level_exceptions": [],
     "orphan_exclude_globs": ["docs/templates/**"],
+    "taxonomy": {
+      "exclude_globs": ["docs/templates/**"],
+      "doc_types": [
+        {
+          "id": "index",
+          "path_globs": ["docs/INDEX.md"],
+          "filename_pattern": "^INDEX\\.md$"
+        },
+        {
+          "id": "decision",
+          "path_globs": ["docs/decisions/**"],
+          "filename_pattern": "^[0-9]{3}-[a-z0-9-]+\\.md$"
+        },
+        {
+          "id": "observation",
+          "path_globs": ["docs/observations/**"],
+          "filename_pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+\\.md$",
+          "allowed_filenames": ["research-log.md"]
+        },
+        {
+          "id": "how-to",
+          "path_globs": ["docs/how-to/**"]
+        },
+        {
+          "id": "reference",
+          "path_globs": ["docs/reference/**", "docs/contracts/**"]
+        },
+        {
+          "id": "explanation",
+          "path_globs": ["docs/explanation/**", "docs/services/**"]
+        },
+        {
+          "id": "runbook",
+          "path_globs": ["docs/runbooks/**"]
+        }
+      ]
+    },
     "migration_debt": {
       "legacy_in_scope_allowlist": []
     }

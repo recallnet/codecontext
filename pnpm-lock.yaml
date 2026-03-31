@@ -18,8 +18,8 @@ importers:
         specifier: ^0.16.0
         version: 0.16.0
       '@recallnet/docs-governance-preset':
-        specifier: ^0.2.2
-        version: 0.2.2
+        specifier: ^0.3.3
+        version: 0.3.3
       eslint:
         specifier: ^9.0.0
         version: 9.39.4
@@ -605,24 +605,30 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@recallnet/docs-governance-policy@0.2.1':
-    resolution: {integrity: sha512-2h/MEq+9+Vb2wMV4zGP04Nm9Fy6HgAoAmYFQveTAXMuVqxhOit2maR8XzkoJ/s7cH58kUIhzJ2BNLNjqjkVBiA==}
+  '@recallnet/docs-governance-policy@0.3.1':
+    resolution: {integrity: sha512-Q6plUYVOXDva0wwmJPoE1jIG0BchDq9Ytp9J0bcZwKMPLc19YBhqY9M4kOtfjrZ+NFzwA6G5TBoEWwkx31uzKw==}
     engines: {node: '>=20.0.0'}
 
-  '@recallnet/docs-governance-preset@0.2.2':
-    resolution: {integrity: sha512-YpguGWTqkRIaOvMxB9ISCpcQbHv3hbx1HfZI2TtqQx+BqAQxfJL1TFgPS0QCq2r9fK6bfD190ds6nbmj46raSg==}
+  '@recallnet/docs-governance-preset@0.3.3':
+    resolution: {integrity: sha512-KferH1ctHgl+fGtQQ6pT6nehc85+WJkV1mrxZt7Zw2DwgnMofWWDdSgyvw+wmdGh1IFSOPBah0Rp/tsIJ97VkA==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
-  '@recallnet/remark-lint-docs-freshness@0.2.1':
-    resolution: {integrity: sha512-S7z5ywboyy4h+RrIbv8E/C9hZxxWcNUVp20naxVTpnlOMw1h91RaVgzcQh06dHxrj/kZiQOlnQtTsc5hU7Un+Q==}
+  '@recallnet/remark-lint-docs-freshness@0.2.7':
+    resolution: {integrity: sha512-J2zaCqlrIuqDAL9adUJiGk+6o4mtH1V4XfUHUwIxrGY+0rRvW2b6BoTQBFM8Z2Y6hgGJNgRSzOlIHaoyUB270A==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       remark-frontmatter: ^5.0.0
 
-  '@recallnet/remark-lint-docs-reachability@0.2.1':
-    resolution: {integrity: sha512-FOM82dENWjQsMeGmcD/HAzKGRrVWVEcj4fzodrIdivKliqX2Qu0Vp8wcm22OAB/4xJZYJBv//stO02uo6QZE9g==}
+  '@recallnet/remark-lint-docs-reachability@0.2.7':
+    resolution: {integrity: sha512-ldNTfR8sLCalfs2YzRdmynyOy6swQP1YSVUeog1FPO6fxPNXBSzdVyHYVWKfCDM3G3WRxoB4kHrVwdPq8qoFGQ==}
     engines: {node: '>=20.0.0'}
+
+  '@recallnet/remark-lint-docs-taxonomy@0.2.3':
+    resolution: {integrity: sha512-LegQyHKzW2mzCmDEAtgaBhcX0tUNuqZ39+cuQM7rbrUTA9q9o4zeGJo1OXqO1p6LEiuLJtSBgqrqtem/ZI1Aaw==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      remark-frontmatter: ^5.0.0
 
   '@rollup/rollup-android-arm-eabi@4.60.0':
     resolution: {integrity: sha512-WOhNW9K8bR3kf4zLxbfg6Pxu2ybOUbB2AjMDHSQx86LIF4rH4Ft7vmMwNt0loO0eonglSNy4cpD3MKXXKQu0/A==}
@@ -2822,6 +2828,9 @@ packages:
     resolution: {integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
+  vfile-matter@5.0.1:
+    resolution: {integrity: sha512-o6roP82AiX0XfkyTHyRCMXgHfltUNlXSEqCIS80f+mbAyiQBE2fxtDVMtseyytGx75sihiJFo/zR6r/4LTs2Cw==}
+
   vfile-message@3.1.4:
     resolution: {integrity: sha512-fa0Z6P8HUrQN4BZaX05SIVXic+7kE3b05PWAtPuYP9QLHsLKYR7/AlLW3NtOrpXRLeawpDLMsVkmk5DG0NXgWw==}
 
@@ -3454,13 +3463,14 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@recallnet/docs-governance-policy@0.2.1': {}
+  '@recallnet/docs-governance-policy@0.3.1': {}
 
-  '@recallnet/docs-governance-preset@0.2.2':
+  '@recallnet/docs-governance-preset@0.3.3':
     dependencies:
-      '@recallnet/docs-governance-policy': 0.2.1
-      '@recallnet/remark-lint-docs-freshness': 0.2.1(remark-frontmatter@5.0.0)
-      '@recallnet/remark-lint-docs-reachability': 0.2.1
+      '@recallnet/docs-governance-policy': 0.3.1
+      '@recallnet/remark-lint-docs-freshness': 0.2.7(remark-frontmatter@5.0.0)
+      '@recallnet/remark-lint-docs-reachability': 0.2.7
+      '@recallnet/remark-lint-docs-taxonomy': 0.2.3(remark-frontmatter@5.0.0)
       remark-cli: 12.0.1
       remark-frontmatter: 5.0.0
       remark-lint-frontmatter-schema: 3.15.4
@@ -3469,19 +3479,25 @@ snapshots:
       - bluebird
       - supports-color
 
-  '@recallnet/remark-lint-docs-freshness@0.2.1(remark-frontmatter@5.0.0)':
+  '@recallnet/remark-lint-docs-freshness@0.2.7(remark-frontmatter@5.0.0)':
     dependencies:
-      '@recallnet/docs-governance-policy': 0.2.1
+      '@recallnet/docs-governance-policy': 0.3.1
       remark-frontmatter: 5.0.0
-      yaml: 2.8.3
+      vfile-matter: 5.0.1
 
-  '@recallnet/remark-lint-docs-reachability@0.2.1':
+  '@recallnet/remark-lint-docs-reachability@0.2.7':
     dependencies:
-      '@recallnet/docs-governance-policy': 0.2.1
+      '@recallnet/docs-governance-policy': 0.3.1
       remark: 15.0.1
       remark-frontmatter: 5.0.0
     transitivePeerDependencies:
       - supports-color
+
+  '@recallnet/remark-lint-docs-taxonomy@0.2.3(remark-frontmatter@5.0.0)':
+    dependencies:
+      '@recallnet/docs-governance-policy': 0.3.1
+      remark-frontmatter: 5.0.0
+      yaml: 2.8.3
 
   '@rollup/rollup-android-arm-eabi@4.60.0':
     optional: true
@@ -5781,6 +5797,11 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@5.0.1: {}
+
+  vfile-matter@5.0.1:
+    dependencies:
+      vfile: 6.0.3
+      yaml: 2.8.3
 
   vfile-message@3.1.4:
     dependencies:
