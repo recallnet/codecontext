@@ -1,0 +1,3 @@
+#!/bin/sh
+# Machine-global commit hooks (co-author trailer, etc.)
+~/.config/git/hooks/prepare-commit-msg "$@" 2>/dev/null || true
