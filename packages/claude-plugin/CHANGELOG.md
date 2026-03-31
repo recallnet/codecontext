@@ -1,5 +1,11 @@
 # @recallnet/codecontext-claude-plugin
 
+## 0.1.4
+
+### Patch Changes
+
+- cf1e712: Fix the Claude plugin package README table rendering on npmjs.
+
 ## 0.1.3
 
 ### Patch Changes
