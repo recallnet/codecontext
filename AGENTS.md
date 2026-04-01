@@ -8,8 +8,9 @@ This repo uses `mainline` (`mq`) to coordinate the protected `main` branch.
 The repo root checkout is the canonical protected `main`. Keep it clean
 and boring. All feature work happens in topic worktrees.
 
-A machine-global daemon (`mainlined --all`) runs as a LaunchAgent and
-drains all registered repos automatically. Agents only need to submit.
+`mq submit` queues durably then opportunistically drains the queue
+itself — no daemon required. This repo has `[publish].Mode = 'auto'`,
+so integration and publish happen in one shot.
 
 ### Rules
 
@@ -34,22 +35,22 @@ pnpm install
 # 2. Do all work in the worktree
 #    edit, test, commit (repeat as needed)
 
-# 3. Submit — the daemon integrates onto main and pushes to remote
+# 3. Submit — mq integrates onto main and auto-publishes to remote
 mq submit --check-only --json          # dry-run before expensive work
-mq submit --wait --timeout 15m --json  # submit and block until landed
+mq submit --wait --timeout 15m --json  # submit, integrate, wait for completion
 
 # 4. Clean up
 wtdrop ~/Projects/_wt/recallnet/codecontext/my-feature
 ```
 
-The daemon handles integration (rebase-then-ff onto `main`) and
-auto-publishes (push to remote). The agent's job ends at submit.
-
-For durable tracking by `submission_id` instead of blocking inline:
+`mq submit --wait` blocks until integrated. With `[publish].Mode = 'auto'`
+the publish fires automatically after integration. If you need to confirm
+the full remote-landed outcome, use `mq land` or `mq wait --for landed`:
 
 ```
-mq submit --json                                             # capture submission_id
-mq wait --submission <id> --for landed --json --timeout 30m  # wait by id
+mq land --json --timeout 30m                                 # submit + integrate + publish, one shot
+mq submit --json                                             # or: capture submission_id
+mq wait --submission <id> --for landed --json --timeout 30m  # then wait for remote landing by id
 ```
 
 `submission_id` is the stable handle for a queued change, not the
