@@ -13,7 +13,7 @@ DirtyWorktreePolicy = 'reject'
 MaxQueueDepth = 0
 
 [publish]
-Mode = 'manual'
+Mode = 'auto'
 Coalesced = true
 InterruptInflight = false
 
