@@ -8,6 +8,9 @@ This repo uses `mainline` (`mq`) to coordinate the protected `main` branch.
 The repo root checkout is the canonical protected `main`. Keep it clean
 and boring. All feature work happens in topic worktrees.
 
+A machine-global daemon (`mainlined --all`) runs as a LaunchAgent and
+drains all registered repos automatically. Agents only need to submit.
+
 ### Rules
 
 - **Never commit, merge, rebase, push, or reset on `main`.** The root
@@ -21,41 +24,25 @@ and boring. All feature work happens in topic worktrees.
 
 ### Agent path
 
-From a feature worktree:
+From a feature worktree, finish with:
 
 ```
 mq submit --check-only --json          # dry-run before expensive work
-mq submit --wait --timeout 15m --json  # submit and block until integrated
+mq submit --wait --timeout 15m --json  # submit and block until landed
 ```
 
-Plain `mq submit` queues then opportunistically tries to drain. If
-another worker holds the integration lock it exits cleanly.
+The daemon handles integration (rebase-then-ff onto `main`) and publish
+(push to remote). The agent's job ends at submit.
 
-For durable tracking by submission id instead of blocking inline:
+For durable tracking by `submission_id` instead of blocking inline:
 
 ```
-mq submit --json                                         # capture submission_id
+mq submit --json                                             # capture submission_id
 mq wait --submission <id> --for landed --json --timeout 30m  # wait by id
 ```
 
-For controller/operator use (submit + integrate + publish in one shot):
-
-```
-mq land --json --timeout 30m
-```
-
-### Manual path
-
-When step-by-step control is needed:
-
-```
-# From the feature worktree
-mq submit
-
-# From the repo root (protected main)
-mq run-once    # integrate one queued submission
-mq publish     # push protected tip to remote
-```
+`submission_id` is the stable handle for a queued change, not the
+branch name.
 
 ### Handling failures
 
