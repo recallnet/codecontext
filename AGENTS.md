@@ -28,16 +28,30 @@ wtnew my-feature
 pnpm install
 # ... edit, test, commit ...
 
-# Submit from the feature worktree
-mq submit
+# Validate before submitting (dry run)
+mq submit --check-only
 
-# Integrate and publish from the main worktree
+# Submit and wait for integration to complete
+mq submit --wait --timeout 15m
+
+# Or submit and integrate/publish manually from the main worktree
+mq submit
 mq run-once
 mq publish
 
 # Clean up
 wtdrop <worktree-path>
 ```
+
+### Submit options
+
+- `mq submit` — queue the branch for integration
+- `mq submit --check-only` — dry-run validation (no side effects)
+- `mq submit --wait` — submit and block until integration finishes
+- `mq submit --wait --timeout 15m` — with timeout
+- `mq submit --allow-newer-head` — allow if branch advanced since last
+  submit
+- Add `--json` to any command for machine-readable output
 
 ### Handling failures
 
@@ -52,6 +66,7 @@ wtdrop <worktree-path>
 - `mq status` — current queue state
 - `mq doctor` — health check (branch, locks, queue)
 - `mq repo show` — config and worktree info
+- `mq repo root` — canonical root trust status
 - `mq logs --follow` — integration history
 - `mq watch` — live queue updates
 - `mq events --follow` — raw audit trail
