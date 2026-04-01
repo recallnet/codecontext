@@ -12,12 +12,10 @@ All code changes happen in feature worktrees, never directly on `main`.
 - Create feature worktrees under `~/Projects/_wt/recallnet/codecontext/`:
   `git worktree add ~/Projects/_wt/recallnet/codecontext/<branch> -b <branch>`
 - Do all work (commits, tests, iteration) in the feature worktree.
-- When ready to land, submit from the feature worktree:
-  `mq submit --repo ~/Projects/_wt/recallnet/codecontext/<branch>`
-- Integrate from the main worktree:
-  `mq run-once --repo /Users/devrel/Projects/recallnet/codecontext`
-- Publish (push to remote) from the main worktree:
-  `mq publish --repo /Users/devrel/Projects/recallnet/codecontext`
+- `mq` auto-discovers the repo from your cwd — no `--repo` flag needed.
+- When ready to land, submit from the feature worktree: `mq submit`
+- Integrate and publish from the main worktree: `mq run-once` then
+  `mq publish`
 - Clean up after landing:
   `git worktree remove ~/Projects/_wt/recallnet/codecontext/<branch>`
 
@@ -32,10 +30,13 @@ cd ~/Projects/_wt/recallnet/codecontext/my-feature
 pnpm install   # worktrees don't share node_modules
 # ... make changes, commit ...
 
-# Land through mainline
+# Land through mainline (from the feature worktree)
 mq submit
-mq run-once --repo /Users/devrel/Projects/recallnet/codecontext
-mq publish --repo /Users/devrel/Projects/recallnet/codecontext
+
+# Integrate and publish (from the main worktree)
+cd ~/Projects/recallnet/codecontext
+mq run-once
+mq publish
 
 # Clean up
 git worktree remove ~/Projects/_wt/recallnet/codecontext/my-feature
@@ -44,6 +45,8 @@ git worktree remove ~/Projects/_wt/recallnet/codecontext/my-feature
 ### Monitoring
 
 - `mq status` — current queue state
+- `mq doctor` — health check (branch state, locks, queue)
+- `mq repo show` — repo config and worktree info
 - `mq logs --follow` — integration history
 - `mq watch` — live queue monitoring
 
