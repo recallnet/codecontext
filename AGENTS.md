@@ -126,10 +126,12 @@ branch name.
 ## What To Do When A Package Fix Must Ship
 
 1. Add a changeset for each publishable package that needs a new release.
-2. Commit and push the changeset with the code fix.
-3. Wait for `CI` to pass on `main`.
-4. Wait for `Publish Packages` to run after CI.
-5. Verify the new version is actually on the registry before telling anyone
+2. Commit the changeset with the code fix in the feature worktree.
+3. Submit through `mq submit --wait --timeout 15m --json` (the daemon
+   handles integration and publish to remote).
+4. Wait for `CI` to pass on `main`.
+5. Wait for `Publish Packages` to run after CI.
+6. Verify the new version is actually on the registry before telling anyone
    the fix is published.
 
 ## Important Constraints

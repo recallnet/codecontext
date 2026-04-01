@@ -462,7 +462,7 @@ export default [
 mkdir -p docs/context
 ```
 
-### 6. Configure TSDoc (optional)
+### 5. Configure TSDoc (optional)
 
 ```json
 {
@@ -471,7 +471,7 @@ mkdir -p docs/context
 }
 ```
 
-### 7. Add your first `@context` tag
+### 6. Add your first `@context` tag
 
 ```typescript
 // @context decision !high — chose approach A over B because of X
