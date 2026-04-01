@@ -1,5 +1,52 @@
 # AGENTS
 
+## Branch Workflow (mainline)
+
+This repo uses `mainline` (`mq`) to coordinate the protected `main` branch.
+All code changes happen in feature worktrees, never directly on `main`.
+
+### Rules
+
+- **Never commit, merge, rebase, or push directly on `main`.** The main
+  worktree is read-only for development purposes.
+- Create feature worktrees under `~/Projects/_wt/recallnet/codecontext/`:
+  `git worktree add ~/Projects/_wt/recallnet/codecontext/<branch> -b <branch>`
+- Do all work (commits, tests, iteration) in the feature worktree.
+- When ready to land, submit from the feature worktree:
+  `mq submit --repo ~/Projects/_wt/recallnet/codecontext/<branch>`
+- Integrate from the main worktree:
+  `mq run-once --repo /Users/devrel/Projects/recallnet/codecontext`
+- Publish (push to remote) from the main worktree:
+  `mq publish --repo /Users/devrel/Projects/recallnet/codecontext`
+- Clean up after landing:
+  `git worktree remove ~/Projects/_wt/recallnet/codecontext/<branch>`
+
+### Quick reference
+
+```
+# Create worktree
+git worktree add ~/Projects/_wt/recallnet/codecontext/my-feature -b my-feature
+
+# Work in it
+cd ~/Projects/_wt/recallnet/codecontext/my-feature
+pnpm install   # worktrees don't share node_modules
+# ... make changes, commit ...
+
+# Land through mainline
+mq submit
+mq run-once --repo /Users/devrel/Projects/recallnet/codecontext
+mq publish --repo /Users/devrel/Projects/recallnet/codecontext
+
+# Clean up
+git worktree remove ~/Projects/_wt/recallnet/codecontext/my-feature
+```
+
+### Monitoring
+
+- `mq status` — current queue state
+- `mq logs --follow` — integration history
+- `mq watch` — live queue monitoring
+
 ## Commit Flow
 
 - This is a Recall Labs repo. Use the global `recall-commit` skill for commits

@@ -1,0 +1,22 @@
+[repo]
+ProtectedBranch = 'main'
+RemoteName = 'origin'
+MainWorktree = '/Users/devrel/Projects/recallnet/codecontext'
+WorktreeLayoutPolicy = 'any'
+WorktreeRootPrefix = ''
+HookPolicy = 'inherit'
+
+[integration]
+Strategy = 'rebase-then-ff'
+SyncPolicy = 'sync-before-integrate'
+DirtyWorktreePolicy = 'reject'
+
+[publish]
+Mode = 'manual'
+Coalesced = true
+InterruptInflight = false
+
+[checks]
+PreIntegrate = []
+PrePublish = []
+CommandTimeout = '30s'
