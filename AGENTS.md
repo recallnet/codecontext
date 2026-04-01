@@ -9,37 +9,35 @@ All code changes happen in feature worktrees, never directly on `main`.
 
 - **Never commit, merge, rebase, or push directly on `main`.** The main
   worktree is read-only for development purposes.
-- Create feature worktrees under `~/Projects/_wt/recallnet/codecontext/`:
-  `git worktree add ~/Projects/_wt/recallnet/codecontext/<branch> -b <branch>`
+- Create feature worktrees with `wtnew <branch>` or under
+  `~/Projects/_wt/recallnet/codecontext/`.
 - Do all work (commits, tests, iteration) in the feature worktree.
 - `mq` auto-discovers the repo from your cwd — no `--repo` flag needed.
 - When ready to land, submit from the feature worktree: `mq submit`
 - Integrate and publish from the main worktree: `mq run-once` then
   `mq publish`
-- Clean up after landing:
-  `git worktree remove ~/Projects/_wt/recallnet/codecontext/<branch>`
+- Clean up after landing: `wtdrop <path>` or
+  `git worktree remove <worktree-path>`
 
 ### Quick reference
 
 ```
 # Create worktree
-git worktree add ~/Projects/_wt/recallnet/codecontext/my-feature -b my-feature
+wtnew my-feature
 
-# Work in it
-cd ~/Projects/_wt/recallnet/codecontext/my-feature
+# Work in it (cd into the worktree)
 pnpm install   # worktrees don't share node_modules
 # ... make changes, commit ...
 
 # Land through mainline (from the feature worktree)
 mq submit
 
-# Integrate and publish (from the main worktree)
-cd ~/Projects/recallnet/codecontext
+# Integrate and publish (cd to the main worktree first)
 mq run-once
 mq publish
 
 # Clean up
-git worktree remove ~/Projects/_wt/recallnet/codecontext/my-feature
+wtdrop <worktree-path>
 ```
 
 ### Monitoring

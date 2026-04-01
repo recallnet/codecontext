@@ -10,6 +10,7 @@ HookPolicy = 'inherit'
 Strategy = 'rebase-then-ff'
 SyncPolicy = 'sync-before-integrate'
 DirtyWorktreePolicy = 'reject'
+MaxQueueDepth = 0
 
 [publish]
 Mode = 'manual'
@@ -19,4 +20,4 @@ InterruptInflight = false
 [checks]
 PreIntegrate = []
 PrePublish = []
-CommandTimeout = '30s'
+CommandTimeout = '5m'
