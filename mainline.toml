@@ -1,7 +1,7 @@
 [repo]
 ProtectedBranch = 'main'
 RemoteName = 'origin'
-MainWorktree = '/Users/devrel/Projects/recallnet/codecontext'
+MainWorktree = '.'
 WorktreeLayoutPolicy = 'any'
 WorktreeRootPrefix = ''
 HookPolicy = 'inherit'

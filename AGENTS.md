@@ -5,12 +5,13 @@
 This repo uses `mainline` (`mq`) to coordinate the protected `main` branch.
 `mq` is installed globally and auto-discovers the repo from cwd.
 
-All code changes happen in feature worktrees, never directly on `main`.
+The repo root checkout is the canonical protected `main`. Keep it clean
+and boring. All feature work happens in topic worktrees.
 
 ### Rules
 
-- **Never commit, merge, rebase, push, or reset on `main`.** The main
-  worktree is read-only for development.
+- **Never commit, merge, rebase, push, or reset on `main`.** The root
+  checkout is read-only for development.
 - Allowed on `main`: `git status`, `git diff`, `git log`, `git show`,
   `git fetch`, `git worktree add`.
 - Create feature worktrees with `wtnew <branch>`. Do all work there.
@@ -18,33 +19,40 @@ All code changes happen in feature worktrees, never directly on `main`.
   `node_modules`).
 - Land through `mq`, never through manual merge or push.
 
-### Agent turbo path
+### Agent path
 
-From a feature worktree, the fastest end-to-end path is:
-
-```
-mq submit --check-only --json   # dry-run: verify branch is submittable
-mq land --json --timeout 30m    # submit + integrate + publish, wait for completion
-```
-
-`mq land` is the all-in-one command: it submits, waits for serialized
-integration (rebase-then-ff onto `main`), then publishes to remote.
-
-If you only need integration without publish:
+From a feature worktree:
 
 ```
-mq submit --wait --timeout 15m --json
+mq submit --check-only --json          # dry-run before expensive work
+mq submit --wait --timeout 15m --json  # submit and block until integrated
+```
+
+Plain `mq submit` queues then opportunistically tries to drain. If
+another worker holds the integration lock it exits cleanly.
+
+For durable tracking by submission id instead of blocking inline:
+
+```
+mq submit --json                                         # capture submission_id
+mq wait --submission <id> --for landed --json --timeout 30m  # wait by id
+```
+
+For controller/operator use (submit + integrate + publish in one shot):
+
+```
+mq land --json --timeout 30m
 ```
 
 ### Manual path
 
-When the daemon is not running or you need step-by-step control:
+When step-by-step control is needed:
 
 ```
 # From the feature worktree
 mq submit
 
-# From the main worktree
+# From the repo root (protected main)
 mq run-once    # integrate one queued submission
 mq publish     # push protected tip to remote
 ```
@@ -52,7 +60,7 @@ mq publish     # push protected tip to remote
 ### Handling failures
 
 - If integration fails (conflict, check failure), `main` is untouched.
-  Fix the issue in the feature worktree, commit, then:
+  Fix in the feature worktree, commit, then:
   `mq retry --submission <id>`
 - To abandon: `mq cancel --submission <id>`
 - Check what went wrong: `mq logs --follow`
@@ -63,7 +71,8 @@ mq publish     # push protected tip to remote
 - `mq status --json` — queue state, workers, submissions
 - `mq doctor` — health check (branch, locks, queue)
 - `mq repo show --json` — config, worktrees, upstream status
-- `mq repo audit` — local branches not yet merged into `main`
+- `mq repo root --json` — canonical root trust status
+- `mq repo audit --json` — local branches not yet merged into `main`
 - `mq logs --follow` — integration history
 - `mq watch` — live status refresh
 - `mq events --follow --json --lifecycle` — branch lifecycle stream
