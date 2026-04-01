@@ -3,79 +3,70 @@
 ## Branch Workflow (mainline)
 
 This repo uses `mainline` (`mq`) to coordinate the protected `main` branch.
+`mq` is installed globally and auto-discovers the repo from cwd.
+
 All code changes happen in feature worktrees, never directly on `main`.
-`mq` is installed globally — auto-discovers the repo from cwd.
 
 ### Rules
 
 - **Never commit, merge, rebase, push, or reset on `main`.** The main
-  worktree is read-only for development purposes.
+  worktree is read-only for development.
+- Allowed on `main`: `git status`, `git diff`, `git log`, `git show`,
+  `git fetch`, `git worktree add`.
 - Create feature worktrees with `wtnew <branch>`. Do all work there.
 - Run `pnpm install` once in a new worktree (they don't share
   `node_modules`).
-- When ready to land: `mq submit` (from the feature worktree).
-- To integrate: `mq run-once` (from the main worktree). This rebases the
-  topic onto `main`, runs the full QA suite (see `PreIntegrate` in
-  `mainline.toml`), then fast-forwards `main`.
-- To push to remote: `mq publish` (from the main worktree).
-- Clean up after landing: `wtdrop <worktree-path>`
+- Land through `mq`, never through manual merge or push.
 
-### Quick reference
+### Agent turbo path
+
+From a feature worktree, the fastest end-to-end path is:
 
 ```
-# Create worktree and work in it
-wtnew my-feature
-pnpm install
-# ... edit, test, commit ...
+mq submit --check-only --json   # dry-run: verify branch is submittable
+mq land --json --timeout 30m    # submit + integrate + publish, wait for completion
+```
 
-# Validate before submitting (dry run)
-mq submit --check-only
+`mq land` is the all-in-one command: it submits, waits for serialized
+integration (rebase-then-ff onto `main`), then publishes to remote.
 
-# Submit and wait for integration to complete
-mq submit --wait --timeout 15m
+If you only need integration without publish:
 
-# Or submit and integrate/publish manually from the main worktree
+```
+mq submit --wait --timeout 15m --json
+```
+
+### Manual path
+
+When the daemon is not running or you need step-by-step control:
+
+```
+# From the feature worktree
 mq submit
-mq run-once
-mq publish
 
-# Clean up
-wtdrop <worktree-path>
+# From the main worktree
+mq run-once    # integrate one queued submission
+mq publish     # push protected tip to remote
 ```
-
-### Submit options
-
-- `mq submit` — queue the branch for integration
-- `mq submit --check-only` — dry-run validation (no side effects)
-- `mq submit --wait` — submit and block until integration finishes
-- `mq submit --wait --timeout 15m` — with timeout
-- `mq submit --allow-newer-head` — allow if branch advanced since last
-  submit
-- Add `--json` to any command for machine-readable output
 
 ### Handling failures
 
-- If `mq run-once` fails (conflict, test failure), the protected branch
-  is untouched. Fix the issue in the feature worktree, commit, then
-  `mq retry --submission <id>`.
+- If integration fails (conflict, check failure), `main` is untouched.
+  Fix the issue in the feature worktree, commit, then:
+  `mq retry --submission <id>`
 - To abandon: `mq cancel --submission <id>`
 - Check what went wrong: `mq logs --follow`
+- Auto-repair stuck states: `mq doctor --fix`
 
 ### Monitoring
 
-- `mq status` — current queue state
+- `mq status --json` — queue state, workers, submissions
 - `mq doctor` — health check (branch, locks, queue)
-- `mq repo show` — config and worktree info
-- `mq repo root` — canonical root trust status
+- `mq repo show --json` — config, worktrees, upstream status
+- `mq repo audit` — local branches not yet merged into `main`
 - `mq logs --follow` — integration history
-- `mq watch` — live queue updates
-- `mq events --follow` — raw audit trail
-
-### Daemon (optional)
-
-For unattended integration, run the daemon:
-`mainlined --interval 5s`
-It watches the queue, integrates, and publishes automatically.
+- `mq watch` — live status refresh
+- `mq events --follow --json --lifecycle` — branch lifecycle stream
 
 ## Commit Flow
 
