@@ -10,7 +10,6 @@ HookPolicy = 'inherit'
 Strategy = 'rebase-then-ff'
 SyncPolicy = 'sync-before-integrate'
 DirtyWorktreePolicy = 'reject'
-MaxQueueDepth = 0
 
 [publish]
 Mode = 'manual'
@@ -18,6 +17,17 @@ Coalesced = true
 InterruptInflight = false
 
 [checks]
-PreIntegrate = []
+PreIntegrate = [
+  'pnpm install --frozen-lockfile --ignore-scripts',
+  'npx turbo build',
+  'pnpm lint',
+  'npx turbo typecheck',
+  'npx turbo test',
+  'pnpm go:qa',
+  'pnpm python:qa',
+  'pnpm ruby:qa',
+  'pnpm docs:lint',
+  'pnpm skills:lint',
+]
 PrePublish = []
 CommandTimeout = '5m'

@@ -4,35 +4,34 @@
 
 This repo uses `mainline` (`mq`) to coordinate the protected `main` branch.
 All code changes happen in feature worktrees, never directly on `main`.
+`mq` is installed globally — auto-discovers the repo from cwd.
 
 ### Rules
 
-- **Never commit, merge, rebase, or push directly on `main`.** The main
+- **Never commit, merge, rebase, push, or reset on `main`.** The main
   worktree is read-only for development purposes.
-- Create feature worktrees with `wtnew <branch>` or under
-  `~/Projects/_wt/recallnet/codecontext/`.
-- Do all work (commits, tests, iteration) in the feature worktree.
-- `mq` auto-discovers the repo from your cwd — no `--repo` flag needed.
-- When ready to land, submit from the feature worktree: `mq submit`
-- Integrate and publish from the main worktree: `mq run-once` then
-  `mq publish`
-- Clean up after landing: `wtdrop <path>` or
-  `git worktree remove <worktree-path>`
+- Create feature worktrees with `wtnew <branch>`. Do all work there.
+- Run `pnpm install` once in a new worktree (they don't share
+  `node_modules`).
+- When ready to land: `mq submit` (from the feature worktree).
+- To integrate: `mq run-once` (from the main worktree). This rebases the
+  topic onto `main`, runs the full QA suite (see `PreIntegrate` in
+  `mainline.toml`), then fast-forwards `main`.
+- To push to remote: `mq publish` (from the main worktree).
+- Clean up after landing: `wtdrop <worktree-path>`
 
 ### Quick reference
 
 ```
-# Create worktree
+# Create worktree and work in it
 wtnew my-feature
+pnpm install
+# ... edit, test, commit ...
 
-# Work in it (cd into the worktree)
-pnpm install   # worktrees don't share node_modules
-# ... make changes, commit ...
-
-# Land through mainline (from the feature worktree)
+# Submit from the feature worktree
 mq submit
 
-# Integrate and publish (cd to the main worktree first)
+# Integrate and publish from the main worktree
 mq run-once
 mq publish
 
@@ -40,13 +39,28 @@ mq publish
 wtdrop <worktree-path>
 ```
 
+### Handling failures
+
+- If `mq run-once` fails (conflict, test failure), the protected branch
+  is untouched. Fix the issue in the feature worktree, commit, then
+  `mq retry --submission <id>`.
+- To abandon: `mq cancel --submission <id>`
+- Check what went wrong: `mq logs --follow`
+
 ### Monitoring
 
 - `mq status` — current queue state
-- `mq doctor` — health check (branch state, locks, queue)
-- `mq repo show` — repo config and worktree info
+- `mq doctor` — health check (branch, locks, queue)
+- `mq repo show` — config and worktree info
 - `mq logs --follow` — integration history
-- `mq watch` — live queue monitoring
+- `mq watch` — live queue updates
+- `mq events --follow` — raw audit trail
+
+### Daemon (optional)
+
+For unattended integration, run the daemon:
+`mainlined --interval 5s`
+It watches the queue, integrates, and publishes automatically.
 
 ## Commit Flow
 
