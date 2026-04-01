@@ -21,18 +21,29 @@ drains all registered repos automatically. Agents only need to submit.
 - Run `pnpm install` once in a new worktree (they don't share
   `node_modules`).
 - Land through `mq`, never through manual merge or push.
+- Clean up after landing: `wtdrop <worktree-path>`.
 
-### Agent path
-
-From a feature worktree, finish with:
+### End-to-end flow
 
 ```
+# 1. Create a feature worktree and install deps
+wtnew my-feature
+cd ~/Projects/_wt/recallnet/codecontext/my-feature
+pnpm install
+
+# 2. Do all work in the worktree
+#    edit, test, commit (repeat as needed)
+
+# 3. Submit — the daemon integrates onto main and pushes to remote
 mq submit --check-only --json          # dry-run before expensive work
 mq submit --wait --timeout 15m --json  # submit and block until landed
+
+# 4. Clean up
+wtdrop ~/Projects/_wt/recallnet/codecontext/my-feature
 ```
 
-The daemon handles integration (rebase-then-ff onto `main`) and publish
-(push to remote). The agent's job ends at submit.
+The daemon handles integration (rebase-then-ff onto `main`) and
+auto-publishes (push to remote). The agent's job ends at submit.
 
 For durable tracking by `submission_id` instead of blocking inline:
 
@@ -66,6 +77,7 @@ branch name.
 
 ## Commit Flow
 
+- All commits happen in feature worktrees, never on `main`.
 - This is a Recall Labs repo. Use the global `recall-commit` skill for commits
   here.
 - Default commit flow for this repo:
@@ -73,6 +85,7 @@ branch name.
   capture any high-leverage learnings in `AGENT-LEARNINGS.md` if warranted
   commit with a conventional commit message using the recall-commit format
 - Do not use ad hoc one-line commits when the recall-commit guard applies.
+- After committing, land through `mq submit --wait --timeout 15m --json`.
 
 ## codecontext
 
