@@ -16,17 +16,19 @@ Commands:
   codecontext --diff [ref] <filepath> Context for changed lines only (ref defaults to HEAD)
   codecontext --stale <filepath>      Show only stale/review-required entries
   codecontext --report                Repo-wide decision registry
+  codecontext --report --since-ref <ref> --json  Incremental report (files changed since ref)
   codecontext --staged                Pre-commit hook: check all staged files
   codecontext --help                  Show this help message
 
 Options:
-  --json       Output as JSON (for agent/tool consumption)
-  --scope      Sort by priority, compact briefing format
-  --diff       Filter to context tags in git-changed lines
-  --stale      Filter to stale or review-required entries only
-  --report     Scan the repo and print a project-wide report
-  --staged     Check all staged files for staleness (exit 1 if issues found)
-  --help, -h   Show help
+  --json           Output as JSON (for agent/tool consumption)
+  --scope          Sort by priority, compact briefing format
+  --diff           Filter to context tags in git-changed lines
+  --stale          Filter to stale or review-required entries only
+  --report         Scan the repo and print a project-wide report
+  --since-ref <ref> With --report: limit to files changed since git ref
+  --staged         Check all staged files for staleness (exit 1 if issues found)
+  --help, -h       Show help
 `.trim();
 
 function getFilePathForFlag(args: string[], flag: string): string {
@@ -70,7 +72,17 @@ function main(): void {
   }
 
   if (args.includes("--report")) {
-    runReport(args.includes("--json"));
+    const sinceIdx = args.indexOf("--since-ref");
+    let sinceRef: string | undefined;
+    if (sinceIdx !== -1) {
+      sinceRef = args[sinceIdx + 1];
+      if (!sinceRef || sinceRef.startsWith("--")) {
+        // eslint-disable-next-line no-console
+        console.error("Error: --since-ref requires a <git-ref> argument.");
+        process.exit(1);
+      }
+    }
+    runReport(args.includes("--json"), sinceRef);
     return;
   }
 

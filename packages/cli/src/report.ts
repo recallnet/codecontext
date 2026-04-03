@@ -1,7 +1,10 @@
 import type { FileContext, Priority, StalenessStatus } from "@recallnet/codecontext-parser";
 
 type ReportTag = FileContext["tags"][number] & { verified?: string };
-type ReportAnchored = FileContext["anchored"][number] & { reason?: string };
+type ReportAnchored = FileContext["anchored"][number] & {
+  verifiedDate?: string;
+  reason?: string;
+};
 
 export interface ReportEntry {
   file: string;
@@ -11,14 +14,17 @@ export interface ReportEntry {
   id?: string;
   priority?: Priority;
   verified?: string;
+  verifiedDate?: string;
   status: StalenessStatus;
   reason?: string;
+  blockHash?: string;
   summary: string;
 }
 
 export interface ProjectReport {
   root: string;
   generatedAt: string;
+  sinceRef?: string;
   filesScanned: number;
   entries: ReportEntry[];
 }
@@ -50,14 +56,24 @@ function buildReportEntry(
   if (reportTag.verified) {
     entry.verified = reportTag.verified;
   }
+  if (anchored?.verifiedDate) {
+    entry.verifiedDate = anchored.verifiedDate;
+  }
   if (anchored?.reason) {
     entry.reason = anchored.reason;
+  }
+  if (anchored?.blockHash) {
+    entry.blockHash = anchored.blockHash;
   }
 
   return entry;
 }
 
-export function buildProjectReport(contexts: FileContext[], root: string): ProjectReport {
+export function buildProjectReport(
+  contexts: FileContext[],
+  root: string,
+  sinceRef?: string
+): ProjectReport {
   const entries: ReportEntry[] = [];
 
   for (const ctx of contexts) {
@@ -81,10 +97,16 @@ export function buildProjectReport(contexts: FileContext[], root: string): Proje
     }
   }
 
-  return {
+  const report: ProjectReport = {
     root,
     generatedAt: new Date().toISOString(),
     filesScanned: contexts.length,
     entries,
   };
+
+  if (sinceRef) {
+    report.sinceRef = sinceRef;
+  }
+
+  return report;
 }

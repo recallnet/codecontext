@@ -53,6 +53,43 @@ export function getGitDiffLines(filePath: string, ref = "HEAD"): LineRange[] {
 }
 
 /**
+ * Get list of files changed since a git ref.
+ * Returns absolute paths filtered to source files that still exist on disk.
+ */
+export function getChangedFilesSinceRef(ref: string, root: string): string[] {
+  let output: string;
+  try {
+    output = execSync(`git diff --name-only --diff-filter=ACMR ${ref}`, {
+      encoding: "utf-8",
+      cwd: root,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+  } catch {
+    throw new Error(`Failed to resolve git ref: ${ref}`);
+  }
+
+  return output
+    .trim()
+    .split("\n")
+    .filter((line) => line.length > 0)
+    .map((rel) => resolve(root, rel));
+}
+
+/**
+ * Validate that a git ref can be resolved.
+ */
+export function validateGitRef(ref: string): void {
+  try {
+    execSync(`git rev-parse --verify ${ref}`, {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+  } catch {
+    throw new Error(`Invalid git ref: ${ref}`);
+  }
+}
+
+/**
  * Get list of staged files (for pre-commit hook usage).
  */
 export function getStagedFiles(): string[] {

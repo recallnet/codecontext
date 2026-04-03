@@ -112,21 +112,28 @@ export function formatProjectReport(report: ProjectReport): string {
 }
 
 export function formatProjectReportJson(report: ProjectReport): string {
+  const entries = report.entries.map((entry) => ({
+    file: entry.file,
+    line: entry.line,
+    type: entry.type,
+    subtype: entry.subtype ?? null,
+    id: entry.id ?? null,
+    priority: entry.priority ?? null,
+    status: entry.status,
+    verified: entry.verified ?? null,
+    verifiedDate: entry.verifiedDate ?? null,
+    reason: entry.reason ?? null,
+    blockHash: entry.blockHash ?? null,
+    summary: entry.summary,
+  }));
+
   return JSON.stringify(
     {
       root: report.root,
       generatedAt: report.generatedAt,
       filesScanned: report.filesScanned,
-      entries: report.entries.map((entry) => ({
-        file: entry.file,
-        line: entry.line,
-        type: entry.type,
-        subtype: entry.subtype ?? null,
-        id: entry.id ?? null,
-        priority: entry.priority ?? null,
-        status: entry.status,
-        summary: entry.summary,
-      })),
+      ...(report.sinceRef ? { sinceRef: report.sinceRef } : {}),
+      entries,
     },
     null,
     2
