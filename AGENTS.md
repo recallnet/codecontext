@@ -9,8 +9,7 @@ The repo root checkout is the canonical protected `main`. Keep it clean
 and boring. All feature work happens in topic worktrees.
 
 `mq submit` queues durably then opportunistically drains the queue
-itself — no daemon required. This repo has `[publish].Mode = 'auto'`,
-so integration and publish happen in one shot.
+itself — no daemon required. This repo has `[publish].Mode = 'auto'`.
 
 ### Rules
 
@@ -18,6 +17,8 @@ so integration and publish happen in one shot.
   checkout is read-only for development.
 - Allowed on `main`: `git status`, `git diff`, `git log`, `git show`,
   `git fetch`, `git worktree add`.
+- If the repo root checkout is dirty or not on `main`, treat that as a
+  workflow/setup bug and fix it before continuing.
 - Create feature worktrees with `wtnew <branch>`. Do all work there.
 - Run `pnpm install` once in a new worktree (they don't share
   `node_modules`).
@@ -35,17 +36,17 @@ pnpm install
 # 2. Do all work in the worktree
 #    edit, test, commit (repeat as needed)
 
-# 3. Submit — mq integrates onto main and auto-publishes to remote
+# 3. Submit — default to waiting for the remote-landed result
 mq submit --check-only --json          # dry-run before expensive work
-mq submit --wait --timeout 15m --json  # submit, integrate, wait for completion
+mq submit --wait --for landed --timeout 30m --json
 
 # 4. Clean up
 wtdrop ~/Projects/_wt/recallnet/codecontext/my-feature
 ```
 
-`mq submit --wait` blocks until integrated. With `[publish].Mode = 'auto'`
-the publish fires automatically after integration. If you need to confirm
-the full remote-landed outcome, use `mq land` or `mq wait --for landed`:
+Follow the `submission_id`, not the branch name. The default agent path is
+to wait for `landed`. Plain `mq submit --wait` is only an integration result,
+not the normal end-state to rely on.
 
 ```
 mq land --json --timeout 30m                                 # submit + integrate + publish, one shot
@@ -53,8 +54,8 @@ mq submit --json                                             # or: capture submi
 mq wait --submission <id> --for landed --json --timeout 30m  # then wait for remote landing by id
 ```
 
-`submission_id` is the stable handle for a queued change, not the
-branch name.
+Do not use sleeps, branch-name polling, `mq logs`, `mq events`, or
+`mq watch` as the primary way to determine completion.
 
 ### Handling failures
 
@@ -62,19 +63,21 @@ branch name.
   Fix in the feature worktree, commit, then:
   `mq retry --submission <id>`
 - To abandon: `mq cancel --submission <id>`
-- Check what went wrong: `mq logs --follow`
+- Check what went wrong with `mq status --json`, then use
+  `mq logs --follow` or `mq events --follow --json --lifecycle` for
+  deeper debugging.
 - Auto-repair stuck states: `mq doctor --fix`
 
 ### Monitoring
 
-- `mq status --json` — queue state, workers, submissions
+- `mq status --json` — primary status surface for queue state and current progress
 - `mq doctor` — health check (branch, locks, queue)
 - `mq repo show --json` — config, worktrees, upstream status
 - `mq repo root --json` — canonical root trust status
 - `mq repo audit --json` — local branches not yet merged into `main`
-- `mq logs --follow` — integration history
-- `mq watch` — live status refresh
-- `mq events --follow --json --lifecycle` — branch lifecycle stream
+- `mq logs --follow` — audit/debug history
+- `mq watch` — interactive debug/status refresh
+- `mq events --follow --json --lifecycle` — lifecycle debug stream
 
 ## Commit Flow
 
@@ -86,7 +89,8 @@ branch name.
   capture any high-leverage learnings in `AGENT-LEARNINGS.md` if warranted
   commit with a conventional commit message using the recall-commit format
 - Do not use ad hoc one-line commits when the recall-commit guard applies.
-- After committing, land through `mq submit --wait --timeout 15m --json`.
+- After committing, land through
+  `mq submit --wait --for landed --timeout 30m --json`.
 
 ## codecontext
 
@@ -141,8 +145,7 @@ branch name.
 
 1. Add a changeset for each publishable package that needs a new release.
 2. Commit the changeset with the code fix in the feature worktree.
-3. Submit through `mq submit --wait --timeout 15m --json` (the daemon
-   handles integration and publish to remote).
+3. Submit through `mq submit --wait --for landed --timeout 30m --json`.
 4. Wait for `CI` to pass on `main`.
 5. Wait for `Publish Packages` to run after CI.
 6. Verify the new version is actually on the registry before telling anyone
