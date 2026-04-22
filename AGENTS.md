@@ -172,3 +172,22 @@ Do not use sleeps, branch-name polling, `mq logs`, `mq events`, or
 - Prefer deleting stale docs over re-dating them. Git history already preserves old text; the live docs tree should describe current reality, not accumulate dead docs.
 - Removing stale or duplicate docs is a good default behavior. `rm` is often the right answer.
 - Run `pnpm docs:lint` before merging doc structure or policy changes.
+
+### Publishing Skills
+
+This repo uses `gh skill publish` (GitHub CLI v2.90.0+) to publish skills.
+
+**Prerequisite:** Ensure GitHub CLI v2.90.0+ is installed: `gh --version`
+
+**When modifying skills:**
+1. Make changes to skill files in `skills/{skill-name}/`
+2. Commit and merge to main
+3. Run `gh skill publish --tag vX.Y.Z` to create a release
+4. The `agent-skills` topic will be added automatically
+
+**Installing skills from this repo:**
+```bash
+gh skill install recallnet/codecontext codecontext-setup --agent codex
+```
+
+See: https://cli.github.com/manual/gh_skill_publish
