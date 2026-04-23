@@ -187,7 +187,22 @@ This repo uses `gh skill publish` (GitHub CLI v2.90.0+) to publish skills.
 
 **Installing skills from this repo:**
 ```bash
+# Install the skill
 gh skill install recallnet/codecontext codecontext-setup --agent codex
+
+# Commit it to your repo
+git add .agents/skills/codecontext-setup
+git commit -m "chore: add codecontext-setup skill"
+```
+
+**Updating skills:**
+```bash
+# Update all installed skills
+gh skill update --all
+
+# Commit the changes
+git add .agents/skills/
+git commit -m "chore: update skills"
 ```
 
 See: https://cli.github.com/manual/gh_skill_publish
